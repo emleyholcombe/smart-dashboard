@@ -66,10 +66,133 @@
       margin-top: 0;
       text-align: center;
     }
+
+    .add-item-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .add-item-container input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .add-item-container button {
+      padding: 8px 16px;
+      background-color: #2d89ef;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    .add-item-container button:hover {
+      background-color: #1e6bc7;
+    }
+
+    .task-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      gap: 10px;
+    }
+
+    .task-item:last-child {
+      border-bottom: none;
+    }
+
+    .task-checkbox {
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .task-text.completed {
+      text-decoration: line-through;
+      color: #888;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .delete-btn, .edit-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      transition: background-color 0.2s;
+    }
+
+    .delete-btn {
+      color: #dc3545;
+    }
+
+    .delete-btn:hover {
+      background-color: #f8d7da;
+    }
+
+    .edit-btn {
+      color: #007bff;
+    }
+
+    .edit-btn:hover {
+      background-color: #d1ecf1;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #888;
+      font-style: italic;
+      padding: 20px;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .add-item-container {
+        flex-direction: column;
+      }
+      
+      .add-item-container button {
+        padding: 12px;
+      }
+      
+      .task-item {
+        padding: 12px 0;
+      }
+      
+      .task-text {
+        font-size: 16px;
+      }
+    }
   </style>
 </head>
 <body>
-  <header>My Smart Dashboard</header>
+  <header>Bennett Hub</header>
   <main>
     <!-- Google Calendar -->
     <div class="widget calendar-widget">
@@ -78,23 +201,248 @@
 
     </div>
 
-    <!-- Alexa To-Do List -->
+    <!-- To-Do List -->
     <div class="widget todo-widget">
       <h2>To-Do List</h2>
-      <div id="todo-list">
-        <!-- Replace with embedded Todoist / API content -->
-        <p>No items yet</p>
+      <div class="add-item-container">
+        <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
+        <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
       </div>
+      <ul id="todo-list" class="task-list">
+        <!-- Dynamic content will be loaded here -->
+      </ul>
     </div>
 
-    <!-- Alexa Grocery List -->
+    <!-- Grocery List -->
     <div class="widget grocery-widget">
       <h2>Grocery List</h2>
-      <div id="grocery-list">
-        <!-- Replace with embedded Todoist / API content -->
-        <p>No items yet</p>
+      <div class="add-item-container">
+        <input type="text" id="grocery-input" placeholder="Add grocery item..." maxlength="100">
+        <button onclick="addGroceryItem()" id="add-grocery-btn">Add</button>
       </div>
+      <ul id="grocery-list" class="task-list">
+        <!-- Dynamic content will be loaded here -->
+      </ul>
     </div>
   </main>
+
+  <script>
+    // Data storage
+    let todoItems = JSON.parse(localStorage.getItem('todoItems')) || [];
+    let groceryItems = JSON.parse(localStorage.getItem('groceryItems')) || [];
+
+    // Initialize lists on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      renderTodoList();
+      renderGroceryList();
+      
+      // Add Enter key support for inputs
+      document.getElementById('todo-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          addTodoItem();
+        }
+      });
+      
+      document.getElementById('grocery-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          addGroceryItem();
+        }
+      });
+    });
+
+    // Todo List Functions
+    function addTodoItem() {
+      const input = document.getElementById('todo-input');
+      const text = input.value.trim();
+      
+      if (text) {
+        const item = {
+          id: Date.now(),
+          text: text,
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        todoItems.unshift(item); // Add to beginning of array
+        saveTodoItems();
+        renderTodoList();
+        input.value = '';
+      }
+    }
+
+    function toggleTodoItem(id) {
+      const item = todoItems.find(item => item.id === id);
+      if (item) {
+        item.completed = !item.completed;
+        saveTodoItems();
+        renderTodoList();
+      }
+    }
+
+    function deleteTodoItem(id) {
+      todoItems = todoItems.filter(item => item.id !== id);
+      saveTodoItems();
+      renderTodoList();
+    }
+
+    function editTodoItem(id) {
+      const item = todoItems.find(item => item.id === id);
+      if (item) {
+        const newText = prompt('Edit task:', item.text);
+        if (newText !== null && newText.trim()) {
+          item.text = newText.trim();
+          saveTodoItems();
+          renderTodoList();
+        }
+      }
+    }
+
+    function renderTodoList() {
+      const list = document.getElementById('todo-list');
+      
+      if (todoItems.length === 0) {
+        list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
+        return;
+      }
+      
+      list.innerHTML = todoItems.map(item => `
+        <li class="task-item">
+          <input type="checkbox" class="task-checkbox" 
+                 ${item.completed ? 'checked' : ''} 
+                 onchange="toggleTodoItem(${item.id})">
+          <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
+          <div class="task-actions">
+            <button class="edit-btn" onclick="editTodoItem(${item.id})" title="Edit">✏️</button>
+            <button class="delete-btn" onclick="deleteTodoItem(${item.id})" title="Delete">🗑️</button>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    function saveTodoItems() {
+      localStorage.setItem('todoItems', JSON.stringify(todoItems));
+    }
+
+    // Grocery List Functions
+    function addGroceryItem() {
+      const input = document.getElementById('grocery-input');
+      const text = input.value.trim();
+      
+      if (text) {
+        const item = {
+          id: Date.now(),
+          text: text,
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        groceryItems.unshift(item); // Add to beginning of array
+        saveGroceryItems();
+        renderGroceryList();
+        input.value = '';
+      }
+    }
+
+    function toggleGroceryItem(id) {
+      const item = groceryItems.find(item => item.id === id);
+      if (item) {
+        item.completed = !item.completed;
+        saveGroceryItems();
+        renderGroceryList();
+      }
+    }
+
+    function deleteGroceryItem(id) {
+      groceryItems = groceryItems.filter(item => item.id !== id);
+      saveGroceryItems();
+      renderGroceryList();
+    }
+
+    function editGroceryItem(id) {
+      const item = groceryItems.find(item => item.id === id);
+      if (item) {
+        const newText = prompt('Edit item:', item.text);
+        if (newText !== null && newText.trim()) {
+          item.text = newText.trim();
+          saveGroceryItems();
+          renderGroceryList();
+        }
+      }
+    }
+
+    function renderGroceryList() {
+      const list = document.getElementById('grocery-list');
+      
+      if (groceryItems.length === 0) {
+        list.innerHTML = '<li class="empty-state">No items yet. Add one above!</li>';
+        return;
+      }
+      
+      list.innerHTML = groceryItems.map(item => `
+        <li class="task-item">
+          <input type="checkbox" class="task-checkbox" 
+                 ${item.completed ? 'checked' : ''} 
+                 onchange="toggleGroceryItem(${item.id})">
+          <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
+          <div class="task-actions">
+            <button class="edit-btn" onclick="editGroceryItem(${item.id})" title="Edit">✏️</button>
+            <button class="delete-btn" onclick="deleteGroceryItem(${item.id})" title="Delete">🗑️</button>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    function saveGroceryItems() {
+      localStorage.setItem('groceryItems', JSON.stringify(groceryItems));
+    }
+
+    // Utility function to prevent XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Optional: Auto-save feature and data export/import for sharing between devices
+    function exportData() {
+      const data = {
+        todoItems: todoItems,
+        groceryItems: groceryItems,
+        exportDate: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'smart-dashboard-lists.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (data.todoItems && data.groceryItems) {
+              todoItems = data.todoItems;
+              groceryItems = data.groceryItems;
+              saveTodoItems();
+              saveGroceryItems();
+              renderTodoList();
+              renderGroceryList();
+              alert('Data imported successfully!');
+            }
+          } catch (err) {
+            alert('Error importing data. Please check the file format.');
+          }
+        };
+        reader.readAsText(file);
+      }
+    }
+  </script>
 </body>
 </html>
