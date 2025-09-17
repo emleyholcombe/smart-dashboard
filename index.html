@@ -23,7 +23,9 @@
     }
 
     main {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
       flex: 1;
       gap: 1rem;
       padding: 1rem;
@@ -31,12 +33,26 @@
     }
 
     .widget {
-      flex: 1;
       background: white;
       border-radius: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       padding: 1rem;
       overflow: auto;
+    }
+
+    .calendar-widget {
+      grid-column: 1 / 3;
+      grid-row: 1;
+    }
+
+    .todo-widget {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .grocery-widget {
+      grid-column: 2;
+      grid-row: 2;
     }
 
     iframe {
@@ -56,14 +72,14 @@
   <header>My Smart Dashboard</header>
   <main>
     <!-- Google Calendar -->
-    <div class="widget">
+    <div class="widget calendar-widget">
       <h2>Calendar</h2>
       <iframe src="https://calendar.google.com/calendar/embed?src=holcombe.emley%40gmail.com&ctz=America%2FDenver"></iframe>
 
     </div>
 
     <!-- Alexa To-Do List -->
-    <div class="widget">
+    <div class="widget todo-widget">
       <h2>To-Do List</h2>
       <div id="todo-list">
         <!-- Replace with embedded Todoist / API content -->
@@ -72,7 +88,7 @@
     </div>
 
     <!-- Alexa Grocery List -->
-    <div class="widget">
+    <div class="widget grocery-widget">
       <h2>Grocery List</h2>
       <div id="grocery-list">
         <!-- Replace with embedded Todoist / API content -->
