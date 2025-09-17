@@ -233,6 +233,9 @@
 
     // Initialize lists on page load
     document.addEventListener('DOMContentLoaded', function() {
+      // Clean up old completed items first
+      cleanupCompletedItems();
+      
       renderTodoList();
       renderGroceryList();
       
@@ -248,6 +251,9 @@
           addGroceryItem();
         }
       });
+
+      // Set up automatic cleanup at midnight
+      scheduleNextCleanup();
     });
 
     // Todo List Functions
@@ -274,6 +280,11 @@
       const item = todoItems.find(item => item.id === id);
       if (item) {
         item.completed = !item.completed;
+        if (item.completed) {
+          item.completedAt = new Date().toISOString();
+        } else {
+          delete item.completedAt;
+        }
         saveTodoItems();
         renderTodoList();
       }
@@ -347,6 +358,11 @@
       const item = groceryItems.find(item => item.id === id);
       if (item) {
         item.completed = !item.completed;
+        if (item.completed) {
+          item.completedAt = new Date().toISOString();
+        } else {
+          delete item.completedAt;
+        }
         saveGroceryItems();
         renderGroceryList();
       }
@@ -401,6 +417,71 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    // Cleanup functions for completed items
+    function cleanupCompletedItems() {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      // Clean up todo items
+      const originalTodoCount = todoItems.length;
+      todoItems = todoItems.filter(item => {
+        if (!item.completed || !item.completedAt) return true;
+        
+        const completedDate = new Date(item.completedAt);
+        const completedDay = new Date(completedDate.getFullYear(), completedDate.getMonth(), completedDate.getDate());
+        
+        // Keep items completed today, remove items completed before today
+        return completedDay.getTime() >= today.getTime();
+      });
+      
+      // Clean up grocery items
+      const originalGroceryCount = groceryItems.length;
+      groceryItems = groceryItems.filter(item => {
+        if (!item.completed || !item.completedAt) return true;
+        
+        const completedDate = new Date(item.completedAt);
+        const completedDay = new Date(completedDate.getFullYear(), completedDate.getMonth(), completedDate.getDate());
+        
+        // Keep items completed today, remove items completed before today
+        return completedDay.getTime() >= today.getTime();
+      });
+      
+      // Save if any items were removed
+      if (todoItems.length !== originalTodoCount) {
+        saveTodoItems();
+      }
+      if (groceryItems.length !== originalGroceryCount) {
+        saveGroceryItems();
+      }
+      
+      // Log cleanup activity (optional, for debugging)
+      const todoRemoved = originalTodoCount - todoItems.length;
+      const groceryRemoved = originalGroceryCount - groceryItems.length;
+      if (todoRemoved > 0 || groceryRemoved > 0) {
+        console.log(`Cleaned up ${todoRemoved} completed todo items and ${groceryRemoved} completed grocery items`);
+      }
+    }
+
+    function scheduleNextCleanup() {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 1, 0); // 12:00:01 AM tomorrow
+      
+      const msUntilMidnight = tomorrow.getTime() - now.getTime();
+      
+      setTimeout(() => {
+        cleanupCompletedItems();
+        renderTodoList();
+        renderGroceryList();
+        
+        // Schedule the next cleanup (24 hours later)
+        scheduleNextCleanup();
+      }, msUntilMidnight);
+      
+      console.log(`Next automatic cleanup scheduled for: ${tomorrow.toLocaleString()}`);
     }
 
     // Optional: Auto-save feature and data export/import for sharing between devices
