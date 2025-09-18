@@ -2042,20 +2042,32 @@
       const title = document.createElement('h1');
       title.className = 'fullscreen-title';
       
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.display = 'flex';
+      buttonContainer.style.gap = '1rem';
+      
+      const homeButton = document.createElement('button');
+      homeButton.className = 'back-button';
+      homeButton.onclick = showLandingPage;
+      homeButton.innerHTML = '🏠 Home';
+      
       const backButton = document.createElement('button');
       backButton.className = 'back-button';
       backButton.onclick = closeFullscreen;
-      backButton.innerHTML = '← Back to Dashboard';
+      backButton.innerHTML = '← Dashboard';
       
       // Add auto-return indicator
       const autoReturnIndicator = document.createElement('div');
       autoReturnIndicator.className = 'auto-return-indicator';
       autoReturnIndicator.innerHTML = '<div class="auto-return-dot"></div>Auto-return in 10min';
       
+      buttonContainer.appendChild(homeButton);
+      buttonContainer.appendChild(backButton);
+      
       const headerRight = document.createElement('div');
       headerRight.style.display = 'flex';
       headerRight.style.alignItems = 'center';
-      headerRight.appendChild(backButton);
+      headerRight.appendChild(buttonContainer);
       headerRight.appendChild(autoReturnIndicator);
       
       fullscreenHeader.appendChild(title);
