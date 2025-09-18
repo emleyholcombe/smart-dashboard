@@ -568,7 +568,7 @@
     .task-actions {
       display: flex;
       gap: 4px;
-      opacity: 0;
+      opacity: 1; /* Always visible for better accessibility */
       transition: opacity 0.2s ease;
     }
 
@@ -1199,15 +1199,15 @@
           `<button class="add-from-history-btn" onclick="addFromHistory(${item.id})" title="Add to current meals">+</button>` : '';
           
         return `
-          <li class="meal-item">
+          <li class="task-item ${item.completed ? 'completed' : ''}">
             ${showingHistory ? '' : `<input type="checkbox" class="task-checkbox" 
                    ${item.completed ? 'checked' : ''} 
                    onchange="toggleMealItem(${item.id})">`}
-            <span class="meal-text ${item.completed ? 'completed' : ''}">${mealText}</span>
+            <span class="task-text ${item.completed ? 'completed' : ''}">${mealText}</span>
             <div class="task-actions">
               ${historyButton}
+              <button class="edit-btn" onclick="editMealItem(${item.id})" title="Edit name">✏️</button>
               <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingHistory})" title="${item.url ? 'Edit URL' : 'Add URL'}">${item.url ? '🔗' : '📎'}</button>
-              <button class="edit-btn" onclick="editMealItem(${item.id})" title="Edit">✏️</button>
               <button class="delete-btn" onclick="deleteMealItem(${item.id})" title="Delete">🗑️</button>
             </div>
           </li>
@@ -1458,15 +1458,15 @@
           `<button class="add-from-history-btn" onclick="addFromHistory(${item.id}); renderMealsListFullscreen();" title="Add to current meals">+</button>` : '';
           
         return `
-          <li class="meal-item">
+          <li class="task-item ${item.completed ? 'completed' : ''}">
             ${showingHistory ? '' : `<input type="checkbox" class="task-checkbox" 
                    ${item.completed ? 'checked' : ''} 
                    onchange="toggleMealItem(${item.id}); renderMealsListFullscreen();">`}
-            <span class="meal-text ${item.completed ? 'completed' : ''}">${mealText}</span>
+            <span class="task-text ${item.completed ? 'completed' : ''}">${mealText}</span>
             <div class="task-actions">
               ${historyButton}
+              <button class="edit-btn" onclick="editMealItem(${item.id}); renderMealsListFullscreen();" title="Edit name">✏️</button>
               <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingHistory}); renderMealsListFullscreen();" title="${item.url ? 'Edit URL' : 'Add URL'}">${item.url ? '🔗' : '📎'}</button>
-              <button class="edit-btn" onclick="editMealItem(${item.id}); renderMealsListFullscreen();" title="Edit">✏️</button>
               <button class="delete-btn" onclick="deleteMealItem(${item.id}); renderMealsListFullscreen();" title="Delete">🗑️</button>
             </div>
           </li>
