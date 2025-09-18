@@ -1419,7 +1419,7 @@
             <div class="task-actions">
               ${historyButton}
               <button class="edit-btn" onclick="editMealItem(${item.id})" title="Edit name">✏️</button>
-              <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingHistory})" title="${item.url ? 'Edit URL' : 'Add URL'}">${item.url ? '🔗' : '📎'}</button>
+              <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingHistory})" title="${item.url ? 'Edit URL' : 'Add URL'}">🔗</button>
               <button class="delete-btn" onclick="deleteMealItem(${item.id})" title="Delete">🗑️</button>
             </div>
           </li>
@@ -1679,7 +1679,7 @@
             <div class="task-actions">
               ${historyButton}
               <button class="edit-btn" onclick="editMealItem(${item.id}); renderMealsListFullscreen();" title="Edit name">✏️</button>
-              <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingHistory}); renderMealsListFullscreen();" title="${item.url ? 'Edit URL' : 'Add URL'}">${item.url ? '🔗' : '📎'}</button>
+              <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingHistory}); renderMealsListFullscreen();" title="${item.url ? 'Edit URL' : 'Add URL'}">🔗</button>
               <button class="delete-btn" onclick="deleteMealItem(${item.id}); renderMealsListFullscreen();" title="Delete">🗑️</button>
             </div>
           </li>
