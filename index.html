@@ -279,6 +279,24 @@
       transform: translateY(-1px);
     }
 
+    .auto-return-indicator {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      color: rgba(255, 255, 255, 0.8);
+      margin-left: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .auto-return-dot {
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
     .fullscreen-content {
       flex: 1;
       padding: 2rem;
@@ -583,6 +601,10 @@
       .fullscreen-content {
         margin: 0.5rem;
         padding: 1rem;
+      }
+
+      .auto-return-indicator {
+        display: none; /* Hide on mobile to save space */
       }
     }
 
@@ -1089,6 +1111,52 @@
     }
 
     // Full-screen functionality
+    let inactivityTimer = null;
+    let lastActivityTime = Date.now();
+
+    function resetInactivityTimer() {
+      lastActivityTime = Date.now();
+      
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+      }
+      
+      // Set timer for 10 minutes (600,000 milliseconds)
+      inactivityTimer = setTimeout(() => {
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        if (fullscreenContainer) {
+          console.log('Auto-returning to dashboard after 10 minutes of inactivity');
+          closeFullscreen();
+        }
+      }, 10 * 60 * 1000);
+    }
+
+    function setupInactivityDetection() {
+      // Track various user activities
+      const activities = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click', 'input'];
+      
+      activities.forEach(activity => {
+        document.addEventListener(activity, resetInactivityTimer, true);
+      });
+      
+      // Start the timer
+      resetInactivityTimer();
+    }
+
+    function cleanupInactivityDetection() {
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = null;
+      }
+      
+      // Remove event listeners
+      const activities = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click', 'input'];
+      
+      activities.forEach(activity => {
+        document.removeEventListener(activity, resetInactivityTimer, true);
+      });
+    }
+
     function openFullscreen(widgetType) {
       const main = document.querySelector('main');
       const header = document.querySelector('header');
@@ -1114,8 +1182,19 @@
       backButton.onclick = closeFullscreen;
       backButton.innerHTML = '← Back to Dashboard';
       
+      // Add auto-return indicator
+      const autoReturnIndicator = document.createElement('div');
+      autoReturnIndicator.className = 'auto-return-indicator';
+      autoReturnIndicator.innerHTML = '<div class="auto-return-dot"></div>Auto-return in 10min';
+      
+      const headerRight = document.createElement('div');
+      headerRight.style.display = 'flex';
+      headerRight.style.alignItems = 'center';
+      headerRight.appendChild(backButton);
+      headerRight.appendChild(autoReturnIndicator);
+      
       fullscreenHeader.appendChild(title);
-      fullscreenHeader.appendChild(backButton);
+      fullscreenHeader.appendChild(headerRight);
       
       // Create content area
       const content = document.createElement('div');
@@ -1198,12 +1277,18 @@
       fullscreenDiv.appendChild(fullscreenHeader);
       fullscreenDiv.appendChild(content);
       document.body.appendChild(fullscreenDiv);
+      
+      // Start inactivity detection
+      setupInactivityDetection();
     }
 
     function closeFullscreen() {
       const fullscreenContainer = document.getElementById('fullscreen-container');
       const main = document.querySelector('main');
       const header = document.querySelector('header');
+      
+      // Clean up inactivity detection
+      cleanupInactivityDetection();
       
       if (fullscreenContainer) {
         fullscreenContainer.remove();
