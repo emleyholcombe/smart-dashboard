@@ -1073,9 +1073,6 @@
         saveMealHistory();
         renderMealsList();
         input.value = '';
-        
-        // Prompt for recipe URL and update both current and history
-        setTimeout(() => promptForRecipeUrl(item.id, historyItem.id), 100);
       }
     }
 
@@ -1228,9 +1225,6 @@
         saveMealHistory();
         renderMealsList();
         input.value = '';
-        
-        // Prompt for recipe URL for history item
-        setTimeout(() => promptForHistoryRecipeUrl(historyItem.id), 100);
       }
     }
 
@@ -1419,9 +1413,6 @@
         saveMealItems();
         renderMealsListFullscreen();
         input.value = '';
-        
-        // Prompt for recipe URL
-        setTimeout(() => promptForRecipeUrl(item.id), 100);
       }
     }
 
@@ -1480,9 +1471,6 @@
         saveMealHistory();
         renderMealsListFullscreen();
         input.value = '';
-        
-        // Prompt for recipe URL for history item
-        setTimeout(() => promptForHistoryRecipeUrl(historyItem.id), 100);
       }
     }
 
