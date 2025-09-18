@@ -560,6 +560,11 @@
         font-size: 0.9rem;
         padding: 0.4rem 0.8rem;
       }
+
+      #precipitation-info {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.6rem;
+      }
       
       .add-item-container {
         flex-direction: column;
@@ -672,6 +677,10 @@
       <div class="info-item">
         <span id="weather-icon" class="info-icon">🌡️</span>
         <span id="current-temp" class="weather-temp loading">Loading...</span>
+      </div>
+      <div class="info-item" id="precipitation-info" style="display: none;">
+        <span id="precip-icon" class="info-icon">💧</span>
+        <span id="precip-details" class="weather-temp">--</span>
       </div>
     </div>
   </header>
@@ -1046,9 +1055,72 @@
       return '🌡️';
     }
 
+    function getPrecipitationEmoji(precipType) {
+      const type = precipType.toLowerCase();
+      if (type.includes('rain') || type.includes('drizzle') || type.includes('shower')) {
+        return '🌧️';
+      }
+      if (type.includes('snow') || type.includes('sleet')) {
+        return '❄️';
+      }
+      if (type.includes('thunder') || type.includes('storm')) {
+        return '⛈️';
+      }
+      return '💧'; // Default water drop
+    }
+
+    function formatPrecipitationInfo(weatherData) {
+      try {
+        const today = weatherData.weather[0];
+        const current = weatherData.current_condition[0];
+        
+        // Get precipitation probability for today
+        let maxPrecipChance = 0;
+        let precipType = '';
+        let precipTime = '';
+        
+        // Check hourly data for today
+        if (today.hourly) {
+          const currentHour = new Date().getHours();
+          
+          // Look at next 12 hours for precipitation
+          for (let i = Math.floor(currentHour / 3); i < today.hourly.length && i < Math.floor(currentHour / 3) + 4; i++) {
+            const hour = today.hourly[i];
+            const chanceOfRain = parseInt(hour.chanceofrain) || 0;
+            const chanceOfSnow = parseInt(hour.chanceofsnow) || 0;
+            const maxChance = Math.max(chanceOfRain, chanceOfSnow);
+            
+            if (maxChance > maxPrecipChance) {
+              maxPrecipChance = maxChance;
+              precipType = chanceOfSnow > chanceOfRain ? 'snow' : 'rain';
+              
+              // Convert time (e.g., "300" to "3:00 AM")
+              const timeStr = hour.time.padStart(4, '0');
+              const hourNum = parseInt(timeStr.substring(0, 2));
+              const period = hourNum >= 12 ? 'PM' : 'AM';
+              const displayHour = hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
+              precipTime = `${displayHour}${period}`;
+            }
+          }
+        }
+        
+        return {
+          chance: maxPrecipChance,
+          type: precipType,
+          time: precipTime
+        };
+      } catch (error) {
+        console.log('Error parsing precipitation data:', error);
+        return { chance: 0, type: '', time: '' };
+      }
+    }
+
     async function updateWeather() {
       const tempElement = document.getElementById('current-temp');
       const iconElement = document.getElementById('weather-icon');
+      const precipInfoElement = document.getElementById('precipitation-info');
+      const precipIconElement = document.getElementById('precip-icon');
+      const precipDetailsElement = document.getElementById('precip-details');
       
       try {
         // Using ZIP code 84660 for accurate local weather
@@ -1076,6 +1148,24 @@
           iconElement.textContent = getWeatherEmoji(condition, isNight);
           tempElement.title = condition; // Show condition on hover
           tempElement.classList.remove('loading');
+          
+          // Update precipitation information
+          const precipInfo = formatPrecipitationInfo(data);
+          if (precipInfo.chance > 0) {
+            precipIconElement.textContent = getPrecipitationEmoji(precipInfo.type);
+            
+            let precipText = `${precipInfo.chance}% ${precipInfo.type}`;
+            if (precipInfo.time) {
+              precipText += ` at ${precipInfo.time}`;
+            }
+            
+            precipDetailsElement.textContent = precipText;
+            precipDetailsElement.title = `${precipInfo.chance}% chance of ${precipInfo.type}${precipInfo.time ? ` around ${precipInfo.time}` : ' today'}`;
+            precipInfoElement.style.display = 'flex';
+          } else {
+            precipInfoElement.style.display = 'none';
+          }
+          
           return;
         }
         
@@ -1091,6 +1181,7 @@
           tempElement.textContent = cleanTemp || 'Loading...';
           iconElement.textContent = '🌡️'; // Default icon when condition unknown
           tempElement.classList.remove('loading');
+          precipInfoElement.style.display = 'none'; // Hide precipitation info
           return;
         }
         
@@ -1104,6 +1195,7 @@
         iconElement.textContent = '🌡️';
         tempElement.classList.remove('loading');
         tempElement.title = 'Weather data temporarily unavailable';
+        precipInfoElement.style.display = 'none'; // Hide precipitation info
         
         // Try again in 5 minutes
         setTimeout(updateWeather, 5 * 60 * 1000);
