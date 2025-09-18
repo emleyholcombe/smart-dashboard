@@ -2443,6 +2443,42 @@
       openFullscreen('meals');
     }
 
+    // URL parameter handling
+    function handleURLParameters() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const view = urlParams.get('view');
+      
+      switch(view) {
+        case 'dashboard':
+          showDashboard();
+          break;
+        case 'calendar':
+          showFullscreenCalendar();
+          break;
+        case 'todo':
+          showFullscreenTodo();
+          break;
+        case 'grocery':
+          showFullscreenGrocery();
+          break;
+        case 'meals':
+          showFullscreenMeals();
+          break;
+        case 'meals-history':
+          showFullscreenMealsHistory();
+          break;
+        case 'home':
+        default:
+          // Landing page is already shown by default
+          break;
+      }
+    }
+
+    // Handle URL parameters on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      handleURLParameters();
+    });
+
   </script>
   </div> <!-- Close dashboard div -->
 </body>
