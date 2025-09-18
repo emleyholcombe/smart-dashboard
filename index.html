@@ -285,6 +285,10 @@
       min-height: 400px;
       max-height: 600px;
       overflow: hidden;
+      /* Complete isolation from other widgets */
+      contain: layout style size;
+      transform: translateZ(0); /* Force hardware acceleration and isolation */
+      will-change: auto;
     }
     
     .calendar-widget iframe {
@@ -293,6 +297,13 @@
       height: 100% !important;
       min-height: 350px;
       max-height: 550px;
+      /* Force iframe isolation and stability */
+      contain: strict;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      pointer-events: auto;
+      position: relative;
+      z-index: 1;
     }
 
     .todo-widget {
@@ -314,8 +325,12 @@
     .meals-widget {
       grid-column: 3;
       grid-row: 2;
-      /* Isolate meals widget to prevent affecting other widgets */
-      contain: layout style;
+      /* Complete isolation to prevent affecting other widgets */
+      contain: layout style size;
+      isolation: isolate;
+      transform: translateZ(0);
+      /* Prevent any cascading effects */
+      will-change: auto;
     }
 
     iframe {
@@ -323,6 +338,13 @@
       width: 100%;
       height: 100%;
       border-radius: 10px;
+      /* Prevent any external interference with iframe content */
+      isolation: isolate;
+      contain: layout style;
+      transform: translateZ(0);
+      /* Ensure iframe renders independently */
+      display: block;
+      box-sizing: border-box;
     }
 
     h2 {
@@ -816,12 +838,22 @@
         min-height: 300px !important; /* Much smaller for tablets */
         max-height: 300px !important; /* Force stable height */
         overflow: hidden;
+        /* Enhanced isolation for tablets */
+        contain: layout style size !important;
+        transform: translateZ(0) !important;
+        isolation: isolate;
       }
       
       .calendar-widget iframe {
         height: 250px !important; /* Much smaller calendar height for tablets */
         min-height: 250px !important;
         max-height: 250px !important;
+        /* Force iframe isolation on tablets */
+        contain: strict !important;
+        transform: translateZ(0) !important;
+        backface-visibility: hidden !important;
+        position: relative !important;
+        z-index: 1 !important;
       }
       
       .calendar-widget h2 {
