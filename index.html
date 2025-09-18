@@ -826,7 +826,7 @@
         <h2 onclick="openFullscreen('meals')" style="margin: 0; cursor: pointer;">Meals</h2>
         <button onclick="showMealsHistory()" class="history-button">History</button>
       </div>
-      <div class="add-item-container">
+      <div class="add-item-container" id="meals-add-container">
         <input type="text" id="meals-input" placeholder="Add meal..." maxlength="100">
         <button onclick="addMealItem()" id="add-meals-btn">Add</button>
       </div>
@@ -1056,22 +1056,45 @@
           createdAt: new Date().toISOString()
         };
         
+        // Add to current meals
         mealItems.unshift(item);
+        
+        // Also add to history immediately (permanent record)
+        const historyItem = {
+          id: Date.now() + Math.random(), // Different ID for history
+          text: item.text,
+          url: item.url,
+          createdAt: item.createdAt,
+          addedToHistoryAt: new Date().toISOString()
+        };
+        mealHistory.unshift(historyItem);
+        
         saveMealItems();
+        saveMealHistory();
         renderMealsList();
         input.value = '';
         
-        // Prompt for recipe URL
-        setTimeout(() => promptForRecipeUrl(item.id), 100);
+        // Prompt for recipe URL and update both current and history
+        setTimeout(() => promptForRecipeUrl(item.id, historyItem.id), 100);
       }
     }
 
-    function promptForRecipeUrl(mealId) {
+    function promptForRecipeUrl(mealId, historyId = null) {
       const meal = mealItems.find(item => item.id === mealId);
       if (meal) {
         const url = prompt(`Add recipe URL for "${meal.text}" (optional):`);
         if (url && url.trim()) {
           meal.url = url.trim();
+          
+          // Also update the corresponding history item if it exists
+          if (historyId) {
+            const historyItem = mealHistory.find(item => item.id === historyId);
+            if (historyItem) {
+              historyItem.url = url.trim();
+              saveMealHistory();
+            }
+          }
+          
           saveMealItems();
           renderMealsList();
         }
@@ -1159,17 +1182,79 @@
       localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
     }
 
+    function addMealToHistoryOnly() {
+      const input = document.getElementById('meals-input');
+      const text = input.value.trim();
+      
+      if (text) {
+        const historyItem = {
+          id: Date.now() + Math.random(),
+          text: text,
+          url: '',
+          createdAt: new Date().toISOString(),
+          addedToHistoryAt: new Date().toISOString()
+        };
+        
+        mealHistory.unshift(historyItem);
+        saveMealHistory();
+        renderMealsList();
+        input.value = '';
+        
+        // Prompt for recipe URL for history item
+        setTimeout(() => promptForHistoryRecipeUrl(historyItem.id), 100);
+      }
+    }
+
+    function promptForHistoryRecipeUrl(historyId) {
+      const historyItem = mealHistory.find(item => item.id === historyId);
+      if (historyItem) {
+        const url = prompt(`Add recipe URL for "${historyItem.text}" (optional):`);
+        if (url && url.trim()) {
+          historyItem.url = url.trim();
+          saveMealHistory();
+          renderMealsList();
+        }
+      }
+    }
+
     function showMealsHistory() {
       showingHistory = !showingHistory;
       const historyButton = document.querySelector('.history-button');
       const headerTitle = document.querySelector('.meals-widget h2');
+      const addContainer = document.getElementById('meals-add-container');
       
       if (showingHistory) {
         historyButton.textContent = 'Current';
         headerTitle.textContent = 'Meals History';
+        
+        // Change input container for history mode
+        addContainer.innerHTML = `
+          <input type="text" id="meals-input" placeholder="Add to history only..." maxlength="100">
+          <button onclick="addMealToHistoryOnly()" id="add-meals-btn">Add to History</button>
+        `;
+        
+        // Re-add Enter key support for history input
+        document.getElementById('meals-input').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            addMealToHistoryOnly();
+          }
+        });
       } else {
         historyButton.textContent = 'History';
         headerTitle.textContent = 'Meals';
+        
+        // Restore normal input container
+        addContainer.innerHTML = `
+          <input type="text" id="meals-input" placeholder="Add meal..." maxlength="100">
+          <button onclick="addMealItem()" id="add-meals-btn">Add</button>
+        `;
+        
+        // Re-add Enter key support for normal input
+        document.getElementById('meals-input').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            addMealItem();
+          }
+        });
       }
       
       renderMealsList();
@@ -1235,33 +1320,8 @@
         return completedDay.getTime() >= today.getTime();
       });
 
-      // Clean up meal items and move completed ones to history
+      // Clean up meal items (remove completed ones from current list)
       const originalMealCount = mealItems.length;
-      const mealsToArchive = mealItems.filter(item => {
-        if (!item.completed || !item.completedAt) return false;
-        
-        const completedDate = new Date(item.completedAt);
-        const completedDay = new Date(completedDate.getFullYear(), completedDate.getMonth(), completedDate.getDate());
-        
-        // Archive items completed before today
-        return completedDay.getTime() < today.getTime();
-      });
-
-      // Add completed meals to history (avoid duplicates)
-      mealsToArchive.forEach(meal => {
-        const existingInHistory = mealHistory.find(h => h.text === meal.text && h.url === meal.url);
-        if (!existingInHistory) {
-          mealHistory.push({
-            id: Date.now() + Math.random(), // Ensure unique ID
-            text: meal.text,
-            url: meal.url,
-            completedAt: meal.completedAt,
-            archivedAt: new Date().toISOString()
-          });
-        }
-      });
-
-      // Remove completed meals from current list
       mealItems = mealItems.filter(item => {
         if (!item.completed || !item.completedAt) return true;
         
@@ -1279,17 +1339,16 @@
       if (groceryItems.length !== originalGroceryCount) {
         saveGroceryItems();
       }
-      if (mealItems.length !== originalMealCount || mealsToArchive.length > 0) {
+      if (mealItems.length !== originalMealCount) {
         saveMealItems();
-        saveMealHistory();
       }
       
       // Log cleanup activity (optional, for debugging)
       const todoRemoved = originalTodoCount - todoItems.length;
       const groceryRemoved = originalGroceryCount - groceryItems.length;
-      const mealsArchived = mealsToArchive.length;
-      if (todoRemoved > 0 || groceryRemoved > 0 || mealsArchived > 0) {
-        console.log(`Cleaned up ${todoRemoved} todo items, ${groceryRemoved} grocery items, and archived ${mealsArchived} meals to history`);
+      const mealsRemoved = originalMealCount - mealItems.length;
+      if (todoRemoved > 0 || groceryRemoved > 0 || mealsRemoved > 0) {
+        console.log(`Cleaned up ${todoRemoved} todo items, ${groceryRemoved} grocery items, and ${mealsRemoved} completed meals`);
       }
     }
 
@@ -1371,6 +1430,30 @@
           </li>
         `;
       }).join('');
+    }
+
+    // Fullscreen meals history function
+    function addMealToHistoryOnlyFullscreen() {
+      const input = document.getElementById('fullscreen-meals-input');
+      const text = input.value.trim();
+      
+      if (text) {
+        const historyItem = {
+          id: Date.now() + Math.random(),
+          text: text,
+          url: '',
+          createdAt: new Date().toISOString(),
+          addedToHistoryAt: new Date().toISOString()
+        };
+        
+        mealHistory.unshift(historyItem);
+        saveMealHistory();
+        renderMealsListFullscreen();
+        input.value = '';
+        
+        // Prompt for recipe URL for history item
+        setTimeout(() => promptForHistoryRecipeUrl(historyItem.id), 100);
+      }
     }
 
     // Header Information Functions
@@ -1782,16 +1865,22 @@
         headerContainer.appendChild(historyBtn);
         content.appendChild(headerContainer);
         
-        // Add input container (only for current meals, not history)
-        if (!showingHistory) {
-          const addContainer = document.createElement('div');
-          addContainer.className = 'add-item-container';
+        // Add input container
+        const addContainer = document.createElement('div');
+        addContainer.className = 'add-item-container';
+        
+        if (showingHistory) {
+          addContainer.innerHTML = `
+            <input type="text" id="fullscreen-meals-input" placeholder="Add to history only..." maxlength="100">
+            <button onclick="addMealToHistoryOnlyFullscreen()" id="fullscreen-add-meals-btn">Add to History</button>
+          `;
+        } else {
           addContainer.innerHTML = `
             <input type="text" id="fullscreen-meals-input" placeholder="Add meal..." maxlength="100">
             <button onclick="addMealItemFullscreen()" id="fullscreen-add-meals-btn">Add</button>
           `;
-          content.appendChild(addContainer);
         }
+        content.appendChild(addContainer);
         
         // Add task list
         const taskList = document.createElement('ul');
@@ -1803,12 +1892,16 @@
         setTimeout(() => {
           renderMealsListFullscreen();
           
-          // Add Enter key support (only if input exists)
+          // Add Enter key support
           const input = document.getElementById('fullscreen-meals-input');
           if (input) {
             input.addEventListener('keypress', function(e) {
               if (e.key === 'Enter') {
-                addMealItemFullscreen();
+                if (showingHistory) {
+                  addMealToHistoryOnlyFullscreen();
+                } else {
+                  addMealItemFullscreen();
+                }
               }
             });
           }
