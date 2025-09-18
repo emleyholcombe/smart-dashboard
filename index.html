@@ -122,7 +122,7 @@
 
     main {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       grid-template-rows: 1fr 1fr;
       flex: 1;
       gap: 1.5rem;
@@ -165,7 +165,7 @@
     }
 
     .calendar-widget {
-      grid-column: 1 / 3;
+      grid-column: 1 / 4;
       grid-row: 1;
     }
 
@@ -176,6 +176,11 @@
 
     .grocery-widget {
       grid-column: 2;
+      grid-row: 2;
+    }
+
+    .meals-widget {
+      grid-column: 3;
       grid-row: 2;
     }
 
@@ -309,6 +314,100 @@
 
     .hidden {
       display: none !important;
+    }
+
+    /* Meals-specific styles */
+    .meal-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      gap: 12px;
+      transition: all 0.2s ease;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .meal-item:hover {
+      background: rgba(102, 126, 234, 0.03);
+      border-radius: 8px;
+      margin: 0 -8px;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .meal-text {
+      flex: 1;
+      font-size: 15px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    .meal-text.completed {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    .meal-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .meal-link:hover {
+      text-decoration: underline;
+    }
+
+    .history-button {
+      background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-left: 1rem;
+    }
+
+    .history-button:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .meal-url-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .meal-url-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+    }
+
+    .add-from-history-btn {
+      background: var(--success-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .add-from-history-btn:hover {
+      background: #22c55e;
+      transform: scale(1.05);
     }
 
     .add-item-container {
@@ -519,7 +618,7 @@
     @media (max-width: 768px) {
       main {
         grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
+        grid-template-rows: auto auto auto auto;
         padding: 1rem;
         gap: 1rem;
       }
@@ -537,6 +636,11 @@
       .grocery-widget {
         grid-column: 1;
         grid-row: 3;
+      }
+
+      .meals-widget {
+        grid-column: 1;
+        grid-row: 4;
       }
 
       .widget {
@@ -688,7 +792,7 @@
     <!-- Google Calendar -->
     <div class="widget calendar-widget" id="calendar-widget">
       <h2 onclick="openFullscreen('calendar')">Calendar</h2>
-      <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=WEEK&showCalendars=0&showTabs=0&showPrint=0&showDate=1&showNav=1&showTitle=0"></iframe>
+      <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=WEEK&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0"></iframe>
 
     </div>
 
@@ -715,12 +819,30 @@
         <!-- Dynamic content will be loaded here -->
       </ul>
     </div>
+
+    <!-- Meals List -->
+    <div class="widget meals-widget" id="meals-widget">
+      <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+        <h2 onclick="openFullscreen('meals')" style="margin: 0; cursor: pointer;">Meals</h2>
+        <button onclick="showMealsHistory()" class="history-button">History</button>
+      </div>
+      <div class="add-item-container">
+        <input type="text" id="meals-input" placeholder="Add meal..." maxlength="100">
+        <button onclick="addMealItem()" id="add-meals-btn">Add</button>
+      </div>
+      <ul id="meals-list" class="task-list">
+        <!-- Dynamic content will be loaded here -->
+      </ul>
+    </div>
   </main>
 
   <script>
     // Data storage
     let todoItems = JSON.parse(localStorage.getItem('todoItems')) || [];
     let groceryItems = JSON.parse(localStorage.getItem('groceryItems')) || [];
+    let mealItems = JSON.parse(localStorage.getItem('mealItems')) || [];
+    let mealHistory = JSON.parse(localStorage.getItem('mealHistory')) || [];
+    let showingHistory = false;
 
     // Initialize lists on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -729,6 +851,7 @@
       
       renderTodoList();
       renderGroceryList();
+      renderMealsList();
       
       // Initialize header info
       updateDateTime();
@@ -750,6 +873,12 @@
       document.getElementById('grocery-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
           addGroceryItem();
+        }
+      });
+      
+      document.getElementById('meals-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          addMealItem();
         }
       });
 
@@ -913,6 +1042,163 @@
       localStorage.setItem('groceryItems', JSON.stringify(groceryItems));
     }
 
+    // Meals List Functions
+    function addMealItem() {
+      const input = document.getElementById('meals-input');
+      const text = input.value.trim();
+      
+      if (text) {
+        const item = {
+          id: Date.now(),
+          text: text,
+          url: '',
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        mealItems.unshift(item);
+        saveMealItems();
+        renderMealsList();
+        input.value = '';
+        
+        // Prompt for recipe URL
+        setTimeout(() => promptForRecipeUrl(item.id), 100);
+      }
+    }
+
+    function promptForRecipeUrl(mealId) {
+      const meal = mealItems.find(item => item.id === mealId);
+      if (meal) {
+        const url = prompt(`Add recipe URL for "${meal.text}" (optional):`);
+        if (url && url.trim()) {
+          meal.url = url.trim();
+          saveMealItems();
+          renderMealsList();
+        }
+      }
+    }
+
+    function toggleMealItem(id) {
+      const item = mealItems.find(item => item.id === id);
+      if (item) {
+        item.completed = !item.completed;
+        if (item.completed) {
+          item.completedAt = new Date().toISOString();
+        } else {
+          delete item.completedAt;
+        }
+        saveMealItems();
+        renderMealsList();
+      }
+    }
+
+    function deleteMealItem(id) {
+      mealItems = mealItems.filter(item => item.id !== id);
+      saveMealItems();
+      renderMealsList();
+    }
+
+    function editMealItem(id) {
+      const item = mealItems.find(item => item.id === id);
+      if (item) {
+        const newText = prompt('Edit meal:', item.text);
+        if (newText !== null && newText.trim()) {
+          item.text = newText.trim();
+          
+          // Also prompt to update URL
+          const newUrl = prompt('Update recipe URL (leave blank to keep current):', item.url || '');
+          if (newUrl !== null) {
+            item.url = newUrl.trim();
+          }
+          
+          saveMealItems();
+          renderMealsList();
+        }
+      }
+    }
+
+    function renderMealsList() {
+      const list = document.getElementById('meals-list');
+      const items = showingHistory ? mealHistory : mealItems;
+      
+      if (items.length === 0) {
+        const emptyMessage = showingHistory ? 'No meals in history yet.' : 'No meals yet. Add one above!';
+        list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
+        return;
+      }
+      
+      list.innerHTML = items.map(item => {
+        const mealText = item.url ? 
+          `<a href="${item.url}" target="_blank" class="meal-link">${escapeHtml(item.text)}</a>` : 
+          escapeHtml(item.text);
+          
+        const historyButton = showingHistory ? 
+          `<button class="add-from-history-btn" onclick="addFromHistory(${item.id})" title="Add to current meals">+</button>` : '';
+          
+        return `
+          <li class="meal-item">
+            ${showingHistory ? '' : `<input type="checkbox" class="task-checkbox" 
+                   ${item.completed ? 'checked' : ''} 
+                   onchange="toggleMealItem(${item.id})">`}
+            <span class="meal-text ${item.completed ? 'completed' : ''}">${mealText}</span>
+            <div class="task-actions">
+              ${historyButton}
+              <button class="edit-btn" onclick="editMealItem(${item.id})" title="Edit">✏️</button>
+              <button class="delete-btn" onclick="deleteMealItem(${item.id})" title="Delete">🗑️</button>
+            </div>
+          </li>
+        `;
+      }).join('');
+    }
+
+    function saveMealItems() {
+      localStorage.setItem('mealItems', JSON.stringify(mealItems));
+    }
+
+    function saveMealHistory() {
+      localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
+    }
+
+    function showMealsHistory() {
+      showingHistory = !showingHistory;
+      const historyButton = document.querySelector('.history-button');
+      const headerTitle = document.querySelector('.meals-widget h2');
+      
+      if (showingHistory) {
+        historyButton.textContent = 'Current';
+        headerTitle.textContent = 'Meals History';
+      } else {
+        historyButton.textContent = 'History';
+        headerTitle.textContent = 'Meals';
+      }
+      
+      renderMealsList();
+    }
+
+    function addFromHistory(historyId) {
+      const historyItem = mealHistory.find(item => item.id === historyId);
+      if (historyItem) {
+        const newItem = {
+          id: Date.now(),
+          text: historyItem.text,
+          url: historyItem.url,
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        mealItems.unshift(newItem);
+        saveMealItems();
+        
+        // Switch back to current view and render
+        showingHistory = false;
+        const historyButton = document.querySelector('.history-button');
+        const headerTitle = document.querySelector('.meals-widget h2');
+        historyButton.textContent = 'History';
+        headerTitle.textContent = 'Meals';
+        renderMealsList();
+      }
+    }
+
     // Utility function to prevent XSS
     function escapeHtml(text) {
       const div = document.createElement('div');
@@ -948,6 +1234,43 @@
         // Keep items completed today, remove items completed before today
         return completedDay.getTime() >= today.getTime();
       });
+
+      // Clean up meal items and move completed ones to history
+      const originalMealCount = mealItems.length;
+      const mealsToArchive = mealItems.filter(item => {
+        if (!item.completed || !item.completedAt) return false;
+        
+        const completedDate = new Date(item.completedAt);
+        const completedDay = new Date(completedDate.getFullYear(), completedDate.getMonth(), completedDate.getDate());
+        
+        // Archive items completed before today
+        return completedDay.getTime() < today.getTime();
+      });
+
+      // Add completed meals to history (avoid duplicates)
+      mealsToArchive.forEach(meal => {
+        const existingInHistory = mealHistory.find(h => h.text === meal.text && h.url === meal.url);
+        if (!existingInHistory) {
+          mealHistory.push({
+            id: Date.now() + Math.random(), // Ensure unique ID
+            text: meal.text,
+            url: meal.url,
+            completedAt: meal.completedAt,
+            archivedAt: new Date().toISOString()
+          });
+        }
+      });
+
+      // Remove completed meals from current list
+      mealItems = mealItems.filter(item => {
+        if (!item.completed || !item.completedAt) return true;
+        
+        const completedDate = new Date(item.completedAt);
+        const completedDay = new Date(completedDate.getFullYear(), completedDate.getMonth(), completedDate.getDate());
+        
+        // Keep items completed today, remove items completed before today
+        return completedDay.getTime() >= today.getTime();
+      });
       
       // Save if any items were removed
       if (todoItems.length !== originalTodoCount) {
@@ -956,12 +1279,17 @@
       if (groceryItems.length !== originalGroceryCount) {
         saveGroceryItems();
       }
+      if (mealItems.length !== originalMealCount || mealsToArchive.length > 0) {
+        saveMealItems();
+        saveMealHistory();
+      }
       
       // Log cleanup activity (optional, for debugging)
       const todoRemoved = originalTodoCount - todoItems.length;
       const groceryRemoved = originalGroceryCount - groceryItems.length;
-      if (todoRemoved > 0 || groceryRemoved > 0) {
-        console.log(`Cleaned up ${todoRemoved} completed todo items and ${groceryRemoved} completed grocery items`);
+      const mealsArchived = mealsToArchive.length;
+      if (todoRemoved > 0 || groceryRemoved > 0 || mealsArchived > 0) {
+        console.log(`Cleaned up ${todoRemoved} todo items, ${groceryRemoved} grocery items, and archived ${mealsArchived} meals to history`);
       }
     }
 
@@ -983,6 +1311,66 @@
       }, msUntilMidnight);
       
       console.log(`Next automatic cleanup scheduled for: ${tomorrow.toLocaleString()}`);
+    }
+
+    // Fullscreen meals functions
+    function addMealItemFullscreen() {
+      const input = document.getElementById('fullscreen-meals-input');
+      const text = input.value.trim();
+      
+      if (text) {
+        const item = {
+          id: Date.now(),
+          text: text,
+          url: '',
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        mealItems.unshift(item);
+        saveMealItems();
+        renderMealsListFullscreen();
+        input.value = '';
+        
+        // Prompt for recipe URL
+        setTimeout(() => promptForRecipeUrl(item.id), 100);
+      }
+    }
+
+    function renderMealsListFullscreen() {
+      const list = document.getElementById('fullscreen-meals-list');
+      if (!list) return;
+      
+      const items = showingHistory ? mealHistory : mealItems;
+      
+      if (items.length === 0) {
+        const emptyMessage = showingHistory ? 'No meals in history yet.' : 'No meals yet. Add one above!';
+        list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
+        return;
+      }
+      
+      list.innerHTML = items.map(item => {
+        const mealText = item.url ? 
+          `<a href="${item.url}" target="_blank" class="meal-link">${escapeHtml(item.text)}</a>` : 
+          escapeHtml(item.text);
+          
+        const historyButton = showingHistory ? 
+          `<button class="add-from-history-btn" onclick="addFromHistory(${item.id}); renderMealsListFullscreen();" title="Add to current meals">+</button>` : '';
+          
+        return `
+          <li class="meal-item">
+            ${showingHistory ? '' : `<input type="checkbox" class="task-checkbox" 
+                   ${item.completed ? 'checked' : ''} 
+                   onchange="toggleMealItem(${item.id}); renderMealsListFullscreen();">`}
+            <span class="meal-text ${item.completed ? 'completed' : ''}">${mealText}</span>
+            <div class="task-actions">
+              ${historyButton}
+              <button class="edit-btn" onclick="editMealItem(${item.id}); renderMealsListFullscreen();" title="Edit">✏️</button>
+              <button class="delete-btn" onclick="deleteMealItem(${item.id}); renderMealsListFullscreen();" title="Delete">🗑️</button>
+            </div>
+          </li>
+        `;
+      }).join('');
     }
 
     // Header Information Functions
@@ -1296,7 +1684,7 @@
       if (widgetType === 'calendar') {
         title.textContent = 'Calendar';
         const iframe = document.createElement('iframe');
-        iframe.src = 'https://calendar.google.com/calendar/embed?height=800&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=WEEK&showCalendars=0&showTabs=0&showPrint=0&showDate=1&showNav=1&showTitle=0';
+        iframe.src = 'https://calendar.google.com/calendar/embed?height=800&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=WEEK&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0';
         iframe.style.width = '100%';
         iframe.style.height = '100%';
         iframe.style.border = 'none';
@@ -1364,6 +1752,67 @@
             }
           });
         }, 100);
+        
+      } else if (widgetType === 'meals') {
+        title.textContent = showingHistory ? 'Meals History' : 'Meals';
+        
+        // Add header with history toggle
+        const headerContainer = document.createElement('div');
+        headerContainer.style.display = 'flex';
+        headerContainer.style.justifyContent = 'space-between';
+        headerContainer.style.alignItems = 'center';
+        headerContainer.style.marginBottom = '1.5rem';
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = showingHistory ? 'Meals History' : 'Meals';
+        titleSpan.style.fontSize = '1.2rem';
+        titleSpan.style.fontWeight = '600';
+        
+        const historyBtn = document.createElement('button');
+        historyBtn.className = 'history-button';
+        historyBtn.textContent = showingHistory ? 'Current' : 'History';
+        historyBtn.onclick = () => {
+          showMealsHistory();
+          titleSpan.textContent = showingHistory ? 'Meals History' : 'Meals';
+          historyBtn.textContent = showingHistory ? 'Current' : 'History';
+          renderMealsListFullscreen();
+        };
+        
+        headerContainer.appendChild(titleSpan);
+        headerContainer.appendChild(historyBtn);
+        content.appendChild(headerContainer);
+        
+        // Add input container (only for current meals, not history)
+        if (!showingHistory) {
+          const addContainer = document.createElement('div');
+          addContainer.className = 'add-item-container';
+          addContainer.innerHTML = `
+            <input type="text" id="fullscreen-meals-input" placeholder="Add meal..." maxlength="100">
+            <button onclick="addMealItemFullscreen()" id="fullscreen-add-meals-btn">Add</button>
+          `;
+          content.appendChild(addContainer);
+        }
+        
+        // Add task list
+        const taskList = document.createElement('ul');
+        taskList.id = 'fullscreen-meals-list';
+        taskList.className = 'task-list';
+        content.appendChild(taskList);
+        
+        // Render existing meals
+        setTimeout(() => {
+          renderMealsListFullscreen();
+          
+          // Add Enter key support (only if input exists)
+          const input = document.getElementById('fullscreen-meals-input');
+          if (input) {
+            input.addEventListener('keypress', function(e) {
+              if (e.key === 'Enter') {
+                addMealItemFullscreen();
+              }
+            });
+          }
+        }, 100);
       }
       
       fullscreenDiv.appendChild(fullscreenHeader);
@@ -1393,6 +1842,7 @@
       // Re-render lists to sync any changes made in fullscreen
       renderTodoList();
       renderGroceryList();
+      renderMealsList();
     }
 
     // Fullscreen todo functions
