@@ -1283,6 +1283,12 @@
         historyButton.textContent = 'Current';
         headerTitle.textContent = 'To-Do History';
         
+        // Update header onclick to open fullscreen history
+        headerTitle.onclick = () => {
+          showingTodoHistory = true;
+          openFullscreen('todo');
+        };
+        
         // Replace add container with search interface
         const addContainer = document.getElementById('todo-add-container');
         addContainer.innerHTML = `
@@ -1319,6 +1325,9 @@
       } else {
         historyButton.textContent = 'History';
         headerTitle.textContent = 'To-Do List';
+        
+        // Restore original header onclick behavior
+        headerTitle.onclick = () => openFullscreen('todo');
         
         // Restore original add container
         const addContainer = document.getElementById('todo-add-container');
