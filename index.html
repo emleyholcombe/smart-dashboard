@@ -237,7 +237,7 @@
     main {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
+      grid-template-rows: minmax(400px, 1fr) minmax(200px, 1fr);
       flex: 1;
       gap: 1.5rem;
       padding: 2rem;
@@ -281,6 +281,18 @@
     .calendar-widget {
       grid-column: 1 / 4;
       grid-row: 1;
+      /* Force stable dimensions to prevent layout shifts */
+      min-height: 400px;
+      max-height: 600px;
+      overflow: hidden;
+    }
+    
+    .calendar-widget iframe {
+      /* Ensure iframe doesn't cause layout changes */
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 350px;
+      max-height: 550px;
     }
 
     .todo-widget {
@@ -302,6 +314,8 @@
     .meals-widget {
       grid-column: 3;
       grid-row: 2;
+      /* Isolate meals widget to prevent affecting other widgets */
+      contain: layout style;
     }
 
     iframe {
@@ -799,12 +813,15 @@
       /* Calendar optimizations */
       .calendar-widget {
         padding: 1rem;
-        min-height: 300px; /* Much smaller for tablets */
+        min-height: 300px !important; /* Much smaller for tablets */
+        max-height: 300px !important; /* Force stable height */
+        overflow: hidden;
       }
       
       .calendar-widget iframe {
-        height: 250px; /* Much smaller calendar height for tablets */
-        min-height: 250px;
+        height: 250px !important; /* Much smaller calendar height for tablets */
+        min-height: 250px !important;
+        max-height: 250px !important;
       }
       
       .calendar-widget h2 {
