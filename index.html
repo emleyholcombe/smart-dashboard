@@ -1742,7 +1742,7 @@
 
     function showMealsHistory() {
       showingMealHistory = !showingMealHistory;
-      const historyButton = document.querySelector('.history-button');
+      const historyButton = document.querySelector('.meals-widget .history-button');
       const headerTitle = document.querySelector('.meals-widget h2');
       const addContainer = document.getElementById('meals-add-container');
       
@@ -1799,7 +1799,7 @@
         
         // Switch back to current view and render
         showingMealHistory = false;
-        const historyButton = document.querySelector('.history-button');
+        const historyButton = document.querySelector('.meals-widget .history-button');
         const headerTitle = document.querySelector('.meals-widget h2');
         historyButton.textContent = 'History';
         headerTitle.textContent = 'Meals';
