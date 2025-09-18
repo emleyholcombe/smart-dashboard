@@ -1122,19 +1122,34 @@
     let todoItems = JSON.parse(localStorage.getItem('todoItems')) || [];
     let todoHistory = JSON.parse(localStorage.getItem('todoHistory')) || [];
     let groceryItems = JSON.parse(localStorage.getItem('groceryItems')) || [];
-    let mealItems = JSON.parse(localStorage.getItem('mealItems')) || [];
-    let mealHistory = JSON.parse(localStorage.getItem('mealHistory')) || [];
+    let mealItems, mealHistory;
+    try {
+      mealItems = JSON.parse(localStorage.getItem('mealItems')) || [];
+      mealHistory = JSON.parse(localStorage.getItem('mealHistory')) || [];
+      console.log('Loaded meals from localStorage:', {
+        mealItems: mealItems.length,
+        mealHistory: mealHistory.length
+      });
+    } catch (error) {
+      console.error('Error loading meals from localStorage:', error);
+      mealItems = [];
+      mealHistory = [];
+    }
     let showingMealHistory = false;
     let showingTodoHistory = false;
 
     // Initialize lists on page load
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOMContentLoaded fired, initializing lists...');
+      
       // Clean up old completed items first
       cleanupCompletedItems();
       
+      console.log('About to render lists...');
       renderTodoList();
       renderGroceryList();
       renderMealsList();
+      console.log('Lists rendered.');
       
       // Initialize header info
       updateDateTime();
@@ -1693,7 +1708,13 @@
 
     function renderMealsList() {
       const list = document.getElementById('meals-list');
+      if (!list) {
+        console.error('meals-list element not found');
+        return;
+      }
+      
       const items = showingMealHistory ? mealHistory : mealItems;
+      console.log('Rendering meals:', items.length, 'items, showingHistory:', showingMealHistory);
       
       if (items.length === 0) {
         const emptyMessage = showingMealHistory ? 'No meals in history yet.' : 'No meals yet. Add one above!';
