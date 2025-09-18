@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bennett Hub</title>
+  <title>Smart Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -194,6 +194,14 @@
       font-weight: 600;
       position: relative;
       padding-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+
+    h2:hover {
+      color: var(--primary-color);
+      transform: translateY(-1px);
     }
 
     h2::after {
@@ -206,6 +214,83 @@
       height: 3px;
       background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
       border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    h2:hover::after {
+      width: 60px;
+    }
+
+    /* Full-screen mode styles */
+    .fullscreen-mode {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1000;
+      background: var(--background);
+      display: flex;
+      flex-direction: column;
+      animation: slideInFullscreen 0.3s ease-out;
+    }
+
+    @keyframes slideInFullscreen {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .fullscreen-header {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .fullscreen-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .back-button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .fullscreen-content {
+      flex: 1;
+      padding: 2rem;
+      overflow: auto;
+      background: var(--card-background);
+      margin: 1rem;
+      border-radius: 20px;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     .add-item-container {
@@ -483,6 +568,22 @@
       h2 {
         font-size: 1.25rem;
       }
+
+      .fullscreen-header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .fullscreen-title {
+        font-size: 1.25rem;
+      }
+
+      .fullscreen-content {
+        margin: 0.5rem;
+        padding: 1rem;
+      }
     }
 
     @media (max-width: 480px) {
@@ -547,22 +648,22 @@
         <span id="current-time">Loading...</span>
       </div>
       <div class="info-item">
-        <span class="info-icon">🌡️</span>
+        <span id="weather-icon" class="info-icon">🌡️</span>
         <span id="current-temp" class="weather-temp loading">Loading...</span>
       </div>
     </div>
   </header>
   <main>
     <!-- Google Calendar -->
-    <div class="widget calendar-widget">
-      <h2>Calendar</h2>
+    <div class="widget calendar-widget" id="calendar-widget">
+      <h2 onclick="openFullscreen('calendar')">Calendar</h2>
       <iframe src="https://calendar.google.com/calendar/embed?src=holcombe.emley%40gmail.com&ctz=America%2FDenver"></iframe>
 
     </div>
 
     <!-- To-Do List -->
-    <div class="widget todo-widget">
-      <h2>To-Do List</h2>
+    <div class="widget todo-widget" id="todo-widget">
+      <h2 onclick="openFullscreen('todo')">To-Do List</h2>
       <div class="add-item-container">
         <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
         <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
@@ -573,8 +674,8 @@
     </div>
 
     <!-- Grocery List -->
-    <div class="widget grocery-widget">
-      <h2>Grocery List</h2>
+    <div class="widget grocery-widget" id="grocery-widget">
+      <h2 onclick="openFullscreen('grocery')">Grocery List</h2>
       <div class="add-item-container">
         <input type="text" id="grocery-input" placeholder="Add grocery item..." maxlength="100">
         <button onclick="addGroceryItem()" id="add-grocery-btn">Add</button>
@@ -871,55 +972,336 @@
       const timeOptions = { 
         hour: 'numeric', 
         minute: '2-digit',
-        second: '2-digit',
         hour12: true 
       };
       const timeString = now.toLocaleTimeString('en-US', timeOptions);
       document.getElementById('current-time').textContent = timeString;
     }
 
+    function getWeatherEmoji(condition, isNight = false) {
+      const conditionLower = condition.toLowerCase();
+      
+      // Night conditions
+      if (isNight) {
+        if (conditionLower.includes('clear') || conditionLower.includes('sunny')) {
+          return '🌙'; // Clear night
+        }
+        if (conditionLower.includes('partly') || conditionLower.includes('partial')) {
+          return '☁️'; // Partly cloudy night
+        }
+        if (conditionLower.includes('cloud')) {
+          return '☁️'; // Cloudy night
+        }
+      }
+      
+      // Day conditions
+      if (conditionLower.includes('sunny') || conditionLower.includes('clear')) {
+        return '☀️'; // Sunny
+      }
+      if (conditionLower.includes('partly') || conditionLower.includes('partial')) {
+        return '⛅'; // Partly cloudy
+      }
+      if (conditionLower.includes('cloud') || conditionLower.includes('overcast')) {
+        return '☁️'; // Cloudy
+      }
+      if (conditionLower.includes('rain') || conditionLower.includes('drizzle') || conditionLower.includes('shower')) {
+        return '🌧️'; // Rainy
+      }
+      if (conditionLower.includes('thunder') || conditionLower.includes('storm')) {
+        return '⛈️'; // Thunderstorm
+      }
+      if (conditionLower.includes('snow') || conditionLower.includes('blizzard')) {
+        return '❄️'; // Snow
+      }
+      if (conditionLower.includes('fog') || conditionLower.includes('mist') || conditionLower.includes('haze')) {
+        return '🌫️'; // Fog
+      }
+      if (conditionLower.includes('wind')) {
+        return '💨'; // Windy
+      }
+      
+      // Default fallback
+      return '🌡️';
+    }
+
     async function updateWeather() {
       const tempElement = document.getElementById('current-temp');
+      const iconElement = document.getElementById('weather-icon');
       
       try {
         // Using ZIP code 84660 for accurate local weather
         const location = '84660'; // ZIP code for precise location-based weather
         
-        // Using OpenWeatherMap's free API (no key required for basic data)
-        // Alternative: you can use wttr.in for a simpler API
-        const response = await fetch(`https://wttr.in/${location}?format=j1`);
+        // Try to get detailed weather data first
+        const detailedResponse = await fetch(`https://wttr.in/${location}?format=j1`, {
+          method: 'GET',
+          mode: 'cors'
+        });
         
-        if (!response.ok) {
-          throw new Error('Weather data unavailable');
+        if (detailedResponse.ok) {
+          const data = await detailedResponse.json();
+          const current = data.current_condition[0];
+          const tempF = current.temp_F;
+          const condition = current.weatherDesc[0].value;
+          
+          // Determine if it's night time (simple check based on current hour)
+          const now = new Date();
+          const hour = now.getHours();
+          const isNight = hour < 6 || hour > 20; // Between 8 PM and 6 AM
+          
+          // Update temperature and icon
+          tempElement.textContent = `${tempF}°F`;
+          iconElement.textContent = getWeatherEmoji(condition, isNight);
+          tempElement.title = condition; // Show condition on hover
+          tempElement.classList.remove('loading');
+          return;
         }
         
-        const data = await response.json();
-        const tempF = data.current_condition[0].temp_F;
-        const condition = data.current_condition[0].weatherDesc[0].value;
+        // Fallback to simple temperature only
+        const simpleResponse = await fetch(`https://wttr.in/${location}?format=%t&m`, {
+          method: 'GET',
+          mode: 'cors'
+        });
         
-        tempElement.textContent = `${tempF}°F`;
-        tempElement.title = condition; // Show condition on hover
-        tempElement.classList.remove('loading');
+        if (simpleResponse.ok) {
+          const temp = await simpleResponse.text();
+          const cleanTemp = temp.trim().replace(/[^\d°CF-]/g, '');
+          tempElement.textContent = cleanTemp || 'Loading...';
+          iconElement.textContent = '🌡️'; // Default icon when condition unknown
+          tempElement.classList.remove('loading');
+          return;
+        }
+        
+        throw new Error('All weather APIs failed');
         
       } catch (error) {
         console.log('Weather update failed:', error);
         
-        // Fallback: try a simpler approach
-        try {
-          const response = await fetch(`https://wttr.in/84660?format=%t`);
-          if (response.ok) {
-            const temp = await response.text();
-            tempElement.textContent = temp.trim();
-            tempElement.classList.remove('loading');
-          } else {
-            throw new Error('Fallback failed');
-          }
-        } catch (fallbackError) {
-          tempElement.textContent = 'Weather unavailable';
-          tempElement.classList.remove('loading');
-          console.log('Weather fallback failed:', fallbackError);
-        }
+        // Graceful fallback - show a placeholder
+        tempElement.textContent = 'Weather';
+        iconElement.textContent = '🌡️';
+        tempElement.classList.remove('loading');
+        tempElement.title = 'Weather data temporarily unavailable';
+        
+        // Try again in 5 minutes
+        setTimeout(updateWeather, 5 * 60 * 1000);
       }
+    }
+
+    // Full-screen functionality
+    function openFullscreen(widgetType) {
+      const main = document.querySelector('main');
+      const header = document.querySelector('header');
+      
+      // Hide main dashboard
+      main.classList.add('hidden');
+      header.classList.add('hidden');
+      
+      // Create full-screen container
+      const fullscreenDiv = document.createElement('div');
+      fullscreenDiv.className = 'fullscreen-mode';
+      fullscreenDiv.id = 'fullscreen-container';
+      
+      // Create header with back button
+      const fullscreenHeader = document.createElement('div');
+      fullscreenHeader.className = 'fullscreen-header';
+      
+      const title = document.createElement('h1');
+      title.className = 'fullscreen-title';
+      
+      const backButton = document.createElement('button');
+      backButton.className = 'back-button';
+      backButton.onclick = closeFullscreen;
+      backButton.innerHTML = '← Back to Dashboard';
+      
+      fullscreenHeader.appendChild(title);
+      fullscreenHeader.appendChild(backButton);
+      
+      // Create content area
+      const content = document.createElement('div');
+      content.className = 'fullscreen-content';
+      
+      // Configure based on widget type
+      if (widgetType === 'calendar') {
+        title.textContent = 'Calendar';
+        const iframe = document.createElement('iframe');
+        iframe.src = 'https://calendar.google.com/calendar/embed?src=holcombe.emley%40gmail.com&ctz=America%2FDenver';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.borderRadius = '10px';
+        content.appendChild(iframe);
+        
+      } else if (widgetType === 'todo') {
+        title.textContent = 'To-Do List';
+        
+        // Add input container
+        const addContainer = document.createElement('div');
+        addContainer.className = 'add-item-container';
+        addContainer.innerHTML = `
+          <input type="text" id="fullscreen-todo-input" placeholder="Add new task..." maxlength="100">
+          <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
+        `;
+        
+        // Add task list
+        const taskList = document.createElement('ul');
+        taskList.id = 'fullscreen-todo-list';
+        taskList.className = 'task-list';
+        
+        content.appendChild(addContainer);
+        content.appendChild(taskList);
+        
+        // Render existing todos
+        setTimeout(() => {
+          renderTodoListFullscreen();
+          
+          // Add Enter key support
+          document.getElementById('fullscreen-todo-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+              addTodoItemFullscreen();
+            }
+          });
+        }, 100);
+        
+      } else if (widgetType === 'grocery') {
+        title.textContent = 'Grocery List';
+        
+        // Add input container
+        const addContainer = document.createElement('div');
+        addContainer.className = 'add-item-container';
+        addContainer.innerHTML = `
+          <input type="text" id="fullscreen-grocery-input" placeholder="Add grocery item..." maxlength="100">
+          <button onclick="addGroceryItemFullscreen()" id="fullscreen-add-grocery-btn">Add</button>
+        `;
+        
+        // Add task list
+        const taskList = document.createElement('ul');
+        taskList.id = 'fullscreen-grocery-list';
+        taskList.className = 'task-list';
+        
+        content.appendChild(addContainer);
+        content.appendChild(taskList);
+        
+        // Render existing groceries
+        setTimeout(() => {
+          renderGroceryListFullscreen();
+          
+          // Add Enter key support
+          document.getElementById('fullscreen-grocery-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+              addGroceryItemFullscreen();
+            }
+          });
+        }, 100);
+      }
+      
+      fullscreenDiv.appendChild(fullscreenHeader);
+      fullscreenDiv.appendChild(content);
+      document.body.appendChild(fullscreenDiv);
+    }
+
+    function closeFullscreen() {
+      const fullscreenContainer = document.getElementById('fullscreen-container');
+      const main = document.querySelector('main');
+      const header = document.querySelector('header');
+      
+      if (fullscreenContainer) {
+        fullscreenContainer.remove();
+      }
+      
+      // Show main dashboard
+      main.classList.remove('hidden');
+      header.classList.remove('hidden');
+      
+      // Re-render lists to sync any changes made in fullscreen
+      renderTodoList();
+      renderGroceryList();
+    }
+
+    // Fullscreen todo functions
+    function addTodoItemFullscreen() {
+      const input = document.getElementById('fullscreen-todo-input');
+      const text = input.value.trim();
+      
+      if (text) {
+        const item = {
+          id: Date.now(),
+          text: text,
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        todoItems.unshift(item);
+        saveTodoItems();
+        renderTodoListFullscreen();
+        input.value = '';
+      }
+    }
+
+    function renderTodoListFullscreen() {
+      const list = document.getElementById('fullscreen-todo-list');
+      if (!list) return;
+      
+      if (todoItems.length === 0) {
+        list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
+        return;
+      }
+      
+      list.innerHTML = todoItems.map(item => `
+        <li class="task-item">
+          <input type="checkbox" class="task-checkbox" 
+                 ${item.completed ? 'checked' : ''} 
+                 onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
+          <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
+          <div class="task-actions">
+            <button class="edit-btn" onclick="editTodoItem(${item.id}); renderTodoListFullscreen();" title="Edit">✏️</button>
+            <button class="delete-btn" onclick="deleteTodoItem(${item.id}); renderTodoListFullscreen();" title="Delete">🗑️</button>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    // Fullscreen grocery functions
+    function addGroceryItemFullscreen() {
+      const input = document.getElementById('fullscreen-grocery-input');
+      const text = input.value.trim();
+      
+      if (text) {
+        const item = {
+          id: Date.now(),
+          text: text,
+          completed: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        groceryItems.unshift(item);
+        saveGroceryItems();
+        renderGroceryListFullscreen();
+        input.value = '';
+      }
+    }
+
+    function renderGroceryListFullscreen() {
+      const list = document.getElementById('fullscreen-grocery-list');
+      if (!list) return;
+      
+      if (groceryItems.length === 0) {
+        list.innerHTML = '<li class="empty-state">No items yet. Add one above!</li>';
+        return;
+      }
+      
+      list.innerHTML = groceryItems.map(item => `
+        <li class="task-item">
+          <input type="checkbox" class="task-checkbox" 
+                 ${item.completed ? 'checked' : ''} 
+                 onchange="toggleGroceryItem(${item.id}); renderGroceryListFullscreen();">
+          <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
+          <div class="task-actions">
+            <button class="edit-btn" onclick="editGroceryItem(${item.id}); renderGroceryListFullscreen();" title="Edit">✏️</button>
+            <button class="delete-btn" onclick="deleteGroceryItem(${item.id}); renderGroceryListFullscreen();" title="Delete">🗑️</button>
+          </div>
+        </li>
+      `).join('');
     }
 
     // Optional: Auto-save feature and data export/import for sharing between devices
