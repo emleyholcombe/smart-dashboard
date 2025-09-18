@@ -167,6 +167,12 @@
     .calendar-widget {
       grid-column: 1 / 4;
       grid-row: 1;
+      overflow: visible;
+      min-height: 500px;
+    }
+    
+    .calendar-widget iframe {
+      min-height: 500px;
     }
 
     .todo-widget {
@@ -626,6 +632,12 @@
       .calendar-widget {
         grid-column: 1;
         grid-row: 1;
+        overflow: visible;
+        min-height: 400px;
+      }
+      
+      .calendar-widget iframe {
+        min-height: 400px;
       }
 
       .todo-widget {
@@ -792,7 +804,7 @@
     <!-- Google Calendar -->
     <div class="widget calendar-widget" id="calendar-widget">
       <h2 onclick="openFullscreen('calendar')">Calendar</h2>
-      <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=WEEK&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0"></iframe>
+      <iframe src="https://calendar.google.com/calendar/embed?height=1000&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=WEEK&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0&showCalendars=1" style="border: 0" width="100%" height="100%" frameborder="0"></iframe>
 
     </div>
 
@@ -1767,7 +1779,7 @@
       if (widgetType === 'calendar') {
         title.textContent = 'Calendar';
         const iframe = document.createElement('iframe');
-        iframe.src = 'https://calendar.google.com/calendar/embed?height=800&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=WEEK&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0';
+        iframe.src = 'https://calendar.google.com/calendar/embed?height=1500&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=WEEK&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0&showCalendars=1';
         iframe.style.width = '100%';
         iframe.style.height = '100%';
         iframe.style.border = 'none';
