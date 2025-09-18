@@ -1100,6 +1100,10 @@
             <span id="sync-icon" class="info-icon">☁️</span>
             <span id="sync-text" class="weather-temp">Synced</span>
           </div>
+          <div class="info-item" onclick="showDebugInfo()" style="cursor: pointer;" title="Show debug info">
+            <span class="info-icon">🔍</span>
+            <span class="weather-temp">Debug</span>
+          </div>
         </div>
       </header>
   <main>
@@ -1154,10 +1158,14 @@
   </main>
 
   <script>
-    // GitHub Gist Configuration
+    // Sync Configuration
     const GITHUB_USERNAME = 'emleyholcombe'; // Your GitHub username
     let GIST_ID = localStorage.getItem('dashboardGistId') || null;
     const GIST_FILENAME = 'smart-dashboard-data.json';
+    
+    // Alternative: JSONBin.io (free, no auth required for public bins)
+    let JSONBIN_ID = localStorage.getItem('dashboardJsonBinId') || null;
+    const JSONBIN_API = 'https://api.jsonbin.io/v3/b';
     
     // Data storage
     let todoItems = [];
@@ -1199,6 +1207,18 @@
         }
         const errorText = await response.text();
         console.error('❌ Gist creation failed:', response.status, errorText);
+        console.error('Response details:', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+        
+        // If it's a 401/403, it's likely an auth issue
+        if (response.status === 401 || response.status === 403) {
+          console.warn('🚫 GitHub API requires authentication for creating Gists');
+          alert('⚠️ Sync requires GitHub authentication. Using local storage only.');
+        }
+        
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       } catch (error) {
         console.error('Failed to create Gist:', error);
@@ -1324,8 +1344,42 @@
         return;
       }
       
+      // Show debug info in alert for mobile debugging
+      const data = getCurrentData();
+      const debugInfo = `
+Sync Debug Info:
+- GIST_ID: ${GIST_ID || 'None'}
+- Online: ${isOnline}
+- Todo Items: ${data.todoItems.length}
+- Grocery Items: ${data.groceryItems.length}
+- Meal Items: ${data.mealItems.length}
+- Last Updated: ${data.lastUpdated}
+      `;
+      
       await saveAllData();
-      alert('✅ Sync attempt completed! Check console for details.');
+      alert('✅ Sync completed!' + debugInfo);
+    }
+    
+    // Debug function to show current state
+    function showDebugInfo() {
+      const data = getCurrentData();
+      const gistStatus = GIST_ID ? `✅ Gist ID: ${GIST_ID}` : '❌ No Gist Created';
+      const debugInfo = `
+📊 Dashboard Debug Info:
+${gistStatus}
+🌐 Online: ${isOnline}
+📝 Todo Items: ${data.todoItems.length}
+📋 Todo History: ${data.todoHistory.length}
+🛒 Grocery Items: ${data.groceryItems.length}
+🍽️ Meal Items: ${data.mealItems.length}
+🍽️ Meal History: ${data.mealHistory.length}
+⏰ Last Updated: ${data.lastUpdated}
+
+📱 localStorage Keys:
+${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('Items') || k.includes('History')).join(', ')}
+      `;
+      alert(debugInfo);
+      console.log('Debug Info:', data);
     }
     
     // Update sync status indicator
