@@ -288,6 +288,12 @@
       grid-row: 2;
     }
 
+    .todo-widget .task-list {
+      max-height: 300px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
     .grocery-widget {
       grid-column: 2;
       grid-row: 2;
@@ -994,6 +1000,11 @@
         <button class="nav-button" onclick="showFullscreenTodo()">
           <span class="nav-icon">✅</span>
           <span class="nav-label">To-Do</span>
+        </button>
+        
+        <button class="nav-button" onclick="showFullscreenTodoHistory()">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">To-Do History</span>
         </button>
         
         <button class="nav-button" onclick="showFullscreenGrocery()">
@@ -2683,6 +2694,13 @@
     function showFullscreenTodo() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
+      openFullscreen('todo');
+    }
+
+    function showFullscreenTodoHistory() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      showingTodoHistory = true;
       openFullscreen('todo');
     }
 
