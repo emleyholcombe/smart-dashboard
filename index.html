@@ -616,6 +616,26 @@
 
     /* Tablet responsiveness */
     @media (min-width: 769px) and (max-width: 1024px) {
+      /* Compact header for tablets */
+      header {
+        padding: 1rem; /* Reduce from 1.5rem to 1rem */
+      }
+      
+      .header-title {
+        font-size: 1.6rem; /* Reduce from 2rem to 1.6rem */
+        margin-bottom: 0.5rem; /* Add small margin */
+      }
+      
+      .header-info {
+        gap: 1.5rem; /* Reduce from 2rem to 1.5rem */
+        font-size: 0.9rem; /* Slightly smaller text */
+      }
+      
+      .info-item {
+        padding: 0.4rem 0.8rem; /* More compact info items */
+      }
+      
+      /* Calendar optimizations */
       .calendar-widget {
         padding: 1rem; /* Reduce padding to give more space to calendar */
         min-height: 600px; /* Ensure widget is tall enough */
@@ -637,6 +657,12 @@
       /* Make other widgets more compact on tablets */
       .todo-widget, .grocery-widget, .meals-widget {
         padding: 1.2rem;
+      }
+      
+      /* Optimize main grid for better space usage */
+      main {
+        gap: 1rem; /* Reduce gap between widgets */
+        padding: 1rem; /* Reduce main padding */
       }
     }
 
