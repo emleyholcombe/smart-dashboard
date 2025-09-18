@@ -1069,7 +1069,7 @@
     let groceryItems = JSON.parse(localStorage.getItem('groceryItems')) || [];
     let mealItems = JSON.parse(localStorage.getItem('mealItems')) || [];
     let mealHistory = JSON.parse(localStorage.getItem('mealHistory')) || [];
-    let showingHistory = false;
+    let showingMealHistory = false;
 
     // Initialize lists on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -1394,10 +1394,10 @@
 
     function renderMealsList() {
       const list = document.getElementById('meals-list');
-      const items = showingHistory ? mealHistory : mealItems;
+      const items = showingMealHistory ? mealHistory : mealItems;
       
       if (items.length === 0) {
-        const emptyMessage = showingHistory ? 'No meals in history yet.' : 'No meals yet. Add one above!';
+        const emptyMessage = showingMealHistory ? 'No meals in history yet.' : 'No meals yet. Add one above!';
         list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
         return;
       }
@@ -1407,19 +1407,19 @@
           `<a href="${item.url}" target="_blank" class="meal-link">${escapeHtml(item.text)}</a>` : 
           escapeHtml(item.text);
           
-        const historyButton = showingHistory ? 
+        const historyButton = showingMealHistory ? 
           `<button class="add-from-history-btn" onclick="addFromHistory(${item.id})" title="Add to current meals">+</button>` : '';
           
         return `
           <li class="task-item ${item.completed ? 'completed' : ''}">
-            ${showingHistory ? '' : `<input type="checkbox" class="task-checkbox" 
+            ${showingMealHistory ? '' : `<input type="checkbox" class="task-checkbox" 
                    ${item.completed ? 'checked' : ''} 
                    onchange="toggleMealItem(${item.id})">`}
             <span class="task-text ${item.completed ? 'completed' : ''}">${mealText}</span>
             <div class="task-actions">
               ${historyButton}
               <button class="edit-btn" onclick="editMealItem(${item.id})" title="Edit name">✏️</button>
-              <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingHistory})" title="${item.url ? 'Edit URL' : 'Add URL'}">🔗</button>
+              <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingMealHistory})" title="${item.url ? 'Edit URL' : 'Add URL'}">🔗</button>
               <button class="delete-btn" onclick="deleteMealItem(${item.id})" title="Delete">🗑️</button>
             </div>
           </li>
@@ -1468,12 +1468,12 @@
     }
 
     function showMealsHistory() {
-      showingHistory = !showingHistory;
+      showingMealHistory = !showingMealHistory;
       const historyButton = document.querySelector('.history-button');
       const headerTitle = document.querySelector('.meals-widget h2');
       const addContainer = document.getElementById('meals-add-container');
       
-      if (showingHistory) {
+      if (showingMealHistory) {
         historyButton.textContent = 'Current';
         headerTitle.textContent = 'Meals History';
         
@@ -1525,7 +1525,7 @@
         saveMealItems();
         
         // Switch back to current view and render
-        showingHistory = false;
+        showingMealHistory = false;
         const historyButton = document.querySelector('.history-button');
         const headerTitle = document.querySelector('.meals-widget h2');
         historyButton.textContent = 'History';
@@ -1647,17 +1647,17 @@
       const list = document.getElementById('fullscreen-meals-list');
       if (!list) return;
       
-      let items = showingHistory ? mealHistory : mealItems;
+      let items = showingMealHistory ? mealHistory : mealItems;
       
       // Apply search filtering if in history mode and search term exists
-      if (showingHistory && currentMealSearchTerm) {
+      if (showingMealHistory && currentMealSearchTerm) {
         items = fuzzySearchMeals(items, currentMealSearchTerm);
       }
       
       if (items.length === 0) {
-        const emptyMessage = showingHistory && currentMealSearchTerm ? 
+        const emptyMessage = showingMealHistory && currentMealSearchTerm ? 
           `No meals found matching "${currentMealSearchTerm}"` :
-          showingHistory ? 'No meals in history yet.' : 'No meals yet. Add one above!';
+          showingMealHistory ? 'No meals in history yet.' : 'No meals yet. Add one above!';
         list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
         return;
       }
@@ -1667,19 +1667,19 @@
           `<a href="${item.url}" target="_blank" class="meal-link">${escapeHtml(item.text)}</a>` : 
           escapeHtml(item.text);
           
-        const historyButton = showingHistory ? 
+        const historyButton = showingMealHistory ? 
           `<button class="add-from-history-btn" onclick="addFromHistory(${item.id}); renderMealsListFullscreen();" title="Add to current meals">+</button>` : '';
           
         return `
           <li class="task-item ${item.completed ? 'completed' : ''}">
-            ${showingHistory ? '' : `<input type="checkbox" class="task-checkbox" 
+            ${showingMealHistory ? '' : `<input type="checkbox" class="task-checkbox" 
                    ${item.completed ? 'checked' : ''} 
                    onchange="toggleMealItem(${item.id}); renderMealsListFullscreen();">`}
             <span class="task-text ${item.completed ? 'completed' : ''}">${mealText}</span>
             <div class="task-actions">
               ${historyButton}
               <button class="edit-btn" onclick="editMealItem(${item.id}); renderMealsListFullscreen();" title="Edit name">✏️</button>
-              <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingHistory}); renderMealsListFullscreen();" title="${item.url ? 'Edit URL' : 'Add URL'}">🔗</button>
+              <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingMealHistory}); renderMealsListFullscreen();" title="${item.url ? 'Edit URL' : 'Add URL'}">🔗</button>
               <button class="delete-btn" onclick="deleteMealItem(${item.id}); renderMealsListFullscreen();" title="Delete">🗑️</button>
             </div>
           </li>
@@ -2151,7 +2151,7 @@
         }, 100);
         
       } else if (widgetType === 'meals') {
-        title.textContent = showingHistory ? 'Meals History' : 'Meals';
+        title.textContent = showingMealHistory ? 'Meals History' : 'Meals';
         
         // Add header with history toggle
         const headerContainer = document.createElement('div');
@@ -2161,17 +2161,17 @@
         headerContainer.style.marginBottom = '1.5rem';
         
         const titleSpan = document.createElement('span');
-        titleSpan.textContent = showingHistory ? 'Meals History' : 'Meals';
+        titleSpan.textContent = showingMealHistory ? 'Meals History' : 'Meals';
         titleSpan.style.fontSize = '1.2rem';
         titleSpan.style.fontWeight = '600';
         
         const historyBtn = document.createElement('button');
         historyBtn.className = 'history-button';
-        historyBtn.textContent = showingHistory ? 'Current' : 'History';
+        historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
         historyBtn.onclick = () => {
           showMealsHistory();
-          titleSpan.textContent = showingHistory ? 'Meals History' : 'Meals';
-          historyBtn.textContent = showingHistory ? 'Current' : 'History';
+          titleSpan.textContent = showingMealHistory ? 'Meals History' : 'Meals';
+          historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
           renderMealsListFullscreen();
         };
         
@@ -2180,7 +2180,7 @@
         content.appendChild(headerContainer);
         
         // Add search bar for history mode
-        if (showingHistory) {
+        if (showingMealHistory) {
           const searchContainer = document.createElement('div');
           searchContainer.className = 'add-item-container';
           searchContainer.style.marginBottom = '1rem';
@@ -2205,7 +2205,7 @@
         const addContainer = document.createElement('div');
         addContainer.className = 'add-item-container';
         
-        if (showingHistory) {
+        if (showingMealHistory) {
           addContainer.innerHTML = `
             <input type="text" id="fullscreen-meals-input" placeholder="Add to history only..." maxlength="100">
             <button onclick="addMealToHistoryOnlyFullscreen()" id="fullscreen-add-meals-btn">Add to History</button>
@@ -2233,7 +2233,7 @@
           if (input) {
             input.addEventListener('keypress', function(e) {
               if (e.key === 'Enter') {
-                if (showingHistory) {
+                if (showingMealHistory) {
                   addMealToHistoryOnlyFullscreen();
                 } else {
                   addMealItemFullscreen();
@@ -2439,7 +2439,7 @@
     function showFullscreenMealsHistory() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
-      showingHistory = true;
+      showingMealHistory = true;
       openFullscreen('meals');
     }
 
