@@ -1178,101 +1178,81 @@
     let isOnline = navigator.onLine;
     let syncInProgress = false;
     
-    // GitHub Gist API functions
-    async function createGist(data) {
+    // JSONBin.io API functions (free, no auth required)
+    async function createJsonBin(data) {
       try {
-        const response = await fetch('https://api.github.com/gists', {
+        const response = await fetch(`${JSONBIN_API}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            description: 'Smart Dashboard Data - Private Storage',
-            public: false,
-            files: {
-              [GIST_FILENAME]: {
-                content: JSON.stringify(data, null, 2)
-              }
-            }
+            dashboardData: data,
+            created: new Date().toISOString(),
+            version: '1.0'
           })
         });
         
         if (response.ok) {
-          const gist = await response.json();
-          GIST_ID = gist.id;
-          localStorage.setItem('dashboardGistId', GIST_ID);
-          console.log('✅ Created new Gist:', GIST_ID);
-          console.log('🔗 Gist URL:', gist.html_url);
+          const result = await response.json();
+          JSONBIN_ID = result.metadata.id;
+          localStorage.setItem('dashboardJsonBinId', JSONBIN_ID);
+          console.log('✅ Created new JSONBin:', JSONBIN_ID);
           return true;
         }
         const errorText = await response.text();
-        console.error('❌ Gist creation failed:', response.status, errorText);
-        console.error('Response details:', {
-          status: response.status,
-          statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries())
-        });
-        
-        // If it's a 401/403, it's likely an auth issue
-        if (response.status === 401 || response.status === 403) {
-          console.warn('🚫 GitHub API requires authentication for creating Gists');
-          alert('⚠️ Sync requires GitHub authentication. Using local storage only.');
-        }
-        
+        console.error('❌ JSONBin creation failed:', response.status, errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       } catch (error) {
-        console.error('Failed to create Gist:', error);
+        console.error('Failed to create JSONBin:', error);
         return false;
       }
     }
     
-    async function updateGist(data) {
-      if (!GIST_ID) return false;
+    async function updateJsonBin(data) {
+      if (!JSONBIN_ID) return false;
       
       try {
-        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-          method: 'PATCH',
+        const response = await fetch(`${JSONBIN_API}/${JSONBIN_ID}`, {
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            files: {
-              [GIST_FILENAME]: {
-                content: JSON.stringify(data, null, 2)
-              }
-            }
+            dashboardData: data,
+            updated: new Date().toISOString(),
+            version: '1.0'
           })
         });
         
         if (response.ok) {
-          console.log('✅ Updated Gist successfully:', GIST_ID);
+          console.log('✅ Updated JSONBin successfully:', JSONBIN_ID);
           return true;
         }
         const errorText = await response.text();
-        console.error('❌ Gist update failed:', response.status, errorText);
+        console.error('❌ JSONBin update failed:', response.status, errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       } catch (error) {
-        console.error('Failed to update Gist:', error);
+        console.error('Failed to update JSONBin:', error);
         return false;
       }
     }
     
-    async function loadFromGist() {
-      if (!GIST_ID) return null;
+    async function loadFromJsonBin() {
+      if (!JSONBIN_ID) return null;
       
       try {
-        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+        const response = await fetch(`${JSONBIN_API}/${JSONBIN_ID}/latest`);
         if (response.ok) {
-          const gist = await response.json();
-          const content = gist.files[GIST_FILENAME]?.content;
-          if (content) {
-            console.log('Loaded data from Gist');
-            return JSON.parse(content);
+          const result = await response.json();
+          if (result.record && result.record.dashboardData) {
+            console.log('✅ Loaded data from JSONBin');
+            return result.record.dashboardData;
           }
         }
         throw new Error(`HTTP ${response.status}`);
       } catch (error) {
-        console.error('Failed to load from Gist:', error);
+        console.error('Failed to load from JSONBin:', error);
         return null;
       }
     }
@@ -1312,19 +1292,19 @@
       localStorage.setItem('mealItems', JSON.stringify(mealItems));
       localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
       
-      // Try to sync to Gist if online
+      // Try to sync to JSONBin if online
       if (isOnline) {
         let success = false;
-        if (GIST_ID) {
-          success = await updateGist(data);
+        if (JSONBIN_ID) {
+          success = await updateJsonBin(data);
         } else {
-          success = await createGist(data);
+          success = await createJsonBin(data);
         }
         
         if (success) {
-          console.log('Data synced to cloud');
+          console.log('✅ Data synced to cloud via JSONBin');
         } else {
-          console.log('Cloud sync failed, data saved locally');
+          console.log('❌ Cloud sync failed, data saved locally');
         }
       }
       
@@ -1363,10 +1343,10 @@ Sync Debug Info:
     // Debug function to show current state
     function showDebugInfo() {
       const data = getCurrentData();
-      const gistStatus = GIST_ID ? `✅ Gist ID: ${GIST_ID}` : '❌ No Gist Created';
+      const syncStatus = JSONBIN_ID ? `✅ JSONBin ID: ${JSONBIN_ID}` : '❌ No Cloud Storage';
       const debugInfo = `
 📊 Dashboard Debug Info:
-${gistStatus}
+${syncStatus}
 🌐 Online: ${isOnline}
 📝 Todo Items: ${data.todoItems.length}
 📋 Todo History: ${data.todoHistory.length}
@@ -1395,7 +1375,7 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
       } else if (!isOnline) {
         syncIcon.textContent = '📱';
         syncText.textContent = 'Offline';
-      } else if (GIST_ID) {
+      } else if (JSONBIN_ID) {
         syncIcon.textContent = '☁️';
         syncText.textContent = 'Synced';
       } else {
@@ -1415,12 +1395,12 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
       const localMealItems = JSON.parse(localStorage.getItem('mealItems') || '[]');
       const localMealHistory = JSON.parse(localStorage.getItem('mealHistory') || '[]');
       
-      // If online, try to load from Gist
-      if (isOnline && GIST_ID) {
-        const cloudData = await loadFromGist();
+      // If online, try to load from JSONBin
+      if (isOnline && JSONBIN_ID) {
+        const cloudData = await loadFromJsonBin();
         if (cloudData) {
           setCurrentData(cloudData);
-          console.log('Loaded data from cloud:', {
+          console.log('✅ Loaded data from cloud:', {
             todoItems: todoItems.length,
             todoHistory: todoHistory.length,
             groceryItems: groceryItems.length,
@@ -1446,9 +1426,9 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
         mealHistory: mealHistory.length
       });
       
-      // If we have local data but no Gist, create one
-      if (isOnline && !GIST_ID && (todoItems.length || groceryItems.length || mealItems.length)) {
-        console.log('Migrating local data to cloud...');
+      // If we have local data but no JSONBin, create one
+      if (isOnline && !JSONBIN_ID && (todoItems.length || groceryItems.length || mealItems.length)) {
+        console.log('🚀 Migrating local data to cloud...');
         await saveAllData();
       }
     }
