@@ -1060,12 +1060,16 @@
         <span id="weather-icon" class="info-icon">🌡️</span>
         <span id="current-temp" class="weather-temp loading">Loading...</span>
       </div>
-      <div class="info-item" id="precipitation-info" style="display: none;">
-        <span id="precip-icon" class="info-icon">💧</span>
-        <span id="precip-details" class="weather-temp">--</span>
-      </div>
-    </div>
-  </header>
+          <div class="info-item" id="precipitation-info" style="display: none;">
+            <span id="precip-icon" class="info-icon">💧</span>
+            <span id="precip-details" class="weather-temp">--</span>
+          </div>
+          <div class="info-item" id="sync-status">
+            <span id="sync-icon" class="info-icon">☁️</span>
+            <span id="sync-text" class="weather-temp">Synced</span>
+          </div>
+        </div>
+      </header>
   <main>
     <!-- Google Calendar -->
     <div class="widget calendar-widget" id="calendar-widget">
@@ -1118,29 +1122,238 @@
   </main>
 
   <script>
+    // GitHub Gist Configuration
+    const GITHUB_USERNAME = 'emleyholcombe'; // Your GitHub username
+    let GIST_ID = localStorage.getItem('dashboardGistId') || null;
+    const GIST_FILENAME = 'smart-dashboard-data.json';
+    
     // Data storage
-    let todoItems = JSON.parse(localStorage.getItem('todoItems')) || [];
-    let todoHistory = JSON.parse(localStorage.getItem('todoHistory')) || [];
-    let groceryItems = JSON.parse(localStorage.getItem('groceryItems')) || [];
-    let mealItems, mealHistory;
-    try {
-      mealItems = JSON.parse(localStorage.getItem('mealItems')) || [];
-      mealHistory = JSON.parse(localStorage.getItem('mealHistory')) || [];
-      console.log('Loaded meals from localStorage:', {
+    let todoItems = [];
+    let todoHistory = [];
+    let groceryItems = [];
+    let mealItems = [];
+    let mealHistory = [];
+    
+    // Data sync status
+    let isOnline = navigator.onLine;
+    let syncInProgress = false;
+    
+    // GitHub Gist API functions
+    async function createGist(data) {
+      try {
+        const response = await fetch('https://api.github.com/gists', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            description: 'Smart Dashboard Data - Private Storage',
+            public: false,
+            files: {
+              [GIST_FILENAME]: {
+                content: JSON.stringify(data, null, 2)
+              }
+            }
+          })
+        });
+        
+        if (response.ok) {
+          const gist = await response.json();
+          GIST_ID = gist.id;
+          localStorage.setItem('dashboardGistId', GIST_ID);
+          console.log('Created new Gist:', GIST_ID);
+          return true;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      } catch (error) {
+        console.error('Failed to create Gist:', error);
+        return false;
+      }
+    }
+    
+    async function updateGist(data) {
+      if (!GIST_ID) return false;
+      
+      try {
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            files: {
+              [GIST_FILENAME]: {
+                content: JSON.stringify(data, null, 2)
+              }
+            }
+          })
+        });
+        
+        if (response.ok) {
+          console.log('Updated Gist successfully');
+          return true;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      } catch (error) {
+        console.error('Failed to update Gist:', error);
+        return false;
+      }
+    }
+    
+    async function loadFromGist() {
+      if (!GIST_ID) return null;
+      
+      try {
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+        if (response.ok) {
+          const gist = await response.json();
+          const content = gist.files[GIST_FILENAME]?.content;
+          if (content) {
+            console.log('Loaded data from Gist');
+            return JSON.parse(content);
+          }
+        }
+        throw new Error(`HTTP ${response.status}`);
+      } catch (error) {
+        console.error('Failed to load from Gist:', error);
+        return null;
+      }
+    }
+    
+    // Unified data management
+    function getCurrentData() {
+      return {
+        todoItems,
+        todoHistory,
+        groceryItems,
+        mealItems,
+        mealHistory,
+        lastUpdated: new Date().toISOString()
+      };
+    }
+    
+    function setCurrentData(data) {
+      if (data.todoItems) todoItems = data.todoItems;
+      if (data.todoHistory) todoHistory = data.todoHistory;
+      if (data.groceryItems) groceryItems = data.groceryItems;
+      if (data.mealItems) mealItems = data.mealItems;
+      if (data.mealHistory) mealHistory = data.mealHistory;
+    }
+    
+    // Save to both localStorage and Gist
+    async function saveAllData() {
+      if (syncInProgress) return;
+      syncInProgress = true;
+      updateSyncStatus();
+      
+      const data = getCurrentData();
+      
+      // Always save to localStorage as backup
+      localStorage.setItem('todoItems', JSON.stringify(todoItems));
+      localStorage.setItem('todoHistory', JSON.stringify(todoHistory));
+      localStorage.setItem('groceryItems', JSON.stringify(groceryItems));
+      localStorage.setItem('mealItems', JSON.stringify(mealItems));
+      localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
+      
+      // Try to sync to Gist if online
+      if (isOnline) {
+        let success = false;
+        if (GIST_ID) {
+          success = await updateGist(data);
+        } else {
+          success = await createGist(data);
+        }
+        
+        if (success) {
+          console.log('Data synced to cloud');
+        } else {
+          console.log('Cloud sync failed, data saved locally');
+        }
+      }
+      
+      syncInProgress = false;
+      updateSyncStatus();
+    }
+    
+    // Update sync status indicator
+    function updateSyncStatus() {
+      const syncIcon = document.getElementById('sync-icon');
+      const syncText = document.getElementById('sync-text');
+      
+      if (!syncIcon || !syncText) return;
+      
+      if (syncInProgress) {
+        syncIcon.textContent = '🔄';
+        syncText.textContent = 'Syncing...';
+      } else if (!isOnline) {
+        syncIcon.textContent = '📱';
+        syncText.textContent = 'Offline';
+      } else if (GIST_ID) {
+        syncIcon.textContent = '☁️';
+        syncText.textContent = 'Synced';
+      } else {
+        syncIcon.textContent = '💾';
+        syncText.textContent = 'Local';
+      }
+    }
+    
+    // Load data from Gist or localStorage
+    async function loadAllData() {
+      console.log('Loading dashboard data...');
+      
+      // First try to load from localStorage
+      const localTodoItems = JSON.parse(localStorage.getItem('todoItems') || '[]');
+      const localTodoHistory = JSON.parse(localStorage.getItem('todoHistory') || '[]');
+      const localGroceryItems = JSON.parse(localStorage.getItem('groceryItems') || '[]');
+      const localMealItems = JSON.parse(localStorage.getItem('mealItems') || '[]');
+      const localMealHistory = JSON.parse(localStorage.getItem('mealHistory') || '[]');
+      
+      // If online, try to load from Gist
+      if (isOnline && GIST_ID) {
+        const cloudData = await loadFromGist();
+        if (cloudData) {
+          setCurrentData(cloudData);
+          console.log('Loaded data from cloud:', {
+            todoItems: todoItems.length,
+            todoHistory: todoHistory.length,
+            groceryItems: groceryItems.length,
+            mealItems: mealItems.length,
+            mealHistory: mealHistory.length
+          });
+          return;
+        }
+      }
+      
+      // Fallback to localStorage
+      todoItems = localTodoItems;
+      todoHistory = localTodoHistory;
+      groceryItems = localGroceryItems;
+      mealItems = localMealItems;
+      mealHistory = localMealHistory;
+      
+      console.log('Loaded data from localStorage:', {
+        todoItems: todoItems.length,
+        todoHistory: todoHistory.length,
+        groceryItems: groceryItems.length,
         mealItems: mealItems.length,
         mealHistory: mealHistory.length
       });
-    } catch (error) {
-      console.error('Error loading meals from localStorage:', error);
-      mealItems = [];
-      mealHistory = [];
+      
+      // If we have local data but no Gist, create one
+      if (isOnline && !GIST_ID && (todoItems.length || groceryItems.length || mealItems.length)) {
+        console.log('Migrating local data to cloud...');
+        await saveAllData();
+      }
     }
     let showingMealHistory = false;
     let showingTodoHistory = false;
 
     // Initialize lists on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOMContentLoaded fired, initializing lists...');
+    document.addEventListener('DOMContentLoaded', async function() {
+      console.log('DOMContentLoaded fired, initializing dashboard...');
+      
+      // Load data from cloud or localStorage
+      await loadAllData();
       
       // Clean up old completed items first
       cleanupCompletedItems();
@@ -1150,6 +1363,23 @@
       renderGroceryList();
       renderMealsList();
       console.log('Lists rendered.');
+      
+      // Monitor online status
+      window.addEventListener('online', () => {
+        isOnline = true;
+        console.log('Back online - syncing data...');
+        updateSyncStatus();
+        saveAllData();
+      });
+      
+      window.addEventListener('offline', () => {
+        isOnline = false;
+        console.log('Offline - data will sync when reconnected');
+        updateSyncStatus();
+      });
+      
+      // Initial sync status update
+      updateSyncStatus();
       
       // Initialize header info
       updateDateTime();
@@ -1299,11 +1529,11 @@
     }
 
     function saveTodoItems() {
-      localStorage.setItem('todoItems', JSON.stringify(todoItems));
+      saveAllData();
     }
 
     function saveTodoHistory() {
-      localStorage.setItem('todoHistory', JSON.stringify(todoHistory));
+      saveAllData();
     }
 
     function showTodoHistory() {
@@ -1580,7 +1810,7 @@
     }
 
     function saveGroceryItems() {
-      localStorage.setItem('groceryItems', JSON.stringify(groceryItems));
+      saveAllData();
     }
 
     // Meals List Functions
@@ -1748,11 +1978,11 @@
     }
 
     function saveMealItems() {
-      localStorage.setItem('mealItems', JSON.stringify(mealItems));
+      saveAllData();
     }
 
     function saveMealHistory() {
-      localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
+      saveAllData();
     }
 
     function addMealToHistoryOnly() {
