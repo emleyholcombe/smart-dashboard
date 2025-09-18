@@ -1806,15 +1806,15 @@
       } catch (error) {
         console.log('Weather update failed:', error);
         
-        // Graceful fallback - show a placeholder
-        tempElement.textContent = 'Weather';
+        // More informative fallback
+        tempElement.textContent = 'No Data';
         iconElement.textContent = '🌡️';
         tempElement.classList.remove('loading');
-        tempElement.title = 'Weather data temporarily unavailable';
-        precipInfoElement.style.display = 'none'; // Hide precipitation info
+        tempElement.title = `Weather unavailable: ${error.message}`;
+        precipInfoElement.style.display = 'none';
         
-        // Try again in 5 minutes
-        setTimeout(updateWeather, 5 * 60 * 1000);
+        // Try again in 2 minutes instead of 5
+        setTimeout(updateWeather, 2 * 60 * 1000);
       }
     }
 
