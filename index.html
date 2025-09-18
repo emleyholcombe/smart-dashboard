@@ -410,6 +410,24 @@
       transform: scale(1.05);
     }
 
+    #clear-search-btn {
+      background: var(--danger-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      min-width: auto;
+    }
+
+    #clear-search-btn:hover {
+      background: #dc2626;
+      transform: scale(1.05);
+    }
+
     .add-item-container {
       display: flex;
       gap: 12px;
@@ -1472,10 +1490,17 @@
       const list = document.getElementById('fullscreen-meals-list');
       if (!list) return;
       
-      const items = showingHistory ? mealHistory : mealItems;
+      let items = showingHistory ? mealHistory : mealItems;
+      
+      // Apply search filtering if in history mode and search term exists
+      if (showingHistory && currentMealSearchTerm) {
+        items = fuzzySearchMeals(items, currentMealSearchTerm);
+      }
       
       if (items.length === 0) {
-        const emptyMessage = showingHistory ? 'No meals in history yet.' : 'No meals yet. Add one above!';
+        const emptyMessage = showingHistory && currentMealSearchTerm ? 
+          `No meals found matching "${currentMealSearchTerm}"` :
+          showingHistory ? 'No meals in history yet.' : 'No meals yet. Add one above!';
         list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
         return;
       }
@@ -1524,6 +1549,56 @@
         renderMealsListFullscreen();
         input.value = '';
       }
+    }
+
+    // Meal search functionality
+    let currentMealSearchTerm = '';
+
+    function filterMealsFullscreen(searchTerm) {
+      currentMealSearchTerm = searchTerm.toLowerCase().trim();
+      renderMealsListFullscreen();
+    }
+
+    function clearMealsSearch() {
+      const searchInput = document.getElementById('fullscreen-meals-search');
+      if (searchInput) {
+        searchInput.value = '';
+      }
+      currentMealSearchTerm = '';
+      renderMealsListFullscreen();
+    }
+
+    function fuzzySearchMeals(items, searchTerm) {
+      if (!searchTerm) return items;
+      
+      return items.filter(item => {
+        const text = item.text.toLowerCase();
+        const url = (item.url || '').toLowerCase();
+        
+        // Exact match gets highest priority
+        if (text.includes(searchTerm) || url.includes(searchTerm)) {
+          return true;
+        }
+        
+        // Fuzzy matching - check if all characters of search term appear in order
+        let searchIndex = 0;
+        for (let i = 0; i < text.length && searchIndex < searchTerm.length; i++) {
+          if (text[i] === searchTerm[searchIndex]) {
+            searchIndex++;
+          }
+        }
+        
+        // Also check URL for fuzzy matching
+        if (searchIndex < searchTerm.length && url) {
+          for (let i = 0; i < url.length && searchIndex < searchTerm.length; i++) {
+            if (url[i] === searchTerm[searchIndex]) {
+              searchIndex++;
+            }
+          }
+        }
+        
+        return searchIndex === searchTerm.length;
+      });
     }
 
     // Header Information Functions
@@ -1934,6 +2009,28 @@
         headerContainer.appendChild(titleSpan);
         headerContainer.appendChild(historyBtn);
         content.appendChild(headerContainer);
+        
+        // Add search bar for history mode
+        if (showingHistory) {
+          const searchContainer = document.createElement('div');
+          searchContainer.className = 'add-item-container';
+          searchContainer.style.marginBottom = '1rem';
+          searchContainer.innerHTML = `
+            <input type="text" id="fullscreen-meals-search" placeholder="Search meals..." maxlength="100">
+            <button onclick="clearMealsSearch()" id="clear-search-btn" title="Clear search">✕</button>
+          `;
+          content.appendChild(searchContainer);
+          
+          // Add search functionality
+          setTimeout(() => {
+            const searchInput = document.getElementById('fullscreen-meals-search');
+            if (searchInput) {
+              searchInput.addEventListener('input', function(e) {
+                filterMealsFullscreen(e.target.value);
+              });
+            }
+          }, 100);
+        }
         
         // Add input container
         const addContainer = document.createElement('div');
