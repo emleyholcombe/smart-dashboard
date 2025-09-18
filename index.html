@@ -2443,6 +2443,7 @@
         historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
         historyBtn.onclick = () => {
           showMealsHistory();
+          // Update button text and title after toggle
           titleSpan.textContent = showingMealHistory ? 'Meals History' : 'Meals';
           historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
           renderMealsListFullscreen();
@@ -2720,7 +2721,21 @@
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       showingMealHistory = true;
+      
+      // Update button text to reflect current state
+      updateMealsButtonState();
+      
       openFullscreen('meals');
+    }
+
+    function updateMealsButtonState() {
+      const historyButton = document.querySelector('.meals-widget .history-button');
+      const headerTitle = document.querySelector('.meals-widget h2');
+      
+      if (historyButton && headerTitle) {
+        historyButton.textContent = showingMealHistory ? 'Current' : 'History';
+        headerTitle.textContent = showingMealHistory ? 'Meals History' : 'Meals';
+      }
     }
 
     // URL parameter handling
