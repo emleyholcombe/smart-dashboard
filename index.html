@@ -614,6 +614,32 @@
       border: 2px dashed rgba(102, 126, 234, 0.2);
     }
 
+    /* Tablet responsiveness */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .calendar-widget {
+        padding: 1rem; /* Reduce padding to give more space to calendar */
+        min-height: 600px; /* Ensure widget is tall enough */
+      }
+      
+      .calendar-widget iframe {
+        height: 550px; /* Increase calendar height for tablets */
+        min-height: 550px;
+      }
+      
+      .calendar-widget h2 {
+        margin-bottom: 1rem; /* Reduce header margin */
+      }
+      
+      .widget {
+        padding: 1.5rem; /* Slightly reduce widget padding on tablets */
+      }
+      
+      /* Make other widgets more compact on tablets */
+      .todo-widget, .grocery-widget, .meals-widget {
+        padding: 1.2rem;
+      }
+    }
+
     /* Mobile responsiveness */
     @media (max-width: 768px) {
       main {
@@ -792,7 +818,7 @@
     <!-- Google Calendar -->
     <div class="widget calendar-widget" id="calendar-widget">
       <h2 onclick="openFullscreen('calendar')">Calendar</h2>
-      <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=AGENDA&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0&showCalendars=1" style="border: 0" width="100%" height="100%" frameborder="0"></iframe>
+      <iframe src="https://calendar.google.com/calendar/embed?height=800&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=AGENDA&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0&showCalendars=1" style="border: 0" width="100%" height="100%" frameborder="0"></iframe>
 
     </div>
 
