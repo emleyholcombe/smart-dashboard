@@ -882,8 +882,8 @@
       const tempElement = document.getElementById('current-temp');
       
       try {
-        // You can customize this location - replace with your city/state or coordinates
-        const location = 'Denver,CO,US'; // Change this to your location
+        // Using ZIP code 84660 for accurate local weather
+        const location = '84660'; // ZIP code for precise location-based weather
         
         // Using OpenWeatherMap's free API (no key required for basic data)
         // Alternative: you can use wttr.in for a simpler API
@@ -906,7 +906,7 @@
         
         // Fallback: try a simpler approach
         try {
-          const response = await fetch(`https://wttr.in/Denver?format=%t`);
+          const response = await fetch(`https://wttr.in/84660?format=%t`);
           if (response.ok) {
             const temp = await response.text();
             tempElement.textContent = temp.trim();
