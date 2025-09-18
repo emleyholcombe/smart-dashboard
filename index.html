@@ -808,7 +808,7 @@
 
     .history-item .task-text {
       color: var(--text-secondary);
-      text-decoration: line-through;
+      /* Removed strikethrough - history items should appear normal */
     }
 
     /* Tablet responsiveness */
@@ -1494,6 +1494,11 @@
         if (item.completed) {
           item.completedAt = new Date().toISOString();
           
+          // If this was re-added from history, remove the old history entry
+          if (item.originalHistoryId) {
+            todoHistory = todoHistory.filter(h => h.id !== item.originalHistoryId);
+          }
+          
           // Add to history immediately when completed
           const historyItem = {
             id: Date.now() + Math.random(),
@@ -1702,6 +1707,7 @@
             <li class="task-item history-item">
               <span class="task-text">${escapeHtml(item.text)}</span>
               <div class="task-actions">
+                <button class="edit-btn" onclick="reAddTodoFromHistory(${item.id})" title="Add back to current list">↩️</button>
                 <button class="delete-btn" onclick="deleteTodoHistoryItem(${item.id})" title="Delete">🗑️</button>
               </div>
             </li>
@@ -1716,6 +1722,28 @@
       todoHistory = todoHistory.filter(item => item.id !== id);
       saveTodoHistory();
       renderTodoList();
+    }
+
+    function reAddTodoFromHistory(historyId) {
+      // Find the item in history
+      const historyItem = todoHistory.find(item => item.id === historyId);
+      if (!historyItem) return;
+      
+      // Create new todo item with a new ID and the original text
+      const newTodoId = Date.now();
+      const newTodoItem = {
+        id: newTodoId,
+        text: historyItem.text,
+        completed: false,
+        originalHistoryId: historyId // Track which history item this came from
+      };
+      
+      // Add to current todo list
+      todoItems.unshift(newTodoItem);
+      saveTodoItems();
+      renderTodoList();
+      
+      console.log(`Re-added "${historyItem.text}" to current todo list`);
     }
 
     // Todo search functionality
