@@ -1760,10 +1760,13 @@
         headerTitle.textContent = 'Meals History';
         
         // Change input container for history mode
-        addContainer.innerHTML = `
-          <input type="text" id="meals-input" placeholder="Add to history only..." maxlength="100">
-          <button onclick="addMealToHistoryOnly()" id="add-meals-btn">Add to History</button>
-        `;
+        const input = document.getElementById('meals-input');
+        const button = document.getElementById('add-meals-btn');
+        if (input && button) {
+          input.placeholder = 'Add to history only...';
+          button.textContent = 'Add to History';
+          button.onclick = addMealToHistoryOnly;
+        }
         
         // Re-add Enter key support for history input
         document.getElementById('meals-input').addEventListener('keypress', function(e) {
@@ -1776,10 +1779,13 @@
         headerTitle.textContent = 'Meals';
         
         // Restore normal input container
-        addContainer.innerHTML = `
-          <input type="text" id="meals-input" placeholder="Add meal..." maxlength="100">
-          <button onclick="addMealItem()" id="add-meals-btn">Add</button>
-        `;
+        const input = document.getElementById('meals-input');
+        const button = document.getElementById('add-meals-btn');
+        if (input && button) {
+          input.placeholder = 'Add meal...';
+          button.textContent = 'Add';
+          button.onclick = addMealItem;
+        }
         
         // Re-add Enter key support for normal input
         document.getElementById('meals-input').addEventListener('keypress', function(e) {
@@ -2371,34 +2377,99 @@
         content.appendChild(iframe);
         
       } else if (widgetType === 'todo') {
-        title.textContent = 'To-Do List';
+        title.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
         
-        // Add input container
+        // Add header with history toggle
+        const headerContainer = document.createElement('div');
+        headerContainer.style.display = 'flex';
+        headerContainer.style.justifyContent = 'space-between';
+        headerContainer.style.alignItems = 'center';
+        headerContainer.style.marginBottom = '1.5rem';
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
+        titleSpan.style.fontSize = '1.2rem';
+        titleSpan.style.fontWeight = '600';
+        
+        const historyBtn = document.createElement('button');
+        historyBtn.className = 'history-button';
+        historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
+        historyBtn.onclick = () => {
+          showTodoHistory();
+          titleSpan.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
+          historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
+          renderTodoListFullscreen();
+        };
+        
+        headerContainer.appendChild(titleSpan);
+        headerContainer.appendChild(historyBtn);
+        content.appendChild(headerContainer);
+        
+        // Add appropriate input container based on mode
         const addContainer = document.createElement('div');
         addContainer.className = 'add-item-container';
-        addContainer.innerHTML = `
-          <input type="text" id="fullscreen-todo-input" placeholder="Add new task..." maxlength="100">
-          <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
-        `;
+        
+        if (showingTodoHistory) {
+          addContainer.innerHTML = `
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+              <div style="flex: 1;">
+                <input type="text" id="fullscreen-todo-search-input" placeholder="Search tasks..." maxlength="100">
+              </div>
+              <div style="flex: 1;">
+                <input type="date" id="fullscreen-todo-date-from" placeholder="From date">
+              </div>
+              <div style="flex: 1;">
+                <input type="date" id="fullscreen-todo-date-to" placeholder="To date">
+              </div>
+              <button onclick="clearTodoSearchFullscreen()" title="Clear search">✕</button>
+            </div>
+          `;
+        } else {
+          addContainer.innerHTML = `
+            <input type="text" id="fullscreen-todo-input" placeholder="Add new task..." maxlength="100">
+            <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
+          `;
+        }
+        
+        content.appendChild(addContainer);
         
         // Add task list
         const taskList = document.createElement('ul');
         taskList.id = 'fullscreen-todo-list';
         taskList.className = 'task-list';
         
-        content.appendChild(addContainer);
         content.appendChild(taskList);
         
         // Render existing todos
         setTimeout(() => {
           renderTodoListFullscreen();
           
-          // Add Enter key support
-          document.getElementById('fullscreen-todo-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-              addTodoItemFullscreen();
+          if (showingTodoHistory) {
+            // Add search functionality for history mode
+            const searchInput = document.getElementById('fullscreen-todo-search-input');
+            const dateFromInput = document.getElementById('fullscreen-todo-date-from');
+            const dateToInput = document.getElementById('fullscreen-todo-date-to');
+            
+            if (searchInput) {
+              searchInput.addEventListener('input', filterTodoHistoryFullscreen);
             }
-          });
+            if (dateFromInput) {
+              dateFromInput.addEventListener('change', filterTodoHistoryFullscreen);
+            }
+            if (dateToInput) {
+              dateToInput.addEventListener('change', filterTodoHistoryFullscreen);
+            }
+          } else {
+            // Add Enter key support for regular input
+            const input = document.getElementById('fullscreen-todo-input');
+            if (input) {
+              input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                  addTodoItemFullscreen();
+                }
+              });
+            }
+          }
         }, 100);
         
       } else if (widgetType === 'grocery') {
@@ -2581,23 +2652,75 @@
       const list = document.getElementById('fullscreen-todo-list');
       if (!list) return;
       
-      if (todoItems.length === 0) {
-        list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
-        return;
+      if (showingTodoHistory) {
+        let filteredHistory = [...todoHistory];
+        
+        // Apply search filters
+        if (currentTodoSearchTerm) {
+          filteredHistory = fuzzySearchTodos(filteredHistory, currentTodoSearchTerm);
+        }
+        
+        if (currentDateFrom || currentDateTo) {
+          filteredHistory = filterTodosByDateRange(filteredHistory, currentDateFrom, currentDateTo);
+        }
+        
+        if (filteredHistory.length === 0) {
+          const emptyMessage = (currentTodoSearchTerm || currentDateFrom || currentDateTo) ? 
+            'No tasks found matching your search criteria.' : 
+            'No completed tasks yet.';
+          list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
+          return;
+        }
+        
+        const groups = groupTodosByDate(filteredHistory);
+        list.innerHTML = renderTodoHistoryGrouped(groups);
+      } else {
+        if (todoItems.length === 0) {
+          list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
+          return;
+        }
+        
+        list.innerHTML = todoItems.map(item => `
+          <li class="task-item">
+            <input type="checkbox" class="task-checkbox" 
+                   ${item.completed ? 'checked' : ''} 
+                   onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
+            <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
+            <div class="task-actions">
+              <button class="edit-btn" onclick="editTodoItem(${item.id}); renderTodoListFullscreen();" title="Edit">✏️</button>
+              <button class="delete-btn" onclick="deleteTodoItem(${item.id}); renderTodoListFullscreen();" title="Delete">🗑️</button>
+            </div>
+          </li>
+        `).join('');
       }
+    }
+
+    function filterTodoHistoryFullscreen() {
+      const searchInput = document.getElementById('fullscreen-todo-search-input');
+      const dateFromInput = document.getElementById('fullscreen-todo-date-from');
+      const dateToInput = document.getElementById('fullscreen-todo-date-to');
       
-      list.innerHTML = todoItems.map(item => `
-        <li class="task-item">
-          <input type="checkbox" class="task-checkbox" 
-                 ${item.completed ? 'checked' : ''} 
-                 onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
-          <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
-          <div class="task-actions">
-            <button class="edit-btn" onclick="editTodoItem(${item.id}); renderTodoListFullscreen();" title="Edit">✏️</button>
-            <button class="delete-btn" onclick="deleteTodoItem(${item.id}); renderTodoListFullscreen();" title="Delete">🗑️</button>
-          </div>
-        </li>
-      `).join('');
+      currentTodoSearchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      currentDateFrom = dateFromInput ? dateFromInput.value : '';
+      currentDateTo = dateToInput ? dateToInput.value : '';
+      
+      renderTodoListFullscreen();
+    }
+
+    function clearTodoSearchFullscreen() {
+      const searchInput = document.getElementById('fullscreen-todo-search-input');
+      const dateFromInput = document.getElementById('fullscreen-todo-date-from');
+      const dateToInput = document.getElementById('fullscreen-todo-date-to');
+      
+      if (searchInput) searchInput.value = '';
+      if (dateFromInput) dateFromInput.value = '';
+      if (dateToInput) dateToInput.value = '';
+      
+      currentTodoSearchTerm = '';
+      currentDateFrom = '';
+      currentDateTo = '';
+      
+      renderTodoListFullscreen();
     }
 
     // Fullscreen grocery functions
