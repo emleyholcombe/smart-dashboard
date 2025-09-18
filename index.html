@@ -746,6 +746,29 @@
       border: 2px dashed rgba(102, 126, 234, 0.2);
     }
 
+    .date-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      padding: 0.8rem 1rem;
+      margin: 1rem 0 0.5rem 0;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    }
+
+    .history-item {
+      background: rgba(102, 126, 234, 0.05);
+      border-left: 3px solid var(--primary-color);
+      margin-left: 1rem;
+    }
+
+    .history-item .task-text {
+      color: var(--text-secondary);
+      text-decoration: line-through;
+    }
+
     /* Tablet responsiveness */
     @media (min-width: 769px) and (max-width: 1024px) {
       /* Compact header for tablets */
@@ -1025,8 +1048,11 @@
 
     <!-- To-Do List -->
     <div class="widget todo-widget" id="todo-widget">
-      <h2 onclick="openFullscreen('todo')">To-Do List</h2>
-      <div class="add-item-container">
+      <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+        <h2 onclick="openFullscreen('todo')" style="margin: 0; cursor: pointer;">To-Do List</h2>
+        <button onclick="showTodoHistory()" class="history-button">History</button>
+      </div>
+      <div class="add-item-container" id="todo-add-container">
         <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
         <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
       </div>
@@ -1066,10 +1092,12 @@
   <script>
     // Data storage
     let todoItems = JSON.parse(localStorage.getItem('todoItems')) || [];
+    let todoHistory = JSON.parse(localStorage.getItem('todoHistory')) || [];
     let groceryItems = JSON.parse(localStorage.getItem('groceryItems')) || [];
     let mealItems = JSON.parse(localStorage.getItem('mealItems')) || [];
     let mealHistory = JSON.parse(localStorage.getItem('mealHistory')) || [];
     let showingMealHistory = false;
+    let showingTodoHistory = false;
 
     // Initialize lists on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -1139,7 +1167,23 @@
         item.completed = !item.completed;
         if (item.completed) {
           item.completedAt = new Date().toISOString();
+          
+          // Add to history immediately when completed
+          const historyItem = {
+            id: Date.now() + Math.random(),
+            text: item.text,
+            completedAt: item.completedAt,
+            originalId: item.id
+          };
+          todoHistory.unshift(historyItem);
+          saveTodoHistory();
         } else {
+          // Remove from history if unchecked
+          const completedAt = item.completedAt;
+          if (completedAt) {
+            todoHistory = todoHistory.filter(h => h.originalId !== item.id);
+            saveTodoHistory();
+          }
           delete item.completedAt;
         }
         saveTodoItems();
@@ -1168,27 +1212,118 @@
     function renderTodoList() {
       const list = document.getElementById('todo-list');
       
-      if (todoItems.length === 0) {
-        list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
-        return;
+      if (showingTodoHistory) {
+        if (todoHistory.length === 0) {
+          list.innerHTML = '<li class="empty-state">No completed tasks yet.</li>';
+          return;
+        }
+        
+        const groups = groupTodosByDate(todoHistory);
+        list.innerHTML = renderTodoHistoryGrouped(groups);
+      } else {
+        if (todoItems.length === 0) {
+          list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
+          return;
+        }
+        
+        list.innerHTML = todoItems.map(item => `
+          <li class="task-item">
+            <input type="checkbox" class="task-checkbox" 
+                   ${item.completed ? 'checked' : ''} 
+                   onchange="toggleTodoItem(${item.id})">
+            <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
+            <div class="task-actions">
+              <button class="edit-btn" onclick="editTodoItem(${item.id})" title="Edit">✏️</button>
+              <button class="delete-btn" onclick="deleteTodoItem(${item.id})" title="Delete">🗑️</button>
+            </div>
+          </li>
+        `).join('');
       }
-      
-      list.innerHTML = todoItems.map(item => `
-        <li class="task-item">
-          <input type="checkbox" class="task-checkbox" 
-                 ${item.completed ? 'checked' : ''} 
-                 onchange="toggleTodoItem(${item.id})">
-          <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
-          <div class="task-actions">
-            <button class="edit-btn" onclick="editTodoItem(${item.id})" title="Edit">✏️</button>
-            <button class="delete-btn" onclick="deleteTodoItem(${item.id})" title="Delete">🗑️</button>
-          </div>
-        </li>
-      `).join('');
     }
 
     function saveTodoItems() {
       localStorage.setItem('todoItems', JSON.stringify(todoItems));
+    }
+
+    function saveTodoHistory() {
+      localStorage.setItem('todoHistory', JSON.stringify(todoHistory));
+    }
+
+    function showTodoHistory() {
+      showingTodoHistory = !showingTodoHistory;
+      const historyButton = document.querySelector('.todo-widget .history-button');
+      const headerTitle = document.querySelector('.todo-widget h2');
+      
+      if (showingTodoHistory) {
+        historyButton.textContent = 'Current';
+        headerTitle.textContent = 'To-Do History';
+        
+        // Hide add container in history mode
+        document.getElementById('todo-add-container').style.display = 'none';
+      } else {
+        historyButton.textContent = 'History';
+        headerTitle.textContent = 'To-Do List';
+        
+        // Show add container in current mode
+        document.getElementById('todo-add-container').style.display = 'flex';
+      }
+      
+      renderTodoList();
+    }
+
+    function groupTodosByDate(todos) {
+      const groups = {};
+      
+      todos.forEach(item => {
+        const date = new Date(item.completedAt);
+        const dateKey = date.toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        
+        if (!groups[dateKey]) {
+          groups[dateKey] = [];
+        }
+        groups[dateKey].push(item);
+      });
+      
+      return groups;
+    }
+
+    function renderTodoHistoryGrouped(groups) {
+      let html = '';
+      
+      // Sort dates (most recent first)
+      const sortedDates = Object.keys(groups).sort((a, b) => {
+        const dateA = new Date(groups[a][0].completedAt);
+        const dateB = new Date(groups[b][0].completedAt);
+        return dateB - dateA;
+      });
+      
+      sortedDates.forEach(dateKey => {
+        html += `<li class="date-header">${dateKey}</li>`;
+        
+        groups[dateKey].forEach(item => {
+          html += `
+            <li class="task-item history-item">
+              <span class="task-text">${escapeHtml(item.text)}</span>
+              <div class="task-actions">
+                <button class="delete-btn" onclick="deleteTodoHistoryItem(${item.id})" title="Delete">🗑️</button>
+              </div>
+            </li>
+          `;
+        });
+      });
+      
+      return html;
+    }
+
+    function deleteTodoHistoryItem(id) {
+      todoHistory = todoHistory.filter(item => item.id !== id);
+      saveTodoHistory();
+      renderTodoList();
     }
 
     // Grocery List Functions
