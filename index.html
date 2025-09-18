@@ -1096,7 +1096,7 @@
             <span id="precip-icon" class="info-icon">💧</span>
             <span id="precip-details" class="weather-temp">--</span>
           </div>
-          <div class="info-item" id="sync-status">
+          <div class="info-item" id="sync-status" onclick="manualSync()" style="cursor: pointer;" title="Click to force sync">
             <span id="sync-icon" class="info-icon">☁️</span>
             <span id="sync-text" class="weather-temp">Synced</span>
           </div>
@@ -1193,10 +1193,13 @@
           const gist = await response.json();
           GIST_ID = gist.id;
           localStorage.setItem('dashboardGistId', GIST_ID);
-          console.log('Created new Gist:', GIST_ID);
+          console.log('✅ Created new Gist:', GIST_ID);
+          console.log('🔗 Gist URL:', gist.html_url);
           return true;
         }
-        throw new Error(`HTTP ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ Gist creation failed:', response.status, errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       } catch (error) {
         console.error('Failed to create Gist:', error);
         return false;
@@ -1222,10 +1225,12 @@
         });
         
         if (response.ok) {
-          console.log('Updated Gist successfully');
+          console.log('✅ Updated Gist successfully:', GIST_ID);
           return true;
         }
-        throw new Error(`HTTP ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ Gist update failed:', response.status, errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       } catch (error) {
         console.error('Failed to update Gist:', error);
         return false;
@@ -1305,6 +1310,22 @@
       
       syncInProgress = false;
       updateSyncStatus();
+    }
+    
+    // Manual sync function for debugging
+    async function manualSync() {
+      console.log('🔄 Manual sync triggered...');
+      console.log('Current data:', getCurrentData());
+      console.log('GIST_ID:', GIST_ID);
+      console.log('isOnline:', isOnline);
+      
+      if (!isOnline) {
+        alert('Cannot sync: You are offline');
+        return;
+      }
+      
+      await saveAllData();
+      alert('✅ Sync attempt completed! Check console for details.');
     }
     
     // Update sync status indicator
