@@ -1586,17 +1586,17 @@
         // Replace add container with search interface
         const addContainer = document.getElementById('todo-add-container');
         addContainer.innerHTML = `
-          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-            <div style="flex: 1;">
-              <input type="text" id="todo-search-input" placeholder="Search tasks..." maxlength="100">
+          <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem;">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <input type="text" id="todo-search-input" placeholder="Search tasks..." maxlength="100" style="flex: 1;">
+              <button onclick="clearTodoSearch()" title="Clear search" style="padding: 0.5rem; font-size: 0.9rem;">✕</button>
             </div>
-            <div style="flex: 1;">
-              <input type="date" id="todo-date-from" placeholder="From date">
+            <div style="display: flex; gap: 0.5rem; font-size: 0.9rem;">
+              <label style="font-weight: 500; color: var(--text-secondary); white-space: nowrap;">Date range:</label>
+              <input type="date" id="todo-date-from" style="flex: 1; font-size: 0.85rem;" title="From date">
+              <span style="color: var(--text-secondary); align-self: center;">to</span>
+              <input type="date" id="todo-date-to" style="flex: 1; font-size: 0.85rem;" title="To date">
             </div>
-            <div style="flex: 1;">
-              <input type="date" id="todo-date-to" placeholder="To date">
-            </div>
-            <button onclick="clearTodoSearch()" title="Clear search">✕</button>
           </div>
         `;
         
@@ -2711,17 +2711,17 @@
         
         if (showingTodoHistory) {
           addContainer.innerHTML = `
-            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-              <div style="flex: 1;">
-                <input type="text" id="fullscreen-todo-search-input" placeholder="Search tasks..." maxlength="100">
+            <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; max-width: 800px;">
+              <div style="display: flex; gap: 1rem; align-items: center;">
+                <input type="text" id="fullscreen-todo-search-input" placeholder="Search tasks..." maxlength="100" style="flex: 1;">
+                <button onclick="clearTodoSearchFullscreen()" title="Clear all filters" style="padding: 0.7rem 1rem; background: var(--danger-color); color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">Clear All</button>
               </div>
-              <div style="flex: 1;">
-                <input type="date" id="fullscreen-todo-date-from" placeholder="From date">
+              <div style="display: flex; gap: 1rem; align-items: center;">
+                <label style="font-weight: 600; color: var(--text-primary); white-space: nowrap; min-width: 80px;">Date range:</label>
+                <input type="date" id="fullscreen-todo-date-from" style="flex: 1;" title="From date">
+                <span style="color: var(--text-secondary); font-weight: 500;">to</span>
+                <input type="date" id="fullscreen-todo-date-to" style="flex: 1;" title="To date">
               </div>
-              <div style="flex: 1;">
-                <input type="date" id="fullscreen-todo-date-to" placeholder="To date">
-              </div>
-              <button onclick="clearTodoSearchFullscreen()" title="Clear search">✕</button>
             </div>
           `;
         } else {
