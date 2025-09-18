@@ -1213,12 +1213,26 @@
       const list = document.getElementById('todo-list');
       
       if (showingTodoHistory) {
-        if (todoHistory.length === 0) {
-          list.innerHTML = '<li class="empty-state">No completed tasks yet.</li>';
+        let filteredHistory = [...todoHistory];
+        
+        // Apply search filters
+        if (currentTodoSearchTerm) {
+          filteredHistory = fuzzySearchTodos(filteredHistory, currentTodoSearchTerm);
+        }
+        
+        if (currentDateFrom || currentDateTo) {
+          filteredHistory = filterTodosByDateRange(filteredHistory, currentDateFrom, currentDateTo);
+        }
+        
+        if (filteredHistory.length === 0) {
+          const emptyMessage = (currentTodoSearchTerm || currentDateFrom || currentDateTo) ? 
+            'No tasks found matching your search criteria.' : 
+            'No completed tasks yet.';
+          list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
           return;
         }
         
-        const groups = groupTodosByDate(todoHistory);
+        const groups = groupTodosByDate(filteredHistory);
         list.innerHTML = renderTodoHistoryGrouped(groups);
       } else {
         if (todoItems.length === 0) {
@@ -1258,14 +1272,57 @@
         historyButton.textContent = 'Current';
         headerTitle.textContent = 'To-Do History';
         
-        // Hide add container in history mode
-        document.getElementById('todo-add-container').style.display = 'none';
+        // Replace add container with search interface
+        const addContainer = document.getElementById('todo-add-container');
+        addContainer.innerHTML = `
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <div style="flex: 1;">
+              <input type="text" id="todo-search-input" placeholder="Search tasks..." maxlength="100">
+            </div>
+            <div style="flex: 1;">
+              <input type="date" id="todo-date-from" placeholder="From date">
+            </div>
+            <div style="flex: 1;">
+              <input type="date" id="todo-date-to" placeholder="To date">
+            </div>
+            <button onclick="clearTodoSearch()" title="Clear search">✕</button>
+          </div>
+        `;
+        
+        // Add search functionality
+        setTimeout(() => {
+          const searchInput = document.getElementById('todo-search-input');
+          const dateFromInput = document.getElementById('todo-date-from');
+          const dateToInput = document.getElementById('todo-date-to');
+          
+          if (searchInput) {
+            searchInput.addEventListener('input', filterTodoHistory);
+          }
+          if (dateFromInput) {
+            dateFromInput.addEventListener('change', filterTodoHistory);
+          }
+          if (dateToInput) {
+            dateToInput.addEventListener('change', filterTodoHistory);
+          }
+        }, 100);
       } else {
         historyButton.textContent = 'History';
         headerTitle.textContent = 'To-Do List';
         
-        // Show add container in current mode
-        document.getElementById('todo-add-container').style.display = 'flex';
+        // Restore original add container
+        const addContainer = document.getElementById('todo-add-container');
+        addContainer.innerHTML = `
+          <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
+          <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
+        `;
+        addContainer.style.display = 'flex';
+        
+        // Re-add Enter key support
+        document.getElementById('todo-input').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            addTodoItem();
+          }
+        });
       }
       
       renderTodoList();
@@ -1324,6 +1381,76 @@
       todoHistory = todoHistory.filter(item => item.id !== id);
       saveTodoHistory();
       renderTodoList();
+    }
+
+    // Todo search functionality
+    let currentTodoSearchTerm = '';
+    let currentDateFrom = '';
+    let currentDateTo = '';
+
+    function filterTodoHistory() {
+      const searchInput = document.getElementById('todo-search-input');
+      const dateFromInput = document.getElementById('todo-date-from');
+      const dateToInput = document.getElementById('todo-date-to');
+      
+      currentTodoSearchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      currentDateFrom = dateFromInput ? dateFromInput.value : '';
+      currentDateTo = dateToInput ? dateToInput.value : '';
+      
+      renderTodoList();
+    }
+
+    function clearTodoSearch() {
+      const searchInput = document.getElementById('todo-search-input');
+      const dateFromInput = document.getElementById('todo-date-from');
+      const dateToInput = document.getElementById('todo-date-to');
+      
+      if (searchInput) searchInput.value = '';
+      if (dateFromInput) dateFromInput.value = '';
+      if (dateToInput) dateToInput.value = '';
+      
+      currentTodoSearchTerm = '';
+      currentDateFrom = '';
+      currentDateTo = '';
+      
+      renderTodoList();
+    }
+
+    function fuzzySearchTodos(items, searchTerm) {
+      if (!searchTerm) return items;
+      
+      return items.filter(item => {
+        const text = item.text.toLowerCase();
+        
+        // Exact match gets highest priority
+        if (text.includes(searchTerm)) {
+          return true;
+        }
+        
+        // Fuzzy matching - check if all characters of search term appear in order
+        let searchIndex = 0;
+        for (let i = 0; i < text.length && searchIndex < searchTerm.length; i++) {
+          if (text[i] === searchTerm[searchIndex]) {
+            searchIndex++;
+          }
+        }
+        
+        return searchIndex === searchTerm.length;
+      });
+    }
+
+    function filterTodosByDateRange(items, fromDate, toDate) {
+      if (!fromDate && !toDate) return items;
+      
+      return items.filter(item => {
+        const itemDate = new Date(item.completedAt);
+        const itemDateString = itemDate.toISOString().split('T')[0];
+        
+        if (fromDate && itemDateString < fromDate) return false;
+        if (toDate && itemDateString > toDate) return false;
+        
+        return true;
+      });
     }
 
     // Grocery List Functions
