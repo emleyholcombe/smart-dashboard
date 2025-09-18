@@ -7,6 +7,99 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
+    /* Landing Page Styles */
+    .landing-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .landing-container {
+      text-align: center;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .landing-title {
+      font-size: 3rem;
+      font-weight: 700;
+      color: white;
+      margin: 0 0 0.5rem 0;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .landing-subtitle {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0 0 3rem 0;
+      font-weight: 300;
+    }
+
+    .navigation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .nav-button {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-icon {
+      font-size: 2.5rem;
+    }
+
+    .nav-label {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .dashboard {
+      min-height: 100vh;
+    }
+
+    @media (max-width: 768px) {
+      .landing-title {
+        font-size: 2rem;
+      }
+      
+      .navigation-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+      
+      .nav-button {
+        padding: 1.5rem;
+      }
+      
+      .nav-icon {
+        font-size: 2rem;
+      }
+    }
+    
     :root {
       --primary-color: #667eea;
       --primary-dark: #5a6fd8;
@@ -71,6 +164,27 @@
       margin: 0;
       z-index: 1;
       position: relative;
+    }
+
+    .home-button {
+      position: absolute;
+      left: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.2rem;
+      z-index: 2;
+    }
+
+    .home-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-50%) scale(1.05);
     }
 
     .header-info {
@@ -837,7 +951,50 @@
   </style>
 </head>
 <body>
+  <!-- Landing Page -->
+  <div id="landing-page" class="landing-page">
+    <div class="landing-container">
+      <h1 class="landing-title">Bennett Hub</h1>
+      <p class="landing-subtitle">Your Smart Dashboard</p>
+      
+      <div class="navigation-grid">
+        <button class="nav-button" onclick="showDashboard()">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">Dashboard</span>
+        </button>
+        
+        <button class="nav-button" onclick="showFullscreenCalendar()">
+          <span class="nav-icon">📅</span>
+          <span class="nav-label">Calendar</span>
+        </button>
+        
+        <button class="nav-button" onclick="showFullscreenTodo()">
+          <span class="nav-icon">✅</span>
+          <span class="nav-label">To-Do</span>
+        </button>
+        
+        <button class="nav-button" onclick="showFullscreenGrocery()">
+          <span class="nav-icon">🛒</span>
+          <span class="nav-label">Grocery</span>
+        </button>
+        
+        <button class="nav-button" onclick="showFullscreenMeals()">
+          <span class="nav-icon">🍽️</span>
+          <span class="nav-label">Meals</span>
+        </button>
+        
+        <button class="nav-button" onclick="showFullscreenMealsHistory()">
+          <span class="nav-icon">📚</span>
+          <span class="nav-label">Meal History</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="dashboard" style="display: none;">
   <header>
+    <button class="home-button" onclick="showLandingPage()" title="Home">🏠</button>
     <h1 class="header-title">Bennett Hub</h1>
     <div class="header-info">
       <div class="info-item">
@@ -2231,6 +2388,50 @@
         reader.readAsText(file);
       }
     }
+    // Navigation Functions
+    function showLandingPage() {
+      document.getElementById('landing-page').style.display = 'flex';
+      document.getElementById('dashboard').style.display = 'none';
+      closeFullscreen();
+    }
+
+    function showDashboard() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+    }
+
+    function showFullscreenCalendar() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      openFullscreen('calendar');
+    }
+
+    function showFullscreenTodo() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      openFullscreen('todo');
+    }
+
+    function showFullscreenGrocery() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      openFullscreen('grocery');
+    }
+
+    function showFullscreenMeals() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      openFullscreen('meals');
+    }
+
+    function showFullscreenMealsHistory() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      showingHistory = true;
+      openFullscreen('meals');
+    }
+
   </script>
+  </div> <!-- Close dashboard div -->
 </body>
 </html>
