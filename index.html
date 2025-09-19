@@ -1239,20 +1239,37 @@
     }
     
     async function loadFromJsonBin() {
-      if (!JSONBIN_ID) return null;
+      if (!JSONBIN_ID) {
+        console.log('❌ No JSONBIN_ID found');
+        return null;
+      }
       
       try {
-        const response = await fetch(`${JSONBIN_API}/${JSONBIN_ID}/latest`);
+        const url = `${JSONBIN_API}/${JSONBIN_ID}/latest`;
+        console.log('🌐 Fetching from:', url);
+        
+        const response = await fetch(url);
+        console.log('📡 Response status:', response.status, response.statusText);
+        
         if (response.ok) {
           const result = await response.json();
+          console.log('📦 Raw response:', result);
+          
           if (result.record && result.record.dashboardData) {
-            console.log('✅ Loaded data from JSONBin');
+            console.log('✅ Successfully parsed JSONBin data');
             return result.record.dashboardData;
+          } else {
+            console.log('❌ Invalid data structure in JSONBin response');
+            console.log('Expected: result.record.dashboardData');
+            console.log('Got:', Object.keys(result));
           }
+        } else {
+          const errorText = await response.text();
+          console.error('❌ JSONBin fetch failed:', response.status, errorText);
         }
         throw new Error(`HTTP ${response.status}`);
       } catch (error) {
-        console.error('Failed to load from JSONBin:', error);
+        console.error('💥 Exception loading from JSONBin:', error);
         return null;
       }
     }
@@ -1341,13 +1358,32 @@ Sync Debug Info:
     }
     
     // Debug function to show current state
-    function showDebugInfo() {
+    async function showDebugInfo() {
       const data = getCurrentData();
       const syncStatus = JSONBIN_ID ? `✅ JSONBin ID: ${JSONBIN_ID}` : '❌ No Cloud Storage';
+      
+      // Try to fetch cloud data for comparison
+      let cloudStatus = 'Not checked';
+      if (JSONBIN_ID) {
+        try {
+          const cloudData = await loadFromJsonBin();
+          if (cloudData) {
+            cloudStatus = `✅ Cloud has ${cloudData.todoItems?.length || 0} todos, ${cloudData.groceryItems?.length || 0} groceries, ${cloudData.mealItems?.length || 0} meals`;
+          } else {
+            cloudStatus = '❌ Failed to load cloud data';
+          }
+        } catch (error) {
+          cloudStatus = `❌ Error: ${error.message}`;
+        }
+      }
+      
       const debugInfo = `
 📊 Dashboard Debug Info:
 ${syncStatus}
 🌐 Online: ${isOnline}
+☁️ Cloud Status: ${cloudStatus}
+
+📱 Local Data:
 📝 Todo Items: ${data.todoItems.length}
 📋 Todo History: ${data.todoHistory.length}
 🛒 Grocery Items: ${data.groceryItems.length}
@@ -1355,7 +1391,7 @@ ${syncStatus}
 🍽️ Meal History: ${data.mealHistory.length}
 ⏰ Last Updated: ${data.lastUpdated}
 
-📱 localStorage Keys:
+🔧 localStorage Keys:
 ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('Items') || k.includes('History')).join(', ')}
       `;
       alert(debugInfo);
@@ -1384,9 +1420,14 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
       }
     }
     
-    // Load data from Gist or localStorage
+    // Load data from JSONBin or localStorage
     async function loadAllData() {
-      console.log('Loading dashboard data...');
+      console.log('🔄 Loading dashboard data...');
+      console.log('📊 Initial state:', {
+        isOnline,
+        JSONBIN_ID,
+        userAgent: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
+      });
       
       // First try to load from localStorage
       const localTodoItems = JSON.parse(localStorage.getItem('todoItems') || '[]');
@@ -1395,12 +1436,21 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
       const localMealItems = JSON.parse(localStorage.getItem('mealItems') || '[]');
       const localMealHistory = JSON.parse(localStorage.getItem('mealHistory') || '[]');
       
+      console.log('📱 Local storage data:', {
+        todoItems: localTodoItems.length,
+        todoHistory: localTodoHistory.length,
+        groceryItems: localGroceryItems.length,
+        mealItems: localMealItems.length,
+        mealHistory: localMealHistory.length
+      });
+      
       // If online, try to load from JSONBin
       if (isOnline && JSONBIN_ID) {
+        console.log('🌐 Attempting to load from JSONBin:', JSONBIN_ID);
         const cloudData = await loadFromJsonBin();
         if (cloudData) {
           setCurrentData(cloudData);
-          console.log('✅ Loaded data from cloud:', {
+          console.log('✅ Successfully loaded data from cloud:', {
             todoItems: todoItems.length,
             todoHistory: todoHistory.length,
             groceryItems: groceryItems.length,
@@ -1408,7 +1458,14 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
             mealHistory: mealHistory.length
           });
           return;
+        } else {
+          console.log('❌ Failed to load from cloud, using local data');
         }
+      } else {
+        console.log('⚠️ Skipping cloud load:', {
+          isOnline,
+          hasJsonBinId: !!JSONBIN_ID
+        });
       }
       
       // Fallback to localStorage
