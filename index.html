@@ -309,28 +309,79 @@
     .todo-widget {
       grid-column: 1;
       grid-row: 2;
+      /* Force stable dimensions to prevent layout shifts */
+      min-height: 400px;
+      max-height: 400px;
+      display: flex;
+      flex-direction: column;
+      /* Complete isolation from other widgets */
+      contain: layout style size;
+      transform: translateZ(0);
+      will-change: auto;
     }
 
     .todo-widget .task-list {
-      max-height: 300px;
+      max-height: 250px;
       overflow-y: auto;
       overflow-x: hidden;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .todo-widget #todo-add-container {
+      /* Fixed height for add container to prevent size changes */
+      min-height: 80px;
+      max-height: 120px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
 
     .grocery-widget {
       grid-column: 2;
       grid-row: 2;
+      /* Force stable dimensions to prevent layout shifts */
+      min-height: 400px;
+      max-height: 400px;
+      display: flex;
+      flex-direction: column;
+      /* Complete isolation from other widgets */
+      contain: layout style size;
+      transform: translateZ(0);
+      will-change: auto;
+    }
+
+    .grocery-widget .task-list {
+      max-height: 250px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+      min-height: 0;
     }
 
     .meals-widget {
       grid-column: 3;
       grid-row: 2;
+      /* Force stable dimensions to prevent layout shifts */
+      min-height: 400px;
+      max-height: 400px;
+      display: flex;
+      flex-direction: column;
       /* Complete isolation to prevent affecting other widgets */
       contain: layout style size;
       isolation: isolate;
       transform: translateZ(0);
       /* Prevent any cascading effects */
       will-change: auto;
+    }
+
+    .meals-widget .task-list {
+      max-height: 250px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+      min-height: 0;
     }
 
     iframe {
@@ -358,6 +409,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       user-select: none;
+      flex-shrink: 0;
     }
 
     h2:hover {
@@ -589,6 +641,9 @@
       gap: 12px;
       margin-bottom: 1.5rem;
       position: relative;
+      flex-shrink: 0;
+      min-height: 60px;
+      align-items: flex-start;
     }
 
     .add-item-container input {
