@@ -1581,8 +1581,8 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
     function toggleTodoItem(id) {
       const item = todoItems.find(item => item.id === id);
       if (item) {
-        item.completed = !item.completed;
-        if (item.completed) {
+        if (!item.completed) {
+          // Item is being checked off - move to history immediately
           item.completedAt = new Date().toISOString();
           
           // If this was re-added from history, remove the old history entry
@@ -1599,15 +1599,16 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
           };
           todoHistory.unshift(historyItem);
           saveTodoHistory();
+          
+          // Remove from current list immediately
+          todoItems = todoItems.filter(t => t.id !== id);
+          
         } else {
-          // Remove from history if unchecked
-          const completedAt = item.completedAt;
-          if (completedAt) {
-            todoHistory = todoHistory.filter(h => h.originalId !== item.id);
-            saveTodoHistory();
-          }
+          // This shouldn't happen with the new workflow, but keeping for safety
+          item.completed = false;
           delete item.completedAt;
         }
+        
         saveTodoItems();
         renderTodoList();
       }
@@ -1657,17 +1658,18 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
         const groups = groupTodosByDate(filteredHistory);
         list.innerHTML = renderTodoHistoryGrouped(groups);
       } else {
-        if (todoItems.length === 0) {
+        // Only show uncompleted items (completed items are immediately moved to history)
+        const activeItems = todoItems.filter(item => !item.completed);
+        
+        if (activeItems.length === 0) {
           list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
           return;
         }
-        
-        list.innerHTML = todoItems.map(item => `
+        list.innerHTML = activeItems.map(item => `
           <li class="task-item">
             <input type="checkbox" class="task-checkbox" 
-                   ${item.completed ? 'checked' : ''} 
                    onchange="toggleTodoItem(${item.id})">
-            <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
+            <span class="task-text">${escapeHtml(item.text)}</span>
             <div class="task-actions">
               <button class="edit-btn" onclick="editTodoItem(${item.id})" title="Edit">✏️</button>
               <button class="delete-btn" onclick="deleteTodoItem(${item.id})" title="Delete">🗑️</button>
@@ -1831,10 +1833,15 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
       
       // Add to current todo list
       todoItems.unshift(newTodoItem);
+      
+      // Remove from history immediately
+      todoHistory = todoHistory.filter(item => item.id !== historyId);
+      
       saveTodoItems();
+      saveTodoHistory();
       renderTodoList();
       
-      console.log(`Re-added "${historyItem.text}" to current todo list`);
+      console.log(`Re-added "${historyItem.text}" to current todo list and removed from history`);
     }
 
     // Todo search functionality
@@ -2274,17 +2281,8 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       
-      // Clean up todo items
-      const originalTodoCount = todoItems.length;
-      todoItems = todoItems.filter(item => {
-        if (!item.completed || !item.completedAt) return true;
-        
-        const completedDate = new Date(item.completedAt);
-        const completedDay = new Date(completedDate.getFullYear(), completedDate.getMonth(), completedDate.getDate());
-        
-        // Keep items completed today, remove items completed before today
-        return completedDay.getTime() >= today.getTime();
-      });
+      // Todo items are now immediately moved to history when completed, so no cleanup needed
+      const originalTodoCount = 0; // No todo cleanup needed anymore
       
       // Clean up grocery items
       const originalGroceryCount = groceryItems.length;
@@ -3115,17 +3113,18 @@ ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('I
         const groups = groupTodosByDate(filteredHistory);
         list.innerHTML = renderTodoHistoryGrouped(groups);
       } else {
-        if (todoItems.length === 0) {
+        // Only show uncompleted items (completed items are immediately moved to history)
+        const activeItems = todoItems.filter(item => !item.completed);
+        
+        if (activeItems.length === 0) {
           list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
           return;
         }
-        
-        list.innerHTML = todoItems.map(item => `
+        list.innerHTML = activeItems.map(item => `
           <li class="task-item">
             <input type="checkbox" class="task-checkbox" 
-                   ${item.completed ? 'checked' : ''} 
                    onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
-            <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
+            <span class="task-text">${escapeHtml(item.text)}</span>
             <div class="task-actions">
               <button class="edit-btn" onclick="editTodoItem(${item.id}); renderTodoListFullscreen();" title="Edit">✏️</button>
               <button class="delete-btn" onclick="deleteTodoItem(${item.id}); renderTodoListFullscreen();" title="Delete">🗑️</button>
