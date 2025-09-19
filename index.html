@@ -1550,8 +1550,34 @@ ${JSONBIN_ID ? `Copy this ID to other devices: ${JSONBIN_ID}` : 'No sync ID avai
         if (newSyncId && newSyncId.trim()) {
           JSONBIN_ID = newSyncId.trim();
           localStorage.setItem('dashboardJsonBinId', JSONBIN_ID);
-          alert('✅ Sync ID saved! Loading data from cloud...');
-          loadAllData();
+          console.log('🔧 Setting new sync ID:', JSONBIN_ID);
+          
+          try {
+            alert('✅ Sync ID saved! Loading data from cloud...\n\nCheck console for details.');
+            console.log('🔄 Starting loadAllData...');
+            await loadAllData();
+            console.log('✅ loadAllData completed');
+            
+            // Force re-render all lists
+            renderTodoList();
+            renderGroceryList();
+            renderMealsList();
+            console.log('✅ All lists re-rendered');
+            
+            // Show final status
+            const finalData = getCurrentData();
+            const totalItems = finalData.todoItems.length + finalData.groceryItems.length + finalData.mealItems.length + finalData.todoHistory.length + finalData.mealHistory.length;
+            
+            if (totalItems > 0) {
+              alert(`🎉 Success! Loaded ${totalItems} items:\n📝 ${finalData.todoItems.length} todos\n📋 ${finalData.todoHistory.length} todo history\n🛒 ${finalData.groceryItems.length} groceries\n🍽️ ${finalData.mealItems.length} meals\n📚 ${finalData.mealHistory.length} meal history`);
+            } else {
+              alert('⚠️ No items loaded. Check console for errors or verify the sync ID is correct.');
+            }
+            
+          } catch (error) {
+            console.error('❌ Error loading data:', error);
+            alert(`❌ Error loading data: ${error.message}\n\nCheck console for details.`);
+          }
         }
       }
       
