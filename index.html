@@ -1448,8 +1448,31 @@ ${syncStatus}
 
 🔧 localStorage Keys:
 ${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('Items') || k.includes('History')).join(', ')}
+
+📋 To sync between devices:
+${JSONBIN_ID ? `Copy this ID to other devices: ${JSONBIN_ID}` : 'No sync ID available'}
       `;
-      alert(debugInfo);
+      
+      const userAction = confirm(debugInfo + '\n\nWould you like to:\n- OK: Copy sync ID to clipboard (if available)\n- Cancel: Enter sync ID from another device');
+      
+      if (userAction && JSONBIN_ID) {
+        // Copy to clipboard
+        navigator.clipboard.writeText(JSONBIN_ID).then(() => {
+          alert('✅ Sync ID copied to clipboard!\nPaste this ID on your other device.');
+        }).catch(() => {
+          prompt('Copy this sync ID to your other device:', JSONBIN_ID);
+        });
+      } else if (!userAction) {
+        // Prompt for sync ID
+        const newSyncId = prompt('Enter sync ID from your other device:');
+        if (newSyncId && newSyncId.trim()) {
+          JSONBIN_ID = newSyncId.trim();
+          localStorage.setItem('dashboardJsonBinId', JSONBIN_ID);
+          alert('✅ Sync ID saved! Loading data from cloud...');
+          loadAllData();
+        }
+      }
+      
       console.log('Debug Info:', data);
     }
     
