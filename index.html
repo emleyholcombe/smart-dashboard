@@ -1236,30 +1236,85 @@
     // JSONBin.io API functions (free, no auth required)
     async function createJsonBin(data) {
       try {
+        console.log('🔄 Creating JSONBin with data:', data);
+        console.log('📡 Sending to:', JSONBIN_API);
+        
+        const payload = {
+          dashboardData: data,
+          created: new Date().toISOString(),
+          version: '1.0'
+        };
+        
         const response = await fetch(`${JSONBIN_API}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-Bin-Private': 'false'
           },
-          body: JSON.stringify({
-            dashboardData: data,
-            created: new Date().toISOString(),
-            version: '1.0'
-          })
+          body: JSON.stringify(payload)
         });
+        
+        console.log('📡 Response status:', response.status, response.statusText);
         
         if (response.ok) {
           const result = await response.json();
-          JSONBIN_ID = result.metadata.id;
-          localStorage.setItem('dashboardJsonBinId', JSONBIN_ID);
-          console.log('✅ Created new JSONBin:', JSONBIN_ID);
-          return true;
+          console.log('📦 Full response:', result);
+          
+          if (result.metadata && result.metadata.id) {
+            JSONBIN_ID = result.metadata.id;
+            localStorage.setItem('dashboardJsonBinId', JSONBIN_ID);
+            console.log('✅ Created new JSONBin:', JSONBIN_ID);
+            return true;
+          } else {
+            console.error('❌ Invalid response structure:', result);
+            return false;
+          }
         }
+        
         const errorText = await response.text();
         console.error('❌ JSONBin creation failed:', response.status, errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+        
+        // Try alternative approach with a simpler request
+        if (response.status === 401 || response.status === 403) {
+          console.log('🔄 Trying alternative approach...');
+          return await createSimpleStorage(data);
+        }
+        
+        return false;
       } catch (error) {
-        console.error('Failed to create JSONBin:', error);
+        console.error('💥 Exception creating JSONBin:', error);
+        console.log('🔄 Trying alternative approach...');
+        return await createSimpleStorage(data);
+      }
+    }
+    
+    // Fallback storage using a simpler service
+    async function createSimpleStorage(data) {
+      try {
+        // Use dpaste.org as fallback
+        const formData = new FormData();
+        formData.append('content', JSON.stringify(data, null, 2));
+        formData.append('syntax', 'json');
+        formData.append('expiry_days', '365');
+        
+        const response = await fetch('https://dpaste.org/api/', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          const pasteUrl = await response.text();
+          JSONBIN_ID = pasteUrl.trim().split('/').pop();
+          localStorage.setItem('dashboardJsonBinId', JSONBIN_ID);
+          localStorage.setItem('dashboardSyncType', 'dpaste');
+          console.log('✅ Created dpaste backup:', JSONBIN_ID);
+          return true;
+        }
+        
+        console.error('❌ Fallback storage also failed');
+        return false;
+      } catch (error) {
+        console.error('💥 Fallback storage failed:', error);
         return false;
       }
     }
@@ -1388,28 +1443,55 @@
     async function manualSync() {
       console.log('🔄 Manual sync triggered...');
       console.log('Current data:', getCurrentData());
-      console.log('GIST_ID:', GIST_ID);
+      console.log('JSONBIN_ID:', JSONBIN_ID);
       console.log('isOnline:', isOnline);
       
       if (!isOnline) {
-        alert('Cannot sync: You are offline');
+        alert('❌ Cannot sync: You are offline');
         return;
       }
       
-      // Show debug info in alert for mobile debugging
       const data = getCurrentData();
-      const debugInfo = `
-Sync Debug Info:
-- GIST_ID: ${GIST_ID || 'None'}
-- Online: ${isOnline}
-- Todo Items: ${data.todoItems.length}
-- Grocery Items: ${data.groceryItems.length}
-- Meal Items: ${data.mealItems.length}
-- Last Updated: ${data.lastUpdated}
-      `;
+      const totalItems = data.todoItems.length + data.groceryItems.length + data.mealItems.length + data.todoHistory.length + data.mealHistory.length;
       
-      await saveAllData();
-      alert('✅ Sync completed!' + debugInfo);
+      if (totalItems === 0) {
+        alert('⚠️ No data to sync! Add some items first, then try syncing.');
+        return;
+      }
+      
+      console.log(`🔄 Syncing ${totalItems} items...`);
+      
+      try {
+        syncInProgress = true;
+        updateSyncStatus();
+        
+        await saveAllData();
+        
+        const syncStatus = JSONBIN_ID ? `✅ Synced to cloud!\nSync ID: ${JSONBIN_ID}` : '❌ Sync failed - no cloud storage created';
+        
+        const debugInfo = `
+${syncStatus}
+
+📊 Synced data:
+📝 ${data.todoItems.length} current todos
+📋 ${data.todoHistory.length} todo history
+🛒 ${data.groceryItems.length} grocery items  
+🍽️ ${data.mealItems.length} current meals
+📚 ${data.mealHistory.length} meal history
+⏰ Last Updated: ${data.lastUpdated}
+
+${JSONBIN_ID ? '✅ Your data is now available on all devices!' : ''}
+        `;
+        
+        alert(debugInfo);
+        
+      } catch (error) {
+        console.error('Sync failed:', error);
+        alert(`❌ Sync failed: ${error.message}`);
+      } finally {
+        syncInProgress = false;
+        updateSyncStatus();
+      }
     }
     
     // Debug function to show current state
