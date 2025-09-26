@@ -1776,28 +1776,53 @@ ${(GIST_ID && GITHUB_TOKEN) || JSONBIN_ID ? '✅ Your data is now available on a
     // Debug function to show current state
     async function showDebugInfo() {
       const data = getCurrentData();
-      const syncStatus = JSONBIN_ID ? `✅ JSONBin ID: ${JSONBIN_ID}` : '❌ No Cloud Storage';
+      
+      // GitHub Status
+      const githubStatus = (GIST_ID && GITHUB_TOKEN) ? 
+        `✅ GitHub Gist: ${GIST_ID}` : 
+        `❌ GitHub: ${!GITHUB_TOKEN ? 'No token' : 'No gist ID'}`;
+      
+      // JSONBin Status  
+      const jsonbinStatus = JSONBIN_ID ? `✅ JSONBin ID: ${JSONBIN_ID}` : '❌ No JSONBin';
       
       // Try to fetch cloud data for comparison
       let cloudStatus = 'Not checked';
-      if (JSONBIN_ID) {
+      if (GIST_ID && GITHUB_TOKEN) {
+        try {
+          const cloudData = await loadFromGithubGist();
+          if (cloudData) {
+            cloudStatus = `✅ GitHub has ${cloudData.todoItems?.length || 0} todos, ${cloudData.groceryItems?.length || 0} groceries, ${cloudData.mealItems?.length || 0} meals`;
+          } else {
+            cloudStatus = '❌ Failed to load GitHub data';
+          }
+        } catch (error) {
+          cloudStatus = `❌ GitHub Error: ${error.message}`;
+        }
+      } else if (JSONBIN_ID) {
         try {
           const cloudData = await loadFromJsonBin();
           if (cloudData) {
-            cloudStatus = `✅ Cloud has ${cloudData.todoItems?.length || 0} todos, ${cloudData.groceryItems?.length || 0} groceries, ${cloudData.mealItems?.length || 0} meals`;
+            cloudStatus = `✅ JSONBin has ${cloudData.todoItems?.length || 0} todos, ${cloudData.groceryItems?.length || 0} groceries, ${cloudData.mealItems?.length || 0} meals`;
           } else {
-            cloudStatus = '❌ Failed to load cloud data';
+            cloudStatus = '❌ Failed to load JSONBin data';
           }
         } catch (error) {
-          cloudStatus = `❌ Error: ${error.message}`;
+          cloudStatus = `❌ JSONBin Error: ${error.message}`;
         }
       }
       
       const debugInfo = `
 📊 Dashboard Debug Info:
-${syncStatus}
-🌐 Online: ${isOnline}
-☁️ Cloud Status: ${cloudStatus}
+
+🔐 Authentication:
+🐙 GitHub Token: ${GITHUB_TOKEN ? `${GITHUB_TOKEN.substring(0, 8)}...` : 'Not set'}
+🐙 ${githubStatus}
+☁️ ${jsonbinStatus}
+
+🌐 Status:
+Online: ${isOnline}
+Sync: ${syncInProgress ? 'In Progress' : 'Idle'}
+Cloud Status: ${cloudStatus}
 
 📱 Local Data:
 📝 Todo Items: ${data.todoItems.length}
@@ -1807,23 +1832,19 @@ ${syncStatus}
 🍽️ Meal History: ${data.mealHistory.length}
 ⏰ Last Updated: ${data.lastUpdated}
 
-🔧 localStorage Keys:
-${Object.keys(localStorage).filter(k => k.includes('dashboard') || k.includes('Items') || k.includes('History')).join(', ')}
+🔧 localStorage Check:
+GitHub Token: ${localStorage.getItem('githubToken') ? 'Saved' : 'Missing'}
+Gist ID: ${localStorage.getItem('dashboardGistId') ? 'Saved' : 'Missing'}
+JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
-📋 To sync between devices:
-${JSONBIN_ID ? `Copy this ID to other devices: ${JSONBIN_ID}` : 'No sync ID available'}
+📋 Current Sync Method: ${(GIST_ID && GITHUB_TOKEN) ? 'GitHub (Master)' : JSONBIN_ID ? 'JSONBin (Fallback)' : 'Local Only'}
       `;
       
-      const userAction = confirm(debugInfo + '\n\nWould you like to:\n- OK: Copy sync ID to clipboard (if available)\n- Cancel: Enter sync ID from another device');
+      const userAction = confirm(debugInfo + '\n\nWould you like to:\n- OK: Setup GitHub sync\n- Cancel: Continue debugging');
       
-      if (userAction && JSONBIN_ID) {
-        // Copy to clipboard
-        navigator.clipboard.writeText(JSONBIN_ID).then(() => {
-          alert('✅ Sync ID copied to clipboard!\nPaste this ID on your other device.');
-        }).catch(() => {
-          prompt('Copy this sync ID to your other device:', JSONBIN_ID);
-        });
-      } else if (!userAction) {
+      if (userAction) {
+        await setupGithubAuth();
+      } else {
         // Prompt for sync ID
         const newSyncId = prompt('Enter sync ID from your other device:');
         if (newSyncId && newSyncId.trim()) {
