@@ -1945,6 +1945,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           cloudData = await loadFromGithubGist();
           if (cloudData) {
             setCurrentData(cloudData);
+            
+            // Update localStorage to match cloud data (prevents future conflicts)
+            localStorage.setItem('todoItems', JSON.stringify(cloudData.todoItems || []));
+            localStorage.setItem('todoHistory', JSON.stringify(cloudData.todoHistory || []));
+            localStorage.setItem('groceryItems', JSON.stringify(cloudData.groceryItems || []));
+            localStorage.setItem('mealItems', JSON.stringify(cloudData.mealItems || []));
+            localStorage.setItem('mealHistory', JSON.stringify(cloudData.mealHistory || []));
+            
             console.log('✅ Successfully loaded data from GitHub master storage:', {
               todoItems: todoItems.length,
               todoHistory: todoHistory.length,
@@ -1964,6 +1972,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           cloudData = await loadFromJsonBin();
           if (cloudData) {
             setCurrentData(cloudData);
+            
+            // Update localStorage to match cloud data (prevents future conflicts)
+            localStorage.setItem('todoItems', JSON.stringify(cloudData.todoItems || []));
+            localStorage.setItem('todoHistory', JSON.stringify(cloudData.todoHistory || []));
+            localStorage.setItem('groceryItems', JSON.stringify(cloudData.groceryItems || []));
+            localStorage.setItem('mealItems', JSON.stringify(cloudData.mealItems || []));
+            localStorage.setItem('mealHistory', JSON.stringify(cloudData.mealHistory || []));
+            
             console.log('✅ Successfully loaded data from JSONBin fallback');
             
             // Migrate to GitHub if we have the token
