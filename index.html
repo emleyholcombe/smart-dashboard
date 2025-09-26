@@ -1563,13 +1563,14 @@ Current status:
 🔑 Token: ${GITHUB_TOKEN.substring(0, 8)}...
 
 Do you want to:
-• OK = Update token
-• Cancel = Open GitHub token settings`);
+• OK = Exit without changes
+• Cancel = Update token`);
         
-        if (!response) {
-          window.open('https://github.com/settings/tokens', '_blank');
+        if (response) {
+          // User clicked OK - exit without changes
           return false;
         }
+        // User clicked Cancel - continue to update token
       }
       
       // Show instructions and collect token
