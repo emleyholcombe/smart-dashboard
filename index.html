@@ -1155,6 +1155,10 @@
             <span id="sync-icon" class="info-icon">☁️</span>
             <span id="sync-text" class="weather-temp">Synced</span>
           </div>
+          <div class="info-item" onclick="setupGithubAuth()" style="cursor: pointer;" title="Setup GitHub sync">
+            <span class="info-icon">🔐</span>
+            <span class="weather-temp">GitHub</span>
+          </div>
           <div class="info-item" onclick="showDebugInfo()" style="cursor: pointer;" title="Show debug info">
             <span class="info-icon">🔍</span>
             <span class="weather-temp">Debug</span>
@@ -1213,12 +1217,17 @@
   </main>
 
   <script>
-    // Sync Configuration
+    // GitHub Sync Configuration
     const GITHUB_USERNAME = 'emleyholcombe'; // Your GitHub username
     let GIST_ID = localStorage.getItem('dashboardGistId') || null;
     const GIST_FILENAME = 'smart-dashboard-data.json';
+    let GITHUB_TOKEN = localStorage.getItem('githubToken') || null; // Personal Access Token
     
-    // Alternative: JSONBin.io (free, no auth required for public bins)
+    // GitHub API endpoints
+    const GITHUB_API_BASE = 'https://api.github.com';
+    const GISTS_API = `${GITHUB_API_BASE}/gists`;
+    
+    // Legacy JSONBin.io support (deprecated but kept for migration)
     let JSONBIN_ID = localStorage.getItem('dashboardJsonBinId') || null;
     const JSONBIN_API = 'https://api.jsonbin.io/v3/b';
     
@@ -1384,6 +1393,242 @@
       }
     }
     
+    // GitHub Gist API functions for master data storage
+    async function createGithubGist(data) {
+      if (!GITHUB_TOKEN) {
+        console.log('❌ No GitHub token found. Please set up authentication first.');
+        return false;
+      }
+      
+      try {
+        console.log('🔄 Creating GitHub Gist with data:', data);
+        
+        const gistPayload = {
+          description: "Smart Dashboard - Master Data Storage",
+          public: false, // Private gist for security
+          files: {
+            [GIST_FILENAME]: {
+              content: JSON.stringify({
+                dashboardData: data,
+                created: new Date().toISOString(),
+                version: '2.0',
+                device: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
+              }, null, 2)
+            }
+          }
+        };
+        
+        const response = await fetch(GISTS_API, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+          },
+          body: JSON.stringify(gistPayload)
+        });
+        
+        console.log('📡 Response status:', response.status, response.statusText);
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('📦 Gist created:', result.id);
+          
+          GIST_ID = result.id;
+          localStorage.setItem('dashboardGistId', GIST_ID);
+          console.log('✅ Created new GitHub Gist:', GIST_ID);
+          return true;
+        } else {
+          const errorText = await response.text();
+          console.error('❌ GitHub Gist creation failed:', response.status, errorText);
+          return false;
+        }
+      } catch (error) {
+        console.error('💥 Exception creating GitHub Gist:', error);
+        return false;
+      }
+    }
+
+    async function updateGithubGist(data) {
+      if (!GIST_ID) return await createGithubGist(data);
+      if (!GITHUB_TOKEN) {
+        console.log('❌ No GitHub token found. Please set up authentication first.');
+        return false;
+      }
+      
+      try {
+        console.log('🔄 Updating GitHub Gist:', GIST_ID);
+        
+        const gistPayload = {
+          description: "Smart Dashboard - Master Data Storage",
+          files: {
+            [GIST_FILENAME]: {
+              content: JSON.stringify({
+                dashboardData: data,
+                updated: new Date().toISOString(),
+                version: '2.0',
+                device: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
+              }, null, 2)
+            }
+          }
+        };
+        
+        const response = await fetch(`${GISTS_API}/${GIST_ID}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+          },
+          body: JSON.stringify(gistPayload)
+        });
+        
+        if (response.ok) {
+          console.log('✅ Updated GitHub Gist successfully');
+          return true;
+        } else {
+          const errorText = await response.text();
+          console.error('❌ GitHub Gist update failed:', response.status, errorText);
+          return false;
+        }
+      } catch (error) {
+        console.error('💥 Exception updating GitHub Gist:', error);
+        return false;
+      }
+    }
+    
+    async function loadFromGithubGist() {
+      if (!GIST_ID) {
+        console.log('❌ No GIST_ID found');
+        return null;
+      }
+      
+      try {
+        const url = `${GISTS_API}/${GIST_ID}`;
+        console.log('🌐 Fetching from GitHub Gist:', url);
+        
+        const headers = {
+          'Accept': 'application/vnd.github.v3+json'
+        };
+        
+        // Add auth header if we have a token (for private gists)
+        if (GITHUB_TOKEN) {
+          headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
+        }
+        
+        const response = await fetch(url, { headers });
+        console.log('📡 Response status:', response.status, response.statusText);
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('📦 Gist response received');
+          
+          if (result.files && result.files[GIST_FILENAME]) {
+            const fileContent = result.files[GIST_FILENAME].content;
+            const parsedData = JSON.parse(fileContent);
+            
+            if (parsedData.dashboardData) {
+              console.log('✅ Successfully parsed GitHub Gist data');
+              console.log('📊 Last updated:', parsedData.updated || parsedData.created);
+              return parsedData.dashboardData;
+            } else {
+              console.log('❌ Invalid data structure in Gist');
+            }
+          } else {
+            console.log('❌ Gist file not found:', GIST_FILENAME);
+          }
+        } else {
+          const errorText = await response.text();
+          console.error('❌ GitHub Gist fetch failed:', response.status, errorText);
+        }
+        
+        return null;
+      } catch (error) {
+        console.error('💥 Exception loading from GitHub Gist:', error);
+        return null;
+      }
+    }
+    
+    // GitHub token setup function
+    async function setupGithubAuth() {
+      // Check if token already exists
+      if (GITHUB_TOKEN) {
+        const response = confirm(`
+🔐 GitHub Authentication
+
+You already have a GitHub token configured.
+
+Current status: 
+🐙 GitHub Gist ID: ${GIST_ID || 'Not created yet'}
+🔑 Token: ${GITHUB_TOKEN.substring(0, 8)}...
+
+Do you want to:
+• OK = Update token
+• Cancel = Open GitHub token settings`);
+        
+        if (!response) {
+          window.open('https://github.com/settings/tokens', '_blank');
+          return false;
+        }
+      }
+      
+      // Show instructions and collect token
+      const instructions = `
+🔐 GitHub Authentication Setup
+
+To enable GitHub sync, you need a Personal Access Token.
+
+STEP-BY-STEP INSTRUCTIONS:
+1. Click OK to open GitHub settings
+2. Click "Generate new token" → "Tokens (classic)"
+3. Add note: "Smart Dashboard Sync"
+4. Set expiration: 1 year (or your preference)
+5. Check ONLY the "gist" scope ✅
+6. Click "Generate token"
+7. Copy the token (starts with ghp_...)
+8. Come back here and paste it
+
+Ready to continue?`;
+      
+      if (!confirm(instructions)) {
+        return false;
+      }
+      
+      // Open GitHub token page
+      window.open('https://github.com/settings/tokens/new?scopes=gist&description=Smart%20Dashboard%20Sync', '_blank');
+      
+      // Wait a moment then ask for token
+      setTimeout(() => {
+        const token = prompt(`
+🔑 Paste your GitHub Personal Access Token:
+
+The token should start with "ghp_" and be about 40 characters long.
+
+Token:`);
+        
+        if (token && token.trim() && token.startsWith('ghp_')) {
+          localStorage.setItem('githubToken', token.trim());
+          GITHUB_TOKEN = token.trim();
+          console.log('✅ GitHub token saved!');
+          updateSyncStatus();
+          alert('✅ GitHub authentication setup complete!\n\n🐙 Your data will now sync to your private GitHub gist.\n📱 All your devices will stay in sync!');
+          
+          // Try to migrate existing data if available
+          if (todoItems.length || groceryItems.length || mealItems.length) {
+            saveAllData();
+          }
+          
+          return true;
+        } else if (token) {
+          alert('❌ Invalid token format. GitHub tokens start with "ghp_".\n\nClick the GitHub button again to retry.');
+          return false;
+        } else {
+          alert('❌ No token provided. GitHub sync will not work.');
+          return false;
+        }
+      }, 2000);
+    }
+    
     // Unified data management
     function getCurrentData() {
       return {
@@ -1404,7 +1649,7 @@
       if (data.mealHistory) mealHistory = data.mealHistory;
     }
     
-    // Save to both localStorage and Gist
+    // Save to both localStorage and GitHub Gist (master storage)
     async function saveAllData() {
       if (syncInProgress) return;
       syncInProgress = true;
@@ -1419,19 +1664,46 @@
       localStorage.setItem('mealItems', JSON.stringify(mealItems));
       localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
       
-      // Try to sync to JSONBin if online
+      // Try to sync to GitHub Gist (master storage) if online
       if (isOnline) {
         let success = false;
-        if (JSONBIN_ID) {
-          success = await updateJsonBin(data);
+        
+        // If no GitHub token, ask user to set it up
+        if (!GITHUB_TOKEN) {
+          console.log('🔐 No GitHub token found - prompting user setup');
+          const setupSuccess = await setupGithubAuth();
+          if (!setupSuccess) {
+            console.log('❌ GitHub auth setup cancelled, data saved locally only');
+            syncInProgress = false;
+            updateSyncStatus();
+            return;
+          }
+        }
+        
+        // Try GitHub Gist sync
+        if (GIST_ID) {
+          success = await updateGithubGist(data);
         } else {
-          success = await createJsonBin(data);
+          success = await createGithubGist(data);
         }
         
         if (success) {
-          console.log('✅ Data synced to cloud via JSONBin');
+          console.log('✅ Data synced to GitHub master storage');
         } else {
-          console.log('❌ Cloud sync failed, data saved locally');
+          console.log('❌ GitHub sync failed, falling back to JSONBin...');
+          
+          // Fallback to JSONBin for backward compatibility
+          if (JSONBIN_ID) {
+            success = await updateJsonBin(data);
+          } else {
+            success = await createJsonBin(data);
+          }
+          
+          if (success) {
+            console.log('✅ Data synced to JSONBin fallback');
+          } else {
+            console.log('❌ All cloud sync failed, data saved locally only');
+          }
         }
       }
       
@@ -1467,7 +1739,14 @@
         
         await saveAllData();
         
-        const syncStatus = JSONBIN_ID ? `✅ Synced to cloud!\nSync ID: ${JSONBIN_ID}` : '❌ Sync failed - no cloud storage created';
+        let syncStatus;
+        if (GIST_ID && GITHUB_TOKEN) {
+          syncStatus = `✅ Synced to GitHub master storage!\nGist ID: ${GIST_ID}`;
+        } else if (JSONBIN_ID) {
+          syncStatus = `✅ Synced to fallback storage!\nSync ID: ${JSONBIN_ID}`;
+        } else {
+          syncStatus = '❌ Sync failed - no cloud storage created';
+        }
         
         const debugInfo = `
 ${syncStatus}
@@ -1480,7 +1759,7 @@ ${syncStatus}
 📚 ${data.mealHistory.length} meal history
 ⏰ Last Updated: ${data.lastUpdated}
 
-${JSONBIN_ID ? '✅ Your data is now available on all devices!' : ''}
+${(GIST_ID && GITHUB_TOKEN) || JSONBIN_ID ? '✅ Your data is now available on all devices!' : ''}
         `;
         
         alert(debugInfo);
@@ -1597,25 +1876,30 @@ ${JSONBIN_ID ? `Copy this ID to other devices: ${JSONBIN_ID}` : 'No sync ID avai
       } else if (!isOnline) {
         syncIcon.textContent = '📱';
         syncText.textContent = 'Offline';
+      } else if (GIST_ID && GITHUB_TOKEN) {
+        syncIcon.textContent = '🐙';
+        syncText.textContent = 'GitHub';
       } else if (JSONBIN_ID) {
         syncIcon.textContent = '☁️';
-        syncText.textContent = 'Synced';
+        syncText.textContent = 'Cloud';
       } else {
         syncIcon.textContent = '💾';
         syncText.textContent = 'Local';
       }
     }
     
-    // Load data from JSONBin or localStorage
+    // Load data from GitHub Gist (master) -> JSONBin (fallback) -> localStorage
     async function loadAllData() {
       console.log('🔄 Loading dashboard data...');
       console.log('📊 Initial state:', {
         isOnline,
-        JSONBIN_ID,
+        hasGistId: !!GIST_ID,
+        hasJsonBinId: !!JSONBIN_ID,
+        hasGithubToken: !!GITHUB_TOKEN,
         userAgent: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
       });
       
-      // First try to load from localStorage
+      // First load from localStorage as baseline
       const localTodoItems = JSON.parse(localStorage.getItem('todoItems') || '[]');
       const localTodoHistory = JSON.parse(localStorage.getItem('todoHistory') || '[]');
       const localGroceryItems = JSON.parse(localStorage.getItem('groceryItems') || '[]');
@@ -1630,28 +1914,51 @@ ${JSONBIN_ID ? `Copy this ID to other devices: ${JSONBIN_ID}` : 'No sync ID avai
         mealHistory: localMealHistory.length
       });
       
-      // If online, try to load from JSONBin
-      if (isOnline && JSONBIN_ID) {
-        console.log('🌐 Attempting to load from JSONBin:', JSONBIN_ID);
-        const cloudData = await loadFromJsonBin();
-        if (cloudData) {
-          setCurrentData(cloudData);
-          console.log('✅ Successfully loaded data from cloud:', {
-            todoItems: todoItems.length,
-            todoHistory: todoHistory.length,
-            groceryItems: groceryItems.length,
-            mealItems: mealItems.length,
-            mealHistory: mealHistory.length
-          });
-          return;
-        } else {
-          console.log('❌ Failed to load from cloud, using local data');
+      // If online, try to load from master storage (GitHub Gist)
+      if (isOnline) {
+        let cloudData = null;
+        
+        // Priority 1: GitHub Gist (master storage)
+        if (GIST_ID && GITHUB_TOKEN) {
+          console.log('🐙 Attempting to load from GitHub Gist (master):', GIST_ID);
+          cloudData = await loadFromGithubGist();
+          if (cloudData) {
+            setCurrentData(cloudData);
+            console.log('✅ Successfully loaded data from GitHub master storage:', {
+              todoItems: todoItems.length,
+              todoHistory: todoHistory.length,
+              groceryItems: groceryItems.length,
+              mealItems: mealItems.length,
+              mealHistory: mealHistory.length
+            });
+            return;
+          } else {
+            console.log('❌ Failed to load from GitHub, trying fallback...');
+          }
         }
+        
+        // Priority 2: JSONBin (fallback for migration)
+        if (JSONBIN_ID) {
+          console.log('🌐 Attempting to load from JSONBin (fallback):', JSONBIN_ID);
+          cloudData = await loadFromJsonBin();
+          if (cloudData) {
+            setCurrentData(cloudData);
+            console.log('✅ Successfully loaded data from JSONBin fallback');
+            
+            // Migrate to GitHub if we have the token
+            if (GITHUB_TOKEN) {
+              console.log('🔄 Migrating JSONBin data to GitHub master storage...');
+              await saveAllData(); // This will create GitHub Gist
+            }
+            return;
+          } else {
+            console.log('❌ Failed to load from JSONBin fallback');
+          }
+        }
+        
+        console.log('⚠️ No cloud storage available or failed to load');
       } else {
-        console.log('⚠️ Skipping cloud load:', {
-          isOnline,
-          hasJsonBinId: !!JSONBIN_ID
-        });
+        console.log('📱 Offline mode - using local storage only');
       }
       
       // Fallback to localStorage
@@ -1661,7 +1968,7 @@ ${JSONBIN_ID ? `Copy this ID to other devices: ${JSONBIN_ID}` : 'No sync ID avai
       mealItems = localMealItems;
       mealHistory = localMealHistory;
       
-      console.log('Loaded data from localStorage:', {
+      console.log('📱 Using local storage data:', {
         todoItems: todoItems.length,
         todoHistory: todoHistory.length,
         groceryItems: groceryItems.length,
@@ -1669,10 +1976,10 @@ ${JSONBIN_ID ? `Copy this ID to other devices: ${JSONBIN_ID}` : 'No sync ID avai
         mealHistory: mealHistory.length
       });
       
-      // If we have local data but no JSONBin, create one
-      if (isOnline && !JSONBIN_ID && (todoItems.length || groceryItems.length || mealItems.length)) {
-        console.log('🚀 Migrating local data to cloud...');
-        await saveAllData();
+      // If we have local data but no cloud storage, offer to create master storage
+      if (isOnline && !GIST_ID && (todoItems.length || groceryItems.length || mealItems.length)) {
+        console.log('🚀 Local data found but no master storage - will create on next save');
+        // saveAllData() will be called when user adds/modifies data
       }
     }
     let showingMealHistory = false;
