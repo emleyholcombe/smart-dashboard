@@ -1841,11 +1841,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 📋 Current Sync Method: ${(GIST_ID && GITHUB_TOKEN) ? 'GitHub (Master)' : JSONBIN_ID ? 'JSONBin (Fallback)' : 'Local Only'}
       `;
       
-      const userAction = confirm(debugInfo + '\n\nWould you like to:\n- OK: Setup GitHub sync\n- Cancel: Continue debugging');
+      alert(debugInfo);
       
-      if (userAction) {
-        await setupGithubAuth();
-      } else {
+      // No more confusing options - just show the info
+      return;
+      
+      // Remove old debug options code
+      if (false) {
         // Prompt for sync ID
         const newSyncId = prompt('Enter sync ID from your other device:');
         if (newSyncId && newSyncId.trim()) {
