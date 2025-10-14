@@ -2530,14 +2530,32 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       saveAllData();
     }
 
+    // Meal synchronization helper functions
+    function syncMealToHistory(id, updates) {
+      const historyItem = mealHistory.find(item => item.id === id);
+      if (historyItem) {
+        Object.assign(historyItem, updates);
+        saveMealHistory();
+      }
+    }
+
+    function syncHistoryToMeal(id, updates) {
+      const mealItem = mealItems.find(item => item.id === id);
+      if (mealItem) {
+        Object.assign(mealItem, updates);
+        saveMealItems();
+      }
+    }
+
     // Meals List Functions
     function addMealItem() {
       const input = document.getElementById('meals-input');
       const text = input.value.trim();
       
       if (text) {
+        const sharedId = Date.now(); // Use same ID for both lists
         const item = {
-          id: Date.now(),
+          id: sharedId,
           text: text,
           url: '',
           completed: false,
@@ -2547,9 +2565,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Add to current meals
         mealItems.unshift(item);
         
-        // Also add to history immediately (permanent record)
+        // Also add to history immediately (permanent record) with same ID
         const historyItem = {
-          id: Date.now() + Math.random(), // Different ID for history
+          id: sharedId, // Same ID for linking
           text: item.text,
           url: item.url,
           createdAt: item.createdAt,
@@ -2595,6 +2613,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         } else {
           delete item.completedAt;
         }
+        
+        // Sync completion status to history
+        syncMealToHistory(id, { completed: item.completed, completedAt: item.completedAt });
+        
         saveMealItems();
         renderMealsList();
       }
@@ -2602,6 +2624,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     function deleteMealItem(id) {
       mealItems = mealItems.filter(item => item.id !== id);
+      // Note: We don't delete from history - history is permanent
       saveMealItems();
       renderMealsList();
     }
@@ -2618,6 +2641,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           if (newUrl !== null) {
             item.url = newUrl.trim();
           }
+          
+          // Sync changes to history item with same ID
+          syncMealToHistory(id, { text: item.text, url: item.url });
           
           saveMealItems();
           renderMealsList();
@@ -2637,14 +2663,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           item.url = newUrl.trim();
           
           if (isHistory) {
+            // Sync URL change from history to current meals
+            syncHistoryToMeal(id, { url: newUrl.trim() });
             saveMealHistory();
           } else {
-            // Also update the corresponding history item if it exists
-            const historyItem = mealHistory.find(h => h.text === item.text && Math.abs(new Date(h.createdAt) - new Date(item.createdAt)) < 1000);
-            if (historyItem) {
-              historyItem.url = newUrl.trim();
-              saveMealHistory();
-            }
+            // Sync URL change from current meals to history
+            syncMealToHistory(id, { url: newUrl.trim() });
             saveMealItems();
           }
           
@@ -2786,8 +2810,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function addFromHistory(historyId) {
       const historyItem = mealHistory.find(item => item.id === historyId);
       if (historyItem) {
+        // Check if item already exists in current meals
+        const existingItem = mealItems.find(item => item.id === historyId);
+        if (existingItem) {
+          alert('This meal is already in your current list!');
+          return;
+        }
+        
         const newItem = {
-          id: Date.now(),
+          id: historyId, // Use same ID to maintain link
           text: historyItem.text,
           url: historyItem.url,
           completed: false,
@@ -2892,16 +2923,30 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const text = input.value.trim();
       
       if (text) {
+        const sharedId = Date.now(); // Use same ID for both lists
         const item = {
-          id: Date.now(),
+          id: sharedId,
           text: text,
           url: '',
           completed: false,
           createdAt: new Date().toISOString()
         };
         
+        // Add to current meals
         mealItems.unshift(item);
+        
+        // Also add to history immediately (permanent record) with same ID
+        const historyItem = {
+          id: sharedId, // Same ID for linking
+          text: item.text,
+          url: item.url,
+          createdAt: item.createdAt,
+          addedToHistoryAt: new Date().toISOString()
+        };
+        mealHistory.unshift(historyItem);
+        
         saveMealItems();
+        saveMealHistory();
         renderMealsListFullscreen();
         input.value = '';
       }
