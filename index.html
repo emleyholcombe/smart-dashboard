@@ -1061,6 +1061,53 @@
       background: #9333ea; /* Deeper purple for better contrast with blue */
     }
 
+    .avatar-filter, .fullscreen-avatar-filter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+      margin: 0 4px;
+    }
+
+    .avatar-filter:hover, .fullscreen-avatar-filter:hover {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .avatar-filter.active, .fullscreen-avatar-filter.active {
+      border-color: #fff;
+      box-shadow: 0 0 0 2px var(--primary-color);
+      transform: scale(1.05);
+    }
+
+    .avatar-filter.emley, .fullscreen-avatar-filter.emley {
+      background: #d946ef;
+    }
+
+    .avatar-filter.nate, .fullscreen-avatar-filter.nate {
+      background: #60a5fa;
+    }
+
+    .avatar-filter.family, .fullscreen-avatar-filter.family {
+      background: #9333ea;
+    }
+
+    .avatar-filters-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 0.5rem 0;
+    }
+
     .add-item-container input[type="date"] {
       padding: 8px 12px;
       border: 1px solid var(--border-color);
@@ -1497,11 +1544,11 @@
       </div>
       <div class="add-item-container" id="todo-secondary-container" style="margin-top: 0.5rem;">
         <input type="date" id="todo-due-date" title="Due date (optional)">
-        <select id="todo-assigned-to" title="Assign to person">
-          <option value="emley">Emley</option>
-          <option value="nate">Nate</option>
-          <option value="family" selected>Family</option>
-        </select>
+        <div class="avatar-filters-container">
+          <span class="avatar-filter emley" data-avatar="emley" onclick="toggleAvatarFilter('emley')" title="Filter by Emley">E</span>
+          <span class="avatar-filter nate" data-avatar="nate" onclick="toggleAvatarFilter('nate')" title="Filter by Nate">N</span>
+          <span class="avatar-filter family" data-avatar="family" onclick="toggleAvatarFilter('family')" title="Filter by Family">F</span>
+        </div>
       </div>
       <ul id="todo-list" class="task-list">
         <!-- Dynamic content will be loaded here -->
@@ -2359,6 +2406,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
     let showingMealHistory = false;
     let showingTodoHistory = false;
+    let selectedAvatarFilters = []; // Array to track selected avatar filters ('emley', 'nate', 'family')
 
     // Initialize lists on page load
     document.addEventListener('DOMContentLoaded', async function() {
@@ -2435,10 +2483,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function addTodoItem() {
       const input = document.getElementById('todo-input');
       const dueDateInput = document.getElementById('todo-due-date');
-      const assignedToInput = document.getElementById('todo-assigned-to');
       const text = input.value.trim();
       const dueDate = dueDateInput.value;
-      const assignedTo = assignedToInput.value;
       
       if (text) {
         const item = {
@@ -2448,7 +2494,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           createdAt: new Date().toISOString(),
           order: Date.now(), // Add order property for sorting
           dueDate: dueDate || null, // Add due date if provided
-          assignedTo: assignedTo || 'family' // Auto-assign to family if no selection
+          assignedTo: 'family' // Auto-assign to family by default
         };
         
         todoItems.unshift(item); // Add to beginning of array
@@ -2457,7 +2503,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         renderTodoList();
         input.value = '';
         dueDateInput.value = '';
-        assignedToInput.value = '';
       }
     }
 
@@ -2666,8 +2711,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Only show uncompleted items (completed items are immediately moved to history)
         let activeItems = todoItems.filter(item => !item.completed);
         
+        // Apply avatar filters
+        activeItems = filterTodosByAvatar(activeItems);
+        
         if (activeItems.length === 0) {
-          list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
+          const emptyMessage = selectedAvatarFilters.length > 0 ? 
+            'No tasks found for selected filters.' : 
+            'No tasks yet. Add one above!';
+          list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
           return;
         }
         
@@ -2880,6 +2931,64 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         document.body.removeChild(window.currentAssignmentModal);
         window.currentAssignmentModal = null;
       }
+    }
+
+    function toggleAvatarFilter(avatar) {
+      const index = selectedAvatarFilters.indexOf(avatar);
+      if (index > -1) {
+        // Remove filter if already selected
+        selectedAvatarFilters.splice(index, 1);
+      } else {
+        // Add filter if not selected
+        selectedAvatarFilters.push(avatar);
+      }
+      
+      // Update filter button appearance
+      updateAvatarFilterButtons();
+      
+      // Re-render the todo list with filters applied
+      if (document.getElementById('fullscreen-container')) {
+        renderTodoListFullscreen();
+      } else {
+        renderTodoList();
+      }
+    }
+
+    function updateAvatarFilterButtons() {
+      // Update widget filter buttons
+      const widgetFilters = document.querySelectorAll('.avatar-filter');
+      widgetFilters.forEach(button => {
+        const avatar = button.dataset.avatar;
+        if (selectedAvatarFilters.includes(avatar)) {
+          button.classList.add('active');
+        } else {
+          button.classList.remove('active');
+        }
+      });
+      
+      // Update fullscreen filter buttons
+      const fullscreenFilters = document.querySelectorAll('.fullscreen-avatar-filter');
+      fullscreenFilters.forEach(button => {
+        const avatar = button.dataset.avatar;
+        if (selectedAvatarFilters.includes(avatar)) {
+          button.classList.add('active');
+        } else {
+          button.classList.remove('active');
+        }
+      });
+    }
+
+    function filterTodosByAvatar(items) {
+      // If no filters selected, show all items
+      if (selectedAvatarFilters.length === 0) {
+        return items;
+      }
+      
+      // Filter items based on selected avatars
+      return items.filter(item => {
+        const assignedTo = item.assignedTo || 'family'; // Default to family if not assigned
+        return selectedAvatarFilters.includes(assignedTo);
+      });
     }
 
     function editTodoHistoryAssignment(id) {
@@ -3139,11 +3248,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         if (secondContainer) {
           secondContainer.innerHTML = `
             <input type="date" id="todo-due-date" title="Due date (optional)">
-            <select id="todo-assigned-to" title="Assign to person">
-              <option value="emley">Emley</option>
-              <option value="nate">Nate</option>
-              <option value="family" selected>Family</option>
-            </select>
+            <div class="avatar-filters-container">
+              <span class="avatar-filter emley" data-avatar="emley" onclick="toggleAvatarFilter('emley')" title="Filter by Emley">E</span>
+              <span class="avatar-filter nate" data-avatar="nate" onclick="toggleAvatarFilter('nate')" title="Filter by Nate">N</span>
+              <span class="avatar-filter family" data-avatar="family" onclick="toggleAvatarFilter('family')" title="Filter by Family">F</span>
+            </div>
           `;
           secondContainer.style.display = 'flex';
         }
@@ -4645,28 +4754,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           sortTodosByDueDate();
         };
         
-        // Create assignment dropdown
-        const assignmentSelect = document.createElement('select');
-        assignmentSelect.id = 'fullscreen-todo-assigned-to';
-        assignmentSelect.title = 'Default assignment for new tasks';
-        assignmentSelect.style.cssText = `
-          padding: 8px 12px;
-          border: 1px solid var(--border-color);
-          border-radius: 6px;
-          background: var(--bg-secondary);
-          color: var(--text-primary);
-          font-size: 14px;
-          min-width: 100px;
-        `;
-        
-        assignmentSelect.innerHTML = `
-          <option value="emley">Emley</option>
-          <option value="nate">Nate</option>
-          <option value="family" selected>Family</option>
+        // Create avatar filters
+        const avatarFiltersContainer = document.createElement('div');
+        avatarFiltersContainer.className = 'avatar-filters-container';
+        avatarFiltersContainer.innerHTML = `
+          <span class="fullscreen-avatar-filter emley" data-avatar="emley" onclick="toggleAvatarFilter('emley')" title="Filter by Emley">E</span>
+          <span class="fullscreen-avatar-filter nate" data-avatar="nate" onclick="toggleAvatarFilter('nate')" title="Filter by Nate">N</span>
+          <span class="fullscreen-avatar-filter family" data-avatar="family" onclick="toggleAvatarFilter('family')" title="Filter by Family">F</span>
         `;
         
         sortButtonContainer.appendChild(sortBtn);
-        sortButtonContainer.appendChild(assignmentSelect);
+        sortButtonContainer.appendChild(avatarFiltersContainer);
         content.insertBefore(sortButtonContainer, taskList);
       }
       
@@ -4860,28 +4958,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             sortTodosByDueDate();
           };
           
-          // Create assignment dropdown
-          const assignmentSelect = document.createElement('select');
-          assignmentSelect.id = 'fullscreen-todo-assigned-to';
-          assignmentSelect.title = 'Default assignment for new tasks';
-          assignmentSelect.style.cssText = `
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-size: 14px;
-            min-width: 100px;
-          `;
-          
-          assignmentSelect.innerHTML = `
-            <option value="emley">Emley</option>
-            <option value="nate">Nate</option>
-            <option value="family" selected>Family</option>
+          // Create avatar filters
+          const avatarFiltersContainer = document.createElement('div');
+          avatarFiltersContainer.className = 'avatar-filters-container';
+          avatarFiltersContainer.innerHTML = `
+            <span class="fullscreen-avatar-filter emley" data-avatar="emley" onclick="toggleAvatarFilter('emley')" title="Filter by Emley">E</span>
+            <span class="fullscreen-avatar-filter nate" data-avatar="nate" onclick="toggleAvatarFilter('nate')" title="Filter by Nate">N</span>
+            <span class="fullscreen-avatar-filter family" data-avatar="family" onclick="toggleAvatarFilter('family')" title="Filter by Family">F</span>
           `;
           
           sortButtonContainer.appendChild(sortBtn);
-          sortButtonContainer.appendChild(assignmentSelect);
+          sortButtonContainer.appendChild(avatarFiltersContainer);
           content.appendChild(sortButtonContainer);
         }
         
@@ -5090,10 +5177,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function addTodoItemFullscreen() {
       const input = document.getElementById('fullscreen-todo-input');
       const dueDateInput = document.getElementById('fullscreen-todo-due-date');
-      const assignedToInput = document.getElementById('fullscreen-todo-assigned-to');
       const text = input.value.trim();
       const dueDate = dueDateInput ? dueDateInput.value : null;
-      const assignedTo = assignedToInput ? assignedToInput.value : null;
       
       if (text) {
         const item = {
@@ -5103,7 +5188,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           createdAt: new Date().toISOString(),
           order: Date.now(),
           dueDate: dueDate || null,
-          assignedTo: assignedTo || 'family'
+          assignedTo: 'family' // Auto-assign to family by default
         };
         
         todoItems.unshift(item);
@@ -5112,7 +5197,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         renderTodoListFullscreen();
         input.value = '';
         if (dueDateInput) dueDateInput.value = '';
-        if (assignedToInput) assignedToInput.value = '';
       }
     }
 
@@ -5149,8 +5233,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Only show uncompleted items (completed items are immediately moved to history)
         let activeItems = todoItems.filter(item => !item.completed);
         
+        // Apply avatar filters
+        activeItems = filterTodosByAvatar(activeItems);
+        
         if (activeItems.length === 0) {
-          list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
+          const emptyMessage = selectedAvatarFilters.length > 0 ? 
+            'No tasks found for selected filters.' : 
+            'No tasks yet. Add one above!';
+          list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
           return;
         }
         

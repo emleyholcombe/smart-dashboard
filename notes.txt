@@ -2962,3 +2962,43 @@ Changes pushed: Todo sorting functionality and consistent button layout improvem
 
 **Result**: Todo widget now perfectly matches grocery/meals widget layout with full-width text input and properly positioned Add button.
 
+## Avatar-Based Filtering System Implementation
+
+**User Request:** Replace assignment dropdown with clickable avatar filters that allow multi-select filtering of todo tasks.
+
+**Major Changes Made:**
+- **Replaced Dropdown Interface**: Removed assignment dropdown from both widget and fullscreen views
+- **Added Avatar Filter Buttons**: Implemented clickable E/N/F avatar buttons for filtering
+- **Multi-Select Filtering**: Users can select any combination of 1-3 avatars to filter tasks
+- **Toggle Functionality**: Click avatars to add/remove from filter selection
+- **Cross-View Consistency**: Filter state persists between widget and fullscreen modes
+
+**Technical Implementation:**
+- **Global State**: Added `selectedAvatarFilters` array to track active filters
+- **Filter Functions**: 
+  - `toggleAvatarFilter(avatar)` - Adds/removes filters and updates UI
+  - `filterTodosByAvatar(items)` - Applies filtering logic to task arrays
+  - `updateAvatarFilterButtons()` - Syncs visual state across all filter buttons
+- **CSS Styling**: Added `.avatar-filter` and `.fullscreen-avatar-filter` classes with active states
+- **Render Integration**: Updated both `renderTodoList()` and `renderTodoListFullscreen()` to apply filters
+- **Auto-Assignment**: New tasks default to "Family" assignment since dropdown removed
+
+**Interface Changes:**
+- **Widget Layout**: `[Date Input] [E] [N] [F]` filter avatars replace dropdown
+- **Fullscreen Layout**: `[Sort Button] [E] [N] [F]` filters positioned next to sort
+- **Visual Feedback**: Active filters show white border + blue glow, hover effects for all
+- **Empty States**: Smart messages when no tasks match selected filters
+
+**User Experience Features:**
+- **Intuitive Interaction**: Click avatars to toggle filter selection
+- **Visual Clarity**: 32px avatars with clear active/inactive states
+- **Flexible Filtering**: Show all (no selection) or any combination of assignments
+- **Consistent Behavior**: Same functionality in widget and fullscreen modes
+- **Immediate Updates**: Task list filters instantly when avatars clicked
+
+**Benefits:**
+- More visual and intuitive than dropdown selection
+- Allows multi-person task filtering (e.g., show Emley + Family tasks)
+- Prominent placement makes filtering easily accessible
+- Maintains all existing assignment functionality while improving UX
+
