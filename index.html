@@ -1493,6 +1493,8 @@
       <div class="add-item-container" id="todo-add-container">
         <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
         <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
+      </div>
+      <div class="add-item-container" style="margin-top: 0.5rem;">
         <select id="todo-assigned-to" title="Assign to person">
           <option value="">Unassigned</option>
           <option value="emley">Emley</option>
@@ -2915,6 +2917,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         // Replace add container with search interface
         const addContainer = document.getElementById('todo-add-container');
+        const secondContainer = addContainer.nextElementSibling;
+        if (secondContainer && secondContainer.classList.contains('add-item-container')) {
+          secondContainer.style.display = 'none';
+        }
         addContainer.innerHTML = `
           <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem;">
             <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -2958,14 +2964,22 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         addContainer.innerHTML = `
           <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
           <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
-          <select id="todo-assigned-to" title="Assign to person">
-            <option value="">Unassigned</option>
-            <option value="emley">Emley</option>
-            <option value="nate">Nate</option>
-            <option value="family">Family</option>
-          </select>
-          <input type="date" id="todo-due-date" title="Due date (optional)">
         `;
+        
+        // Restore the second container for assignment and date
+        const secondContainer = addContainer.nextElementSibling;
+        if (secondContainer && secondContainer.classList.contains('add-item-container')) {
+          secondContainer.innerHTML = `
+            <select id="todo-assigned-to" title="Assign to person">
+              <option value="">Unassigned</option>
+              <option value="emley">Emley</option>
+              <option value="nate">Nate</option>
+              <option value="family">Family</option>
+            </select>
+            <input type="date" id="todo-due-date" title="Due date (optional)">
+          `;
+          secondContainer.style.display = 'flex';
+        }
         addContainer.style.display = 'flex';
         
         // Re-add Enter key support
