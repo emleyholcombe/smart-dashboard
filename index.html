@@ -606,15 +606,46 @@
     }
 
     .task-item.dragging {
-      opacity: 0.5;
-      transform: rotate(2deg);
+      opacity: 0.6;
+      transform: scale(1.02);
       z-index: 1000;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      border: 2px solid var(--primary-color);
+      background: rgba(255, 255, 255, 0.1);
     }
 
-    .task-item.drag-over {
-      border-top: 3px solid var(--primary-color);
-      margin-top: 3px;
+    /* Insertion indicator - shows where item will be dropped */
+    .task-item.drop-target-above::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      border-radius: 2px;
+      box-shadow: 0 0 8px var(--primary-color);
+      z-index: 1001;
+      animation: dropIndicator 0.6s ease-in-out infinite alternate;
+    }
+
+    .task-item.drop-target-below::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      border-radius: 2px;
+      box-shadow: 0 0 8px var(--primary-color);
+      z-index: 1001;
+      animation: dropIndicator 0.6s ease-in-out infinite alternate;
+    }
+
+    @keyframes dropIndicator {
+      0% { opacity: 0.7; transform: scaleX(0.8); }
+      100% { opacity: 1; transform: scaleX(1); }
     }
 
     .drag-handle {
@@ -2744,6 +2775,32 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     let draggedIndex = null;
     let draggedList = null;
 
+    // Helper functions for improved drag-and-drop visuals
+    function updateDropIndicator(event, targetItem, listItems) {
+      // Clear all existing indicators
+      clearDropIndicators(listItems);
+      
+      if (!draggedItem || draggedItem === targetItem) return;
+      
+      // Get the mouse position relative to the target item
+      const rect = targetItem.getBoundingClientRect();
+      const mouseY = event.clientY;
+      const itemMiddle = rect.top + rect.height / 2;
+      
+      // Determine if we should show indicator above or below
+      if (mouseY < itemMiddle) {
+        targetItem.classList.add('drop-target-above');
+      } else {
+        targetItem.classList.add('drop-target-below');
+      }
+    }
+
+    function clearDropIndicators(listItems) {
+      listItems.forEach(item => {
+        item.classList.remove('drop-target-above', 'drop-target-below');
+      });
+    }
+
     function setupDragAndDrop(listElement, items, listType) {
       const listItems = listElement.querySelectorAll('.task-item');
       
@@ -2769,8 +2826,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             draggedIndex = null;
             draggedList = null;
             
-            // Remove all drag-over classes
-            listItems.forEach(li => li.classList.remove('drag-over'));
+            // Remove all drop indicators
+            clearDropIndicators(listItems);
           });
         }
         
@@ -2785,17 +2842,27 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         item.addEventListener('dragenter', (e) => {
           e.preventDefault();
           if (draggedItem && draggedItem !== item) {
-            item.classList.add('drag-over');
+            updateDropIndicator(e, item, listItems);
+          }
+        });
+        
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (draggedItem && draggedItem !== item) {
+            updateDropIndicator(e, item, listItems);
           }
         });
         
         item.addEventListener('dragleave', (e) => {
-          item.classList.remove('drag-over');
+          // Only remove if we're actually leaving the item (not entering a child)
+          if (!item.contains(e.relatedTarget)) {
+            clearDropIndicators(listItems);
+          }
         });
         
         item.addEventListener('drop', (e) => {
           e.preventDefault();
-          item.classList.remove('drag-over');
+          clearDropIndicators(listItems);
           
           if (draggedItem && draggedItem !== item && draggedList) {
             const dropIndex = Array.from(listItems).indexOf(item);
@@ -2906,8 +2973,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             draggedIndex = null;
             draggedList = null;
             
-            // Remove all drag-over classes
-            listItems.forEach(li => li.classList.remove('drag-over'));
+            // Remove all drop indicators
+            clearDropIndicators(listItems);
           });
         }
         
@@ -2925,18 +2992,32 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             // Only allow drop if in same date group
             const targetDateGroup = item.getAttribute('data-date-group');
             if (draggedList && draggedList.dateGroup === targetDateGroup) {
-              item.classList.add('drag-over');
+              updateDropIndicator(e, item, listItems);
+            }
+          }
+        });
+        
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (draggedItem && draggedItem !== item) {
+            // Only allow drop if in same date group
+            const targetDateGroup = item.getAttribute('data-date-group');
+            if (draggedList && draggedList.dateGroup === targetDateGroup) {
+              updateDropIndicator(e, item, listItems);
             }
           }
         });
         
         item.addEventListener('dragleave', (e) => {
-          item.classList.remove('drag-over');
+          // Only remove if we're actually leaving the item (not entering a child)
+          if (!item.contains(e.relatedTarget)) {
+            clearDropIndicators(listItems);
+          }
         });
         
         item.addEventListener('drop', (e) => {
           e.preventDefault();
-          item.classList.remove('drag-over');
+          clearDropIndicators(listItems);
           
           if (draggedItem && draggedItem !== item && draggedList) {
             const targetDateGroup = item.getAttribute('data-date-group');
