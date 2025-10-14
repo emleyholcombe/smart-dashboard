@@ -2746,16 +2746,19 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     function setupDragAndDrop(listElement, items, listType) {
       const listItems = listElement.querySelectorAll('.task-item');
+      console.log(`Setting up drag and drop for ${listType}:`, listItems.length, 'items');
       
       listItems.forEach((item, index) => {
         // Make drag handle more prominent when dragging is available
         const dragHandle = item.querySelector('.drag-handle');
+        console.log(`Item ${index}:`, dragHandle ? 'has drag handle' : 'NO DRAG HANDLE');
         if (dragHandle) {
           dragHandle.title = 'Drag to reorder';
           dragHandle.draggable = true;
           
           // Only allow dragging from the drag handle
           dragHandle.addEventListener('dragstart', (e) => {
+            console.log('DRAG START:', listType, index);
             draggedItem = item;
             draggedIndex = index;
             draggedList = { items, listType };
