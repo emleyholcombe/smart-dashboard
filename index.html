@@ -2729,6 +2729,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function reorderItems(items, fromIndex, toIndex) {
+      console.log('REORDER ITEMS: from', fromIndex, 'to', toIndex, 'in array of', items.length, 'items');
       const item = items.splice(fromIndex, 1)[0];
       items.splice(toIndex, 0, item);
       
@@ -2737,6 +2738,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       items.forEach((item, index) => {
         item.order = baseOrder - index;
       });
+      console.log('REORDER COMPLETE: new order values assigned');
     }
 
     // Drag and Drop functionality
@@ -2787,6 +2789,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         item.addEventListener('dragenter', (e) => {
           e.preventDefault();
+          console.log('DRAG ENTER:', index);
           if (draggedItem && draggedItem !== item) {
             item.classList.add('drag-over');
           }
@@ -2798,10 +2801,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         item.addEventListener('drop', (e) => {
           e.preventDefault();
+          console.log('DROP EVENT triggered on item:', index);
           item.classList.remove('drag-over');
           
           if (draggedItem && draggedItem !== item && draggedList) {
             const dropIndex = Array.from(listItems).indexOf(item);
+            console.log('DROP: moving from', draggedIndex, 'to', dropIndex);
             
             if (draggedIndex !== dropIndex) {
               // Reorder the items
