@@ -1054,11 +1054,11 @@
     }
 
     .person-avatar.nate {
-      background: #6366f1; /* Indigo-blue that harmonizes with primary color */
+      background: #3b82f6; /* Brighter blue for better contrast */
     }
 
     .person-avatar.family {
-      background: #8b5cf6; /* Violet-purple that bridges the gradient colors */
+      background: #9333ea; /* Deeper purple for better contrast with blue */
     }
 
     .add-item-container input[type="date"] {
@@ -4477,6 +4477,127 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       });
     }
 
+    function rebuildFullscreenTodoInterface() {
+      const content = document.querySelector('.fullscreen-content');
+      if (!content) return;
+      
+      // Remove existing add container and sort button
+      const existingAddContainer = content.querySelector('.add-item-container');
+      const existingSortContainer = content.querySelector('div[style*="justify-content: center"]');
+      
+      if (existingAddContainer) {
+        existingAddContainer.remove();
+      }
+      if (existingSortContainer) {
+        existingSortContainer.remove();
+      }
+      
+      // Create new add container based on current mode
+      const addContainer = document.createElement('div');
+      addContainer.className = 'add-item-container';
+      
+      if (showingTodoHistory) {
+        addContainer.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; max-width: 800px;">
+            <div style="display: flex; gap: 1rem; align-items: center;">
+              <input type="text" id="fullscreen-todo-search-input" placeholder="Search tasks..." maxlength="100" style="flex: 1;">
+              <button onclick="clearTodoSearchFullscreen()" title="Clear all filters" style="padding: 0.7rem 1rem; background: var(--danger-color); color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">Clear All</button>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+              <label style="font-weight: 600; color: var(--text-primary); white-space: nowrap; min-width: 80px;">Date range:</label>
+              <input type="date" id="fullscreen-todo-date-from" style="flex: 1;" title="From date">
+              <span style="color: var(--text-secondary); font-weight: 500;">to</span>
+              <input type="date" id="fullscreen-todo-date-to" style="flex: 1;" title="To date">
+            </div>
+          </div>
+        `;
+      } else {
+        addContainer.innerHTML = `
+          <input type="text" id="fullscreen-todo-input" placeholder="Add new task..." maxlength="100">
+          <select id="fullscreen-todo-assigned-to" title="Assign to person">
+            <option value="emley">Emley</option>
+            <option value="nate">Nate</option>
+            <option value="family" selected>Family</option>
+          </select>
+          <input type="date" id="fullscreen-todo-due-date" title="Due date (optional)">
+          <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
+        `;
+      }
+      
+      // Insert the add container before the task list
+      const taskList = content.querySelector('#fullscreen-todo-list');
+      content.insertBefore(addContainer, taskList);
+      
+      // Add Sort button for current todos only
+      if (!showingTodoHistory) {
+        const sortButtonContainer = document.createElement('div');
+        sortButtonContainer.style.cssText = `
+          display: flex;
+          justify-content: center;
+          margin: 1rem 0;
+        `;
+        
+        const sortBtn = document.createElement('button');
+        sortBtn.textContent = 'Sort by Due Date';
+        sortBtn.title = 'Sort by due date, then alphabetically';
+        sortBtn.style.cssText = `
+          padding: 8px 16px;
+          background: var(--primary-color);
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 14px;
+          transition: background 0.2s ease;
+        `;
+        
+        sortBtn.onmouseover = () => {
+          sortBtn.style.background = '#5a67d8';
+        };
+        
+        sortBtn.onmouseout = () => {
+          sortBtn.style.background = 'var(--primary-color)';
+        };
+        
+        sortBtn.onclick = () => {
+          sortTodosByDueDate();
+        };
+        
+        sortButtonContainer.appendChild(sortBtn);
+        content.insertBefore(sortButtonContainer, taskList);
+      }
+      
+      // Set up event handlers for the new interface
+      setTimeout(() => {
+        if (showingTodoHistory) {
+          // Add search functionality for history mode
+          const searchInput = document.getElementById('fullscreen-todo-search-input');
+          const dateFromInput = document.getElementById('fullscreen-todo-date-from');
+          const dateToInput = document.getElementById('fullscreen-todo-date-to');
+          
+          if (searchInput) {
+            searchInput.addEventListener('input', filterTodoHistoryFullscreen);
+          }
+          if (dateFromInput) {
+            dateFromInput.addEventListener('change', filterTodoHistoryFullscreen);
+          }
+          if (dateToInput) {
+            dateToInput.addEventListener('change', filterTodoHistoryFullscreen);
+          }
+        } else {
+          // Add Enter key support for regular input
+          const input = document.getElementById('fullscreen-todo-input');
+          if (input) {
+            input.addEventListener('keypress', function(e) {
+              if (e.key === 'Enter') {
+                addTodoItemFullscreen();
+              }
+            });
+          }
+        }
+      }, 100);
+    }
+
     function openFullscreen(widgetType) {
       const main = document.querySelector('main');
       const header = document.querySelector('header');
@@ -4562,6 +4683,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           // Update URL based on current mode
           updateURL(showingTodoHistory ? 'todo-history' : 'todo');
           
+          // Rebuild the interface for the new mode
+          rebuildFullscreenTodoInterface();
           renderTodoListFullscreen();
         };
         
