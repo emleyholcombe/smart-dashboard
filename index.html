@@ -3960,33 +3960,29 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       } else if (widgetType === 'todo') {
         title.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
         
-        // Add header with history toggle
-        const headerContainer = document.createElement('div');
-        headerContainer.style.position = 'relative';
-        headerContainer.style.marginBottom = '1.5rem';
-        
-        const titleSpan = document.createElement('span');
-        titleSpan.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
-        titleSpan.style.fontSize = '1.2rem';
-        titleSpan.style.fontWeight = '600';
+        // Create a title container with the history button
+        const titleContainer = document.createElement('div');
+        titleContainer.style.display = 'flex';
+        titleContainer.style.alignItems = 'center';
+        titleContainer.style.gap = '1rem';
         
         const historyBtn = document.createElement('button');
         historyBtn.className = 'fullscreen-history-button';
         historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
         historyBtn.onclick = () => {
           showTodoHistory();
-          // Update both the white header and the black header
+          // Update the white header
           title.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
-          titleSpan.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
           historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
           // Update URL based on current mode
           updateURL(showingTodoHistory ? 'todo-history' : 'todo');
           renderTodoListFullscreen();
         };
         
-        headerContainer.appendChild(titleSpan);
-        headerContainer.appendChild(historyBtn);
-        content.appendChild(headerContainer);
+        titleContainer.appendChild(historyBtn);
+        
+        // Replace the title in the header with the title container
+        fullscreenHeader.insertBefore(titleContainer, headerRight);
         
         // Add appropriate input container based on mode
         const addContainer = document.createElement('div');
@@ -4089,33 +4085,29 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       } else if (widgetType === 'meals') {
         title.textContent = showingMealHistory ? 'Meals History' : 'Meals';
         
-        // Add header with history toggle
-        const headerContainer = document.createElement('div');
-        headerContainer.style.position = 'relative';
-        headerContainer.style.marginBottom = '1.5rem';
-        
-        const titleSpan = document.createElement('span');
-        titleSpan.textContent = showingMealHistory ? 'Meals History' : 'Meals';
-        titleSpan.style.fontSize = '1.2rem';
-        titleSpan.style.fontWeight = '600';
+        // Create a title container with the history button
+        const titleContainer = document.createElement('div');
+        titleContainer.style.display = 'flex';
+        titleContainer.style.alignItems = 'center';
+        titleContainer.style.gap = '1rem';
         
         const historyBtn = document.createElement('button');
         historyBtn.className = 'fullscreen-history-button';
         historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
         historyBtn.onclick = () => {
           showMealsHistory();
-          // Update both the white header and the black header
+          // Update the white header
           title.textContent = showingMealHistory ? 'Meals History' : 'Meals';
-          titleSpan.textContent = showingMealHistory ? 'Meals History' : 'Meals';
           historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
           // Update URL based on current mode
           updateURL(showingMealHistory ? 'meals-history' : 'meals');
           renderMealsListFullscreen();
         };
         
-        headerContainer.appendChild(titleSpan);
-        headerContainer.appendChild(historyBtn);
-        content.appendChild(headerContainer);
+        titleContainer.appendChild(historyBtn);
+        
+        // Replace the title in the header with the title container
+        fullscreenHeader.insertBefore(titleContainer, headerRight);
         
         // Add search bar for history mode
         if (showingMealHistory) {
