@@ -2197,9 +2197,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             id: Date.now() + Math.random(),
             text: item.text,
             completedAt: item.completedAt,
-            originalId: item.id
+            originalId: item.id,
+            order: Date.now() // Add order property for sorting
           };
           todoHistory.unshift(historyItem);
+          updateItemOrders(todoHistory); // Update all orders
           saveTodoHistory();
           
           // Remove from current list immediately
@@ -2259,6 +2261,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         const groups = groupTodosByDate(filteredHistory);
         list.innerHTML = renderTodoHistoryGrouped(groups);
+        
+        // Set up drag and drop for history items (within date groups only)
+        setTimeout(() => setupTodoHistoryDragAndDrop(list, groups), 0);
       } else {
         // Only show uncompleted items (completed items are immediately moved to history)
         let activeItems = todoItems.filter(item => !item.completed);
@@ -2406,9 +2411,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       sortedDates.forEach(dateKey => {
         html += `<li class="date-header">${dateKey}</li>`;
         
-        groups[dateKey].forEach(item => {
+        // Sort items within each date group by order
+        const sortedItems = sortItemsByOrder([...groups[dateKey]]);
+        
+        sortedItems.forEach(item => {
           html += `
-            <li class="task-item history-item">
+            <li class="task-item history-item" data-date-group="${dateKey}">
+              <span class="drag-handle">⋮⋮</span>
               <span class="task-text">${escapeHtml(item.text)}</span>
               <div class="task-actions">
                 <button class="edit-btn" onclick="reAddTodoFromHistory(${item.id})" title="Add back to current list">↩️</button>
@@ -2744,6 +2753,101 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
       });
       saveMealItems();
+    }
+
+    // Todo History Drag and Drop (within date groups only)
+    function setupTodoHistoryDragAndDrop(listElement, groups) {
+      const listItems = listElement.querySelectorAll('.task-item.history-item');
+      
+      listItems.forEach((item, index) => {
+        item.draggable = true;
+        const dateGroup = item.getAttribute('data-date-group');
+        
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          draggedIndex = index;
+          draggedList = { groups, listType: 'todoHistory', dateGroup };
+          item.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        item.addEventListener('dragend', (e) => {
+          item.classList.remove('dragging');
+          draggedItem = null;
+          draggedIndex = null;
+          draggedList = null;
+          
+          // Remove all drag-over classes
+          listItems.forEach(li => li.classList.remove('drag-over'));
+        });
+        
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        });
+        
+        item.addEventListener('dragenter', (e) => {
+          e.preventDefault();
+          if (draggedItem && draggedItem !== item) {
+            // Only allow drop if in same date group
+            const targetDateGroup = item.getAttribute('data-date-group');
+            if (draggedList && draggedList.dateGroup === targetDateGroup) {
+              item.classList.add('drag-over');
+            }
+          }
+        });
+        
+        item.addEventListener('dragleave', (e) => {
+          item.classList.remove('drag-over');
+        });
+        
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.classList.remove('drag-over');
+          
+          if (draggedItem && draggedItem !== item && draggedList) {
+            const targetDateGroup = item.getAttribute('data-date-group');
+            
+            // Only allow drop within same date group
+            if (draggedList.dateGroup === targetDateGroup) {
+              const dropIndex = Array.from(listItems).indexOf(item);
+              
+              if (draggedIndex !== dropIndex) {
+                // Find the items in the specific date group
+                const dateGroupItems = groups[targetDateGroup];
+                
+                // Get the actual item being dragged
+                const draggedItemId = parseInt(draggedItem.querySelector('.edit-btn').onclick.toString().match(/\d+/)[0]);
+                const draggedHistoryItem = todoHistory.find(h => h.id === draggedItemId);
+                
+                // Get the target item
+                const targetItemId = parseInt(item.querySelector('.edit-btn').onclick.toString().match(/\d+/)[0]);
+                const targetHistoryItem = todoHistory.find(h => h.id === targetItemId);
+                
+                if (draggedHistoryItem && targetHistoryItem) {
+                  // Find positions within the date group
+                  const draggedGroupIndex = dateGroupItems.findIndex(i => i.id === draggedHistoryItem.id);
+                  const targetGroupIndex = dateGroupItems.findIndex(i => i.id === targetHistoryItem.id);
+                  
+                  // Reorder within the date group
+                  reorderItems(dateGroupItems, draggedGroupIndex, targetGroupIndex);
+                  
+                  // Update the main todoHistory array with new order
+                  dateGroupItems.forEach(groupItem => {
+                    const historyItem = todoHistory.find(h => h.id === groupItem.id);
+                    if (historyItem) {
+                      historyItem.order = groupItem.order;
+                    }
+                  });
+                  
+                  saveTodoHistory();
+                  renderTodoList();
+                }
+              }
+            }
+          }
+        });
+      });
     }
 
     // Meal synchronization helper functions
@@ -3927,6 +4031,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         const groups = groupTodosByDate(filteredHistory);
         list.innerHTML = renderTodoHistoryGrouped(groups);
+        
+        // Set up drag and drop for history items (within date groups only)
+        setTimeout(() => setupTodoHistoryDragAndDrop(list, groups), 0);
       } else {
         // Only show uncompleted items (completed items are immediately moved to history)
         const activeItems = todoItems.filter(item => !item.completed);
@@ -3987,10 +4094,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           id: Date.now(),
           text: text,
           completed: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          order: Date.now() // Add order property for sorting
         };
         
         groceryItems.unshift(item);
+        updateItemOrders(groceryItems); // Update all orders
         saveGroceryItems();
         renderGroceryListFullscreen();
         input.value = '';
@@ -4006,8 +4115,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return;
       }
       
-      list.innerHTML = groceryItems.map(item => `
+      // Sort by order and ensure all items have order property
+      updateItemOrders(groceryItems);
+      const sortedItems = sortItemsByOrder([...groceryItems]);
+      
+      list.innerHTML = sortedItems.map(item => `
         <li class="task-item">
+          <span class="drag-handle">⋮⋮</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id}); renderGroceryListFullscreen();">
@@ -4018,6 +4132,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           </div>
         </li>
       `).join('');
+      
+      // Set up drag and drop
+      setTimeout(() => setupDragAndDrop(list, groceryItems, 'grocery'), 0);
     }
 
     // Optional: Auto-save feature and data export/import for sharing between devices
