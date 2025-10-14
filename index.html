@@ -591,6 +591,53 @@
       box-shadow: var(--shadow-md);
     }
 
+    /* Drag and Drop Styles */
+    .task-item {
+      cursor: move;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .task-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .task-item.dragging {
+      opacity: 0.5;
+      transform: rotate(2deg);
+      z-index: 1000;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .task-item.drag-over {
+      border-top: 3px solid var(--primary-color);
+      margin-top: 3px;
+    }
+
+    .drag-handle {
+      position: absolute;
+      left: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      cursor: grab;
+    }
+
+    .task-item:hover .drag-handle {
+      opacity: 1;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .task-list {
+      position: relative;
+    }
+
     .meal-url-input {
       width: 100%;
       padding: 8px 12px;
@@ -1648,11 +1695,26 @@ Token:`);
     }
     
     function setCurrentData(data) {
-      if (data.todoItems) todoItems = data.todoItems;
-      if (data.todoHistory) todoHistory = data.todoHistory;
-      if (data.groceryItems) groceryItems = data.groceryItems;
-      if (data.mealItems) mealItems = data.mealItems;
-      if (data.mealHistory) mealHistory = data.mealHistory;
+      if (data.todoItems) {
+        todoItems = data.todoItems;
+        updateItemOrders(todoItems); // Ensure all items have order property
+      }
+      if (data.todoHistory) {
+        todoHistory = data.todoHistory;
+        updateItemOrders(todoHistory); // Ensure all items have order property
+      }
+      if (data.groceryItems) {
+        groceryItems = data.groceryItems;
+        updateItemOrders(groceryItems); // Ensure all items have order property
+      }
+      if (data.mealItems) {
+        mealItems = data.mealItems;
+        updateItemOrders(mealItems); // Ensure all items have order property
+      }
+      if (data.mealHistory) {
+        mealHistory = data.mealHistory;
+        updateItemOrders(mealHistory); // Ensure all items have order property
+      }
     }
     
     // Save to both localStorage and GitHub Gist (master storage)
@@ -2106,10 +2168,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           id: Date.now(),
           text: text,
           completed: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          order: Date.now() // Add order property for sorting
         };
         
         todoItems.unshift(item); // Add to beginning of array
+        updateItemOrders(todoItems); // Update all orders
         saveTodoItems();
         renderTodoList();
         input.value = '';
@@ -2197,14 +2261,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         list.innerHTML = renderTodoHistoryGrouped(groups);
       } else {
         // Only show uncompleted items (completed items are immediately moved to history)
-        const activeItems = todoItems.filter(item => !item.completed);
+        let activeItems = todoItems.filter(item => !item.completed);
         
         if (activeItems.length === 0) {
           list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
           return;
         }
+        
+        // Sort by order and ensure all items have order property
+        updateItemOrders(activeItems);
+        activeItems = sortItemsByOrder(activeItems);
+        
         list.innerHTML = activeItems.map(item => `
           <li class="task-item">
+            <span class="drag-handle">⋮⋮</span>
             <input type="checkbox" class="task-checkbox" 
                    onchange="toggleTodoItem(${item.id})">
             <span class="task-text">${escapeHtml(item.text)}</span>
@@ -2214,6 +2284,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             </div>
           </li>
         `).join('');
+        
+        // Set up drag and drop
+        setTimeout(() => setupDragAndDrop(list, activeItems, 'todo'), 0);
       }
     }
 
@@ -2462,10 +2535,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           id: Date.now(),
           text: text,
           completed: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          order: Date.now() // Add order property for sorting
         };
         
         groceryItems.unshift(item); // Add to beginning of array
+        updateItemOrders(groceryItems); // Update all orders
         saveGroceryItems();
         renderGroceryList();
         input.value = '';
@@ -2512,8 +2587,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return;
       }
       
-      list.innerHTML = groceryItems.map(item => `
+      // Sort by order and ensure all items have order property
+      updateItemOrders(groceryItems);
+      const sortedItems = sortItemsByOrder([...groceryItems]);
+      
+      list.innerHTML = sortedItems.map(item => `
         <li class="task-item">
+          <span class="drag-handle">⋮⋮</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id})">
@@ -2524,10 +2604,146 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           </div>
         </li>
       `).join('');
+      
+      // Set up drag and drop
+      setTimeout(() => setupDragAndDrop(list, groceryItems, 'grocery'), 0);
     }
 
     function saveGroceryItems() {
       saveAllData();
+    }
+
+    // Order management helper functions
+    function updateItemOrders(items) {
+      items.forEach((item, index) => {
+        if (!item.order) {
+          item.order = Date.now() - (items.length - index);
+        }
+      });
+    }
+
+    function sortItemsByOrder(items) {
+      return items.sort((a, b) => (b.order || 0) - (a.order || 0));
+    }
+
+    function reorderItems(items, fromIndex, toIndex) {
+      const item = items.splice(fromIndex, 1)[0];
+      items.splice(toIndex, 0, item);
+      
+      // Update order values based on new positions
+      const baseOrder = Date.now();
+      items.forEach((item, index) => {
+        item.order = baseOrder - index;
+      });
+    }
+
+    // Drag and Drop functionality
+    let draggedItem = null;
+    let draggedIndex = null;
+    let draggedList = null;
+
+    function setupDragAndDrop(listElement, items, listType) {
+      const listItems = listElement.querySelectorAll('.task-item');
+      
+      listItems.forEach((item, index) => {
+        item.draggable = true;
+        
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          draggedIndex = index;
+          draggedList = { items, listType };
+          item.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        item.addEventListener('dragend', (e) => {
+          item.classList.remove('dragging');
+          draggedItem = null;
+          draggedIndex = null;
+          draggedList = null;
+          
+          // Remove all drag-over classes
+          listItems.forEach(li => li.classList.remove('drag-over'));
+        });
+        
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        });
+        
+        item.addEventListener('dragenter', (e) => {
+          e.preventDefault();
+          if (draggedItem && draggedItem !== item) {
+            item.classList.add('drag-over');
+          }
+        });
+        
+        item.addEventListener('dragleave', (e) => {
+          item.classList.remove('drag-over');
+        });
+        
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.classList.remove('drag-over');
+          
+          if (draggedItem && draggedItem !== item && draggedList) {
+            const dropIndex = Array.from(listItems).indexOf(item);
+            
+            if (draggedIndex !== dropIndex) {
+              // Reorder the items
+              reorderItems(draggedList.items, draggedIndex, dropIndex);
+              
+              // Save and re-render based on list type
+              switch (draggedList.listType) {
+                case 'todo':
+                  saveTodoItems();
+                  renderTodoList();
+                  break;
+                case 'todoHistory':
+                  saveTodoHistory();
+                  renderTodoList();
+                  break;
+                case 'grocery':
+                  saveGroceryItems();
+                  renderGroceryList();
+                  break;
+                case 'meals':
+                  saveMealItems();
+                  // Sync order to history for current meals
+                  syncMealOrderToHistory();
+                  renderMealsList();
+                  break;
+                case 'mealHistory':
+                  saveMealHistory();
+                  // Sync order to current meals for history
+                  syncHistoryOrderToMeal();
+                  renderMealsList();
+                  break;
+              }
+            }
+          }
+        });
+      });
+    }
+
+    function syncMealOrderToHistory() {
+      mealItems.forEach(meal => {
+        const historyItem = mealHistory.find(h => h.id === meal.id);
+        if (historyItem) {
+          historyItem.order = meal.order;
+        }
+      });
+      saveMealHistory();
+    }
+
+    function syncHistoryOrderToMeal() {
+      mealHistory.forEach(historyItem => {
+        const meal = mealItems.find(m => m.id === historyItem.id);
+        if (meal) {
+          meal.order = historyItem.order;
+        }
+      });
+      saveMealItems();
     }
 
     // Meal synchronization helper functions
@@ -2554,16 +2770,19 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       if (text) {
         const sharedId = Date.now(); // Use same ID for both lists
+        const orderValue = Date.now();
         const item = {
           id: sharedId,
           text: text,
           url: '',
           completed: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          order: orderValue // Add order property for sorting
         };
         
         // Add to current meals
         mealItems.unshift(item);
+        updateItemOrders(mealItems); // Update all orders
         
         // Also add to history immediately (permanent record) with same ID
         const historyItem = {
@@ -2571,9 +2790,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           text: item.text,
           url: item.url,
           createdAt: item.createdAt,
-          addedToHistoryAt: new Date().toISOString()
+          addedToHistoryAt: new Date().toISOString(),
+          order: orderValue // Same order for linking
         };
         mealHistory.unshift(historyItem);
+        updateItemOrders(mealHistory); // Update all orders
         
         saveMealItems();
         saveMealHistory();
@@ -2636,14 +2857,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         if (newText !== null && newText.trim()) {
           item.text = newText.trim();
           
-          // Also prompt to update URL
-          const newUrl = prompt('Update recipe URL (leave blank to keep current):', item.url || '');
-          if (newUrl !== null) {
-            item.url = newUrl.trim();
-          }
-          
-          // Sync changes to history item with same ID
-          syncMealToHistory(id, { text: item.text, url: item.url });
+          // Sync text change to history item with same ID
+          syncMealToHistory(id, { text: item.text });
           
           saveMealItems();
           renderMealsList();
@@ -2693,7 +2908,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return;
       }
       
-      list.innerHTML = items.map(item => {
+      // Sort by order and ensure all items have order property
+      updateItemOrders(items);
+      const sortedItems = sortItemsByOrder([...items]);
+      
+      list.innerHTML = sortedItems.map(item => {
         const mealText = item.url ? 
           `<a href="${item.url}" target="_blank" class="meal-link">${escapeHtml(item.text)}</a>` : 
           escapeHtml(item.text);
@@ -2703,6 +2922,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
         return `
           <li class="task-item ${item.completed ? 'completed' : ''}">
+            <span class="drag-handle">⋮⋮</span>
             ${showingMealHistory ? '' : `<input type="checkbox" class="task-checkbox" 
                    ${item.completed ? 'checked' : ''} 
                    onchange="toggleMealItem(${item.id})">`}
@@ -2716,6 +2936,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           </li>
         `;
       }).join('');
+      
+      // Set up drag and drop
+      const listType = showingMealHistory ? 'mealHistory' : 'meals';
+      setTimeout(() => setupDragAndDrop(list, items, listType), 0);
     }
 
     function saveMealItems() {
@@ -2924,16 +3148,19 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       if (text) {
         const sharedId = Date.now(); // Use same ID for both lists
+        const orderValue = Date.now();
         const item = {
           id: sharedId,
           text: text,
           url: '',
           completed: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          order: orderValue // Add order property for sorting
         };
         
         // Add to current meals
         mealItems.unshift(item);
+        updateItemOrders(mealItems); // Update all orders
         
         // Also add to history immediately (permanent record) with same ID
         const historyItem = {
@@ -2941,9 +3168,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           text: item.text,
           url: item.url,
           createdAt: item.createdAt,
-          addedToHistoryAt: new Date().toISOString()
+          addedToHistoryAt: new Date().toISOString(),
+          order: orderValue // Same order for linking
         };
         mealHistory.unshift(historyItem);
+        updateItemOrders(mealHistory); // Update all orders
         
         saveMealItems();
         saveMealHistory();
