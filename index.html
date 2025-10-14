@@ -2681,7 +2681,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     function renderTodoList() {
       const list = document.getElementById('todo-list');
-      
+
       if (showingTodoHistory) {
         let filteredHistory = [...todoHistory];
         
@@ -2694,8 +2694,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           filteredHistory = filterTodosByDateRange(filteredHistory, currentDateFrom, currentDateTo);
         }
         
+        // Apply avatar filters
+        filteredHistory = filterTodosByAvatar(filteredHistory);
+        
         if (filteredHistory.length === 0) {
-          const emptyMessage = (currentTodoSearchTerm || currentDateFrom || currentDateTo) ? 
+          const emptyMessage = (currentTodoSearchTerm || currentDateFrom || currentDateTo || selectedAvatarFilters.length > 0) ? 
             'No tasks found matching your search criteria.' : 
             'No completed tasks yet.';
           list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
@@ -3210,6 +3213,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <span style="color: var(--text-secondary); align-self: center;">to</span>
               <input type="date" id="todo-date-to" style="flex: 1; font-size: 0.85rem;" title="To date">
             </div>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 0.5rem;">
+              <span class="avatar-filter emley" data-avatar="emley" onclick="toggleAvatarFilter('emley')" title="Filter by Emley">E</span>
+              <span class="avatar-filter nate" data-avatar="nate" onclick="toggleAvatarFilter('nate')" title="Filter by Nate">N</span>
+              <span class="avatar-filter family" data-avatar="family" onclick="toggleAvatarFilter('family')" title="Filter by Family">F</span>
+            </div>
           </div>
         `;
         
@@ -3402,6 +3410,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       currentTodoSearchTerm = '';
       currentDateFrom = '';
       currentDateTo = '';
+      
+      // Clear avatar filters
+      selectedAvatarFilters = [];
+      updateAvatarFilterButtons();
       
       renderTodoList();
     }
@@ -4703,6 +4715,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <span style="color: var(--text-secondary); font-weight: 500;">to</span>
               <input type="date" id="fullscreen-todo-date-to" style="flex: 1;" title="To date">
             </div>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 0.5rem;">
+              <span class="fullscreen-avatar-filter emley" data-avatar="emley" onclick="toggleAvatarFilter('emley')" title="Filter by Emley">E</span>
+              <span class="fullscreen-avatar-filter nate" data-avatar="nate" onclick="toggleAvatarFilter('nate')" title="Filter by Nate">N</span>
+              <span class="fullscreen-avatar-filter family" data-avatar="family" onclick="toggleAvatarFilter('family')" title="Filter by Family">F</span>
+            </div>
           </div>
         `;
       } else {
@@ -4908,6 +4925,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                 <input type="date" id="fullscreen-todo-date-from" style="flex: 1;" title="From date">
                 <span style="color: var(--text-secondary); font-weight: 500;">to</span>
                 <input type="date" id="fullscreen-todo-date-to" style="flex: 1;" title="To date">
+              </div>
+              <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 0.5rem;">
+                <span class="fullscreen-avatar-filter emley" data-avatar="emley" onclick="toggleAvatarFilter('emley')" title="Filter by Emley">E</span>
+                <span class="fullscreen-avatar-filter nate" data-avatar="nate" onclick="toggleAvatarFilter('nate')" title="Filter by Nate">N</span>
+                <span class="fullscreen-avatar-filter family" data-avatar="family" onclick="toggleAvatarFilter('family')" title="Filter by Family">F</span>
               </div>
             </div>
           `;
@@ -5203,7 +5225,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function renderTodoListFullscreen() {
       const list = document.getElementById('fullscreen-todo-list');
       if (!list) return;
-      
+
       if (showingTodoHistory) {
         let filteredHistory = [...todoHistory];
         
@@ -5216,8 +5238,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           filteredHistory = filterTodosByDateRange(filteredHistory, currentDateFrom, currentDateTo);
         }
         
+        // Apply avatar filters
+        filteredHistory = filterTodosByAvatar(filteredHistory);
+        
         if (filteredHistory.length === 0) {
-          const emptyMessage = (currentTodoSearchTerm || currentDateFrom || currentDateTo) ? 
+          const emptyMessage = (currentTodoSearchTerm || currentDateFrom || currentDateTo || selectedAvatarFilters.length > 0) ? 
             'No tasks found matching your search criteria.' : 
             'No completed tasks yet.';
           list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
@@ -5316,6 +5341,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       currentTodoSearchTerm = '';
       currentDateFrom = '';
       currentDateTo = '';
+      
+      // Clear avatar filters
+      selectedAvatarFilters = [];
+      updateAvatarFilterButtons();
       
       renderTodoListFullscreen();
     }

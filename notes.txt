@@ -3002,3 +3002,21 @@ Changes pushed: Todo sorting functionality and consistent button layout improvem
 - Prominent placement makes filtering easily accessible
 - Maintains all existing assignment functionality while improving UX
 
+## Avatar Filtering Extended to Todo History
+
+**User Request:** Add avatar filtering to todo history widget and fullscreen views.
+
+**Implementation:**
+- **History Widget**: Added avatar filter buttons below date range inputs in search interface
+- **Fullscreen History**: Added avatar filter buttons in search container with proper spacing
+- **Filter Integration**: Applied `filterTodosByAvatar()` to history rendering in both views
+- **Clear All Functionality**: Updated clear functions to reset avatar filters along with search/date filters
+- **Consistent Experience**: Same multi-select avatar filtering works across current and history views
+
+**Technical Changes:**
+- Updated `renderTodoList()` and `renderTodoListFullscreen()` history sections to apply avatar filters
+- Modified history search interfaces to include avatar filter buttons
+- Enhanced `clearTodoSearch()` and `clearTodoSearchFullscreen()` to clear avatar selections
+- Updated empty state messages to account for avatar filter criteria
+- Maintained existing search and date range functionality while adding avatar filtering layer
+
