@@ -851,6 +851,7 @@
     .task-checkbox {
       width: 20px;
       height: 20px;
+      margin-left: 8px;
       margin-right: 8px;
       accent-color: var(--primary-color);
       cursor: pointer;
@@ -2452,7 +2453,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         sortedItems.forEach(item => {
           html += `
-            <li class="task-item history-item" data-date-group="${dateKey}">
+            <li class="task-item history-item" data-date-group="${dateKey}" data-item-id="${item.id}">
               <span class="drag-handle">☰</span>
               <span class="task-text">${escapeHtml(item.text)}</span>
               <div class="task-actions">
@@ -2691,30 +2692,37 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const listItems = listElement.querySelectorAll('.task-item');
       
       listItems.forEach((item, index) => {
-        item.draggable = true;
-        
         // Make drag handle more prominent when dragging is available
         const dragHandle = item.querySelector('.drag-handle');
         if (dragHandle) {
           dragHandle.title = 'Drag to reorder';
+          dragHandle.draggable = true;
+          
+          // Only allow dragging from the drag handle
+          dragHandle.addEventListener('dragstart', (e) => {
+            draggedItem = item;
+            draggedIndex = index;
+            draggedList = { items, listType };
+            item.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+          });
+          
+          dragHandle.addEventListener('dragend', (e) => {
+            item.classList.remove('dragging');
+            draggedItem = null;
+            draggedIndex = null;
+            draggedList = null;
+            
+            // Remove all drag-over classes
+            listItems.forEach(li => li.classList.remove('drag-over'));
+          });
         }
         
+        // Prevent dragging from anywhere else on the item
         item.addEventListener('dragstart', (e) => {
-          draggedItem = item;
-          draggedIndex = index;
-          draggedList = { items, listType };
-          item.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
-        });
-        
-        item.addEventListener('dragend', (e) => {
-          item.classList.remove('dragging');
-          draggedItem = null;
-          draggedIndex = null;
-          draggedList = null;
-          
-          // Remove all drag-over classes
-          listItems.forEach(li => li.classList.remove('drag-over'));
+          if (e.target !== dragHandle) {
+            e.preventDefault();
+          }
         });
         
         item.addEventListener('dragover', (e) => {
@@ -2802,32 +2810,41 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const listItems = listElement.querySelectorAll('.task-item.history-item');
       
       listItems.forEach((item, index) => {
-        item.draggable = true;
         const dateGroup = item.getAttribute('data-date-group');
         
         // Make drag handle more prominent when dragging is available
         const dragHandle = item.querySelector('.drag-handle');
         if (dragHandle) {
           dragHandle.title = 'Drag to reorder within this date';
+          dragHandle.draggable = true;
+          
+          // Only allow dragging from the drag handle
+          dragHandle.addEventListener('dragstart', (e) => {
+            draggedItem = item;
+            draggedIndex = index;
+            draggedList = { groups, listType: 'todoHistory', dateGroup };
+            item.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+          });
+          
+          dragHandle.addEventListener('dragend', (e) => {
+            item.classList.remove('dragging');
+            draggedItem = null;
+            draggedIndex = null;
+            draggedList = null;
+            
+            // Remove all drag-over classes
+            listItems.forEach(li => li.classList.remove('drag-over'));
+          });
         }
         
+        // Prevent dragging from anywhere else on the item
         item.addEventListener('dragstart', (e) => {
-          draggedItem = item;
-          draggedIndex = index;
-          draggedList = { groups, listType: 'todoHistory', dateGroup };
-          item.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
+          if (e.target !== dragHandle) {
+            e.preventDefault();
+          }
         });
         
-        item.addEventListener('dragend', (e) => {
-          item.classList.remove('dragging');
-          draggedItem = null;
-          draggedIndex = null;
-          draggedList = null;
-          
-          // Remove all drag-over classes
-          listItems.forEach(li => li.classList.remove('drag-over'));
-        });
         
         item.addEventListener('dragover', (e) => {
           e.preventDefault();
@@ -2865,11 +2882,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                 const dateGroupItems = groups[targetDateGroup];
                 
                 // Get the actual item being dragged
-                const draggedItemId = parseInt(draggedItem.querySelector('.edit-btn').onclick.toString().match(/\d+/)[0]);
+                const draggedItemId = parseInt(draggedItem.getAttribute('data-item-id'));
                 const draggedHistoryItem = todoHistory.find(h => h.id === draggedItemId);
                 
                 // Get the target item
-                const targetItemId = parseInt(item.querySelector('.edit-btn').onclick.toString().match(/\d+/)[0]);
+                const targetItemId = parseInt(item.getAttribute('data-item-id'));
                 const targetHistoryItem = todoHistory.find(h => h.id === targetItemId);
                 
                 if (draggedHistoryItem && targetHistoryItem) {
@@ -4183,7 +4200,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       list.innerHTML = sortedItems.map(item => `
         <li class="task-item">
-          <span class="drag-handle">⋮⋮</span>
+          <span class="drag-handle">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id}); renderGroceryListFullscreen();">
