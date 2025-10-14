@@ -1562,3 +1562,74 @@ if (document.getElementById('fullscreen-container')) {
 
 **Result**: ✅ Fullscreen drag-and-drop reordering now works perfectly for all list types (To-Do, Grocery, Meals, To-Do History)
 
+## **ENHANCED DRAG-AND-DROP VISUALS** ✨
+
+**User Request**: Improve drag-and-drop graphics to clearly show where items will be dropped based on cursor position.
+
+**Previous Issues**: 
+- Basic `drag-over` styling was unclear about exact drop position
+- Simple border-top indicator didn't show precise insertion point
+- Dragging item appearance was basic (opacity + rotation)
+
+**New Visual System**:
+
+**1. Insertion Indicators**:
+```css
+.task-item.drop-target-above::before {
+  /* Animated gradient line above target item */
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  height: 4px;
+  box-shadow: 0 0 8px var(--primary-color);
+  animation: dropIndicator 0.6s ease-in-out infinite alternate;
+}
+
+.task-item.drop-target-below::after {
+  /* Animated gradient line below target item */
+  /* Same styling as above, positioned at bottom */
+}
+```
+
+**2. Enhanced Dragging Item**:
+```css
+.task-item.dragging {
+  opacity: 0.6;
+  transform: scale(1.02);           /* Subtle scale instead of rotation */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);  /* Dramatic shadow */
+  border: 2px solid var(--primary-color);      /* Highlighted border */
+  background: rgba(255, 255, 255, 0.1);        /* Subtle background */
+}
+```
+
+**3. Smart Position Detection**:
+```javascript
+function updateDropIndicator(event, targetItem, listItems) {
+  const rect = targetItem.getBoundingClientRect();
+  const mouseY = event.clientY;
+  const itemMiddle = rect.top + rect.height / 2;
+  
+  // Show indicator above or below based on mouse position
+  if (mouseY < itemMiddle) {
+    targetItem.classList.add('drop-target-above');
+  } else {
+    targetItem.classList.add('drop-target-below');
+  }
+}
+```
+
+**Features**:
+- ✅ **Precise Positioning**: Shows exactly where item will be inserted
+- ✅ **Mouse-Responsive**: Indicator position follows cursor location
+- ✅ **Animated Feedback**: Pulsing gradient line draws attention
+- ✅ **Enhanced Dragging**: Dragged item has professional hover effect
+- ✅ **All List Types**: Works for To-Do, Grocery, Meals, and History
+- ✅ **Date Group Respect**: Todo history maintains date group constraints
+- ✅ **Smooth Transitions**: Proper event handling prevents flickering
+
+**Files Modified**:
+- Enhanced CSS animations and visual effects (lines ~608-649)
+- Added `updateDropIndicator()` and `clearDropIndicators()` helper functions (lines ~2778-2802)
+- Updated both `setupDragAndDrop()` and `setupTodoHistoryDragAndDrop()` event handlers
+- Replaced all `drag-over` class usage with new indicator system
+
+**Result**: ✅ **Professional drag-and-drop experience** with clear visual feedback showing exact insertion points
+

@@ -2726,7 +2726,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       list.innerHTML = sortedItems.map(item => `
         <li class="task-item">
-          <span class="drag-handle">⋮⋮</span>
+          <span class="drag-handle">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id})">
