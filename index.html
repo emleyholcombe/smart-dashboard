@@ -964,6 +964,44 @@
       opacity: 0.7;
     }
 
+    .task-due-date {
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: rgba(102, 126, 234, 0.1);
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 8px;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .task-due-date.overdue {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .task-item.overdue {
+      border-left: 3px solid #dc2626;
+      background: rgba(239, 68, 68, 0.02);
+    }
+
+    .add-item-container input[type="date"] {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 14px;
+      min-width: 140px;
+    }
+
+    .add-item-container input[type="date"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
     .task-actions {
       display: flex;
       gap: 4px;
@@ -1364,6 +1402,7 @@
       </div>
       <div class="add-item-container" id="todo-add-container">
         <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
+        <input type="date" id="todo-due-date" title="Due date (optional)">
         <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
       </div>
       <ul id="todo-list" class="task-list">
@@ -2297,7 +2336,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     // Todo List Functions
     function addTodoItem() {
       const input = document.getElementById('todo-input');
+      const dueDateInput = document.getElementById('todo-due-date');
       const text = input.value.trim();
+      const dueDate = dueDateInput.value;
       
       if (text) {
         const item = {
@@ -2305,7 +2346,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           text: text,
           completed: false,
           createdAt: new Date().toISOString(),
-          order: Date.now() // Add order property for sorting
+          order: Date.now(), // Add order property for sorting
+          dueDate: dueDate || null // Add due date if provided
         };
         
         todoItems.unshift(item); // Add to beginning of array
@@ -2313,6 +2355,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         saveTodoItems();
         renderTodoList();
         input.value = '';
+        dueDateInput.value = '';
       }
     }
 
@@ -2363,12 +2406,104 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function editTodoItem(id) {
       const item = todoItems.find(item => item.id === id);
       if (item) {
-        const newText = prompt('Edit task:', item.text);
-        if (newText !== null && newText.trim()) {
-          item.text = newText.trim();
-          saveTodoItems();
-          renderTodoList();
-        }
+        // Create a modal dialog for editing
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10000;
+        `;
+        
+        const dialog = document.createElement('div');
+        dialog.style.cssText = `
+          background: var(--bg-primary);
+          padding: 24px;
+          border-radius: 12px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+          max-width: 400px;
+          width: 90%;
+          border: 1px solid var(--border-color);
+        `;
+        
+        dialog.innerHTML = `
+          <h3 style="margin: 0 0 16px 0; color: var(--text-primary);">Edit Task</h3>
+          <input type="text" id="edit-task-text" value="${escapeHtml(item.text)}" 
+                 style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); 
+                        border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); 
+                        font-size: 14px; margin-bottom: 12px; box-sizing: border-box;">
+          <input type="date" id="edit-task-due-date" value="${item.dueDate || ''}" 
+                 style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); 
+                        border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); 
+                        font-size: 14px; margin-bottom: 16px; box-sizing: border-box;">
+          <div style="display: flex; gap: 8px; justify-content: flex-end;">
+            <button id="edit-cancel-btn" style="padding: 8px 16px; border: 1px solid var(--border-color); 
+                    border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); 
+                    cursor: pointer;">Cancel</button>
+            <button id="edit-save-btn" style="padding: 8px 16px; border: none; border-radius: 6px; 
+                    background: var(--primary-color); color: white; cursor: pointer;">Save</button>
+          </div>
+        `;
+        
+        modal.appendChild(dialog);
+        document.body.appendChild(modal);
+        
+        // Focus on text input
+        const textInput = document.getElementById('edit-task-text');
+        textInput.focus();
+        textInput.select();
+        
+        // Handle save
+        const saveBtn = document.getElementById('edit-save-btn');
+        const cancelBtn = document.getElementById('edit-cancel-btn');
+        const dueDateInput = document.getElementById('edit-task-due-date');
+        
+        const handleSave = () => {
+          const newText = textInput.value.trim();
+          const newDueDate = dueDateInput.value;
+          
+          if (newText) {
+            item.text = newText;
+            item.dueDate = newDueDate || null;
+            saveTodoItems();
+            renderTodoList();
+          }
+          document.body.removeChild(modal);
+        };
+        
+        const handleCancel = () => {
+          document.body.removeChild(modal);
+        };
+        
+        saveBtn.addEventListener('click', handleSave);
+        cancelBtn.addEventListener('click', handleCancel);
+        
+        // Handle Enter key in text input
+        textInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            handleSave();
+          }
+        });
+        
+        // Handle Escape key
+        modal.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            handleCancel();
+          }
+        });
+        
+        // Handle click outside dialog
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            handleCancel();
+          }
+        });
       }
     }
 
@@ -2413,18 +2548,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         updateItemOrders(activeItems);
         activeItems = sortItemsByOrder(activeItems);
         
-        list.innerHTML = activeItems.map(item => `
-          <li class="task-item">
-            <span class="drag-handle">☰</span>
-            <input type="checkbox" class="task-checkbox" 
-                   onchange="toggleTodoItem(${item.id})">
-            <span class="task-text">${escapeHtml(item.text)}</span>
-            <div class="task-actions">
-              <button class="edit-btn" onclick="editTodoItem(${item.id})" title="Edit">✏️</button>
-              <button class="delete-btn" onclick="deleteTodoItem(${item.id})" title="Delete">🗑️</button>
-            </div>
-          </li>
-        `).join('');
+        list.innerHTML = activeItems.map(item => {
+          const dueDateDisplay = item.dueDate ? formatDueDate(item.dueDate) : '';
+          const isOverdue = item.dueDate && isTaskOverdue(item.dueDate);
+          const dueDateClass = isOverdue ? 'overdue' : '';
+          
+          return `
+            <li class="task-item ${dueDateClass}">
+              <span class="drag-handle">☰</span>
+              <input type="checkbox" class="task-checkbox" 
+                     onchange="toggleTodoItem(${item.id})">
+              <span class="task-text">${escapeHtml(item.text)}</span>
+              ${dueDateDisplay ? `<span class="task-due-date ${dueDateClass}">${dueDateDisplay}</span>` : ''}
+              <div class="task-actions">
+                <button class="edit-btn" onclick="editTodoItem(${item.id})" title="Edit">✏️</button>
+                <button class="delete-btn" onclick="deleteTodoItem(${item.id})" title="Delete">🗑️</button>
+              </div>
+            </li>
+          `;
+        }).join('');
         
         // Set up drag and drop
         setTimeout(() => setupDragAndDrop(list, activeItems, 'todo'), 0);
@@ -2433,6 +2575,41 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     function saveTodoItems() {
       saveAllData();
+    }
+
+    function formatDueDate(dateString) {
+      const date = new Date(dateString);
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      
+      // Reset time to compare dates only
+      today.setHours(0, 0, 0, 0);
+      tomorrow.setHours(0, 0, 0, 0);
+      date.setHours(0, 0, 0, 0);
+      
+      if (date.getTime() === today.getTime()) {
+        return 'Today';
+      } else if (date.getTime() === tomorrow.getTime()) {
+        return 'Tomorrow';
+      } else {
+        return date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric',
+          year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+        });
+      }
+    }
+
+    function isTaskOverdue(dateString) {
+      const dueDate = new Date(dateString);
+      const today = new Date();
+      
+      // Reset time to compare dates only
+      today.setHours(0, 0, 0, 0);
+      dueDate.setHours(0, 0, 0, 0);
+      
+      return dueDate.getTime() < today.getTime();
     }
 
     function saveTodoHistory() {
@@ -2498,6 +2675,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const addContainer = document.getElementById('todo-add-container');
         addContainer.innerHTML = `
           <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
+          <input type="date" id="todo-due-date" title="Due date (optional)">
           <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
         `;
         addContainer.style.display = 'flex';
@@ -4010,6 +4188,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         } else {
           addContainer.innerHTML = `
             <input type="text" id="fullscreen-todo-input" placeholder="Add new task..." maxlength="100">
+            <input type="date" id="fullscreen-todo-due-date" title="Due date (optional)">
             <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
           `;
         }
@@ -4220,20 +4399,26 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     // Fullscreen todo functions
     function addTodoItemFullscreen() {
       const input = document.getElementById('fullscreen-todo-input');
+      const dueDateInput = document.getElementById('fullscreen-todo-due-date');
       const text = input.value.trim();
+      const dueDate = dueDateInput ? dueDateInput.value : null;
       
       if (text) {
         const item = {
           id: Date.now(),
           text: text,
           completed: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          order: Date.now(),
+          dueDate: dueDate || null
         };
         
         todoItems.unshift(item);
+        updateItemOrders(todoItems);
         saveTodoItems();
         renderTodoListFullscreen();
         input.value = '';
+        if (dueDateInput) dueDateInput.value = '';
       }
     }
 
@@ -4279,18 +4464,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         updateItemOrders(activeItems);
         activeItems = sortItemsByOrder(activeItems);
         
-        list.innerHTML = activeItems.map(item => `
-          <li class="task-item">
-            <span class="drag-handle">☰</span>
-            <input type="checkbox" class="task-checkbox" 
-                   onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
-            <span class="task-text">${escapeHtml(item.text)}</span>
-            <div class="task-actions">
-              <button class="edit-btn" onclick="editTodoItem(${item.id}); renderTodoListFullscreen();" title="Edit">✏️</button>
-              <button class="delete-btn" onclick="deleteTodoItem(${item.id}); renderTodoListFullscreen();" title="Delete">🗑️</button>
-            </div>
-          </li>
-        `).join('');
+        list.innerHTML = activeItems.map(item => {
+          const dueDateDisplay = item.dueDate ? formatDueDate(item.dueDate) : '';
+          const isOverdue = item.dueDate && isTaskOverdue(item.dueDate);
+          const dueDateClass = isOverdue ? 'overdue' : '';
+          
+          return `
+            <li class="task-item ${dueDateClass}">
+              <span class="drag-handle">☰</span>
+              <input type="checkbox" class="task-checkbox" 
+                     onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
+              <span class="task-text">${escapeHtml(item.text)}</span>
+              ${dueDateDisplay ? `<span class="task-due-date ${dueDateClass}">${dueDateDisplay}</span>` : ''}
+              <div class="task-actions">
+                <button class="edit-btn" onclick="editTodoItem(${item.id}); renderTodoListFullscreen();" title="Edit">✏️</button>
+                <button class="delete-btn" onclick="deleteTodoItem(${item.id}); renderTodoListFullscreen();" title="Delete">🗑️</button>
+              </div>
+            </li>
+          `;
+        }).join('');
         
         // Set up drag and drop
         setTimeout(() => setupDragAndDrop(list, activeItems, 'todo'), 0);
