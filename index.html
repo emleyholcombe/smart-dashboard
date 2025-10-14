@@ -1450,8 +1450,8 @@
       </div>
       <div class="add-item-container" id="todo-add-container">
         <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
-        <input type="date" id="todo-due-date" title="Due date (optional)">
         <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
+        <input type="date" id="todo-due-date" title="Due date (optional)">
       </div>
       <ul id="todo-list" class="task-list">
         <!-- Dynamic content will be loaded here -->
@@ -2725,6 +2725,40 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       return dueDate.getTime() === tomorrow.getTime();
     }
 
+    function sortTodosByDueDate() {
+      // Sort todos by due date first (overdue, today, tomorrow, future), then alphabetically for items without due dates
+      todoItems.sort((a, b) => {
+        const aHasDueDate = a.dueDate && a.dueDate.trim() !== '';
+        const bHasDueDate = b.dueDate && b.dueDate.trim() !== '';
+        
+        // If both have due dates, sort by due date
+        if (aHasDueDate && bHasDueDate) {
+          return new Date(a.dueDate) - new Date(b.dueDate);
+        }
+        
+        // If only one has a due date, prioritize the one with due date
+        if (aHasDueDate && !bHasDueDate) return -1;
+        if (!aHasDueDate && bHasDueDate) return 1;
+        
+        // If neither has a due date, sort alphabetically by text
+        return a.text.toLowerCase().localeCompare(b.text.toLowerCase());
+      });
+      
+      // Update order properties to reflect new sorting
+      todoItems.forEach((item, index) => {
+        item.order = Date.now() - (todoItems.length - index);
+      });
+      
+      saveTodoItems();
+      
+      // Render the appropriate view (widget or fullscreen)
+      if (document.getElementById('fullscreen-container')) {
+        renderTodoListFullscreen();
+      } else {
+        renderTodoList();
+      }
+    }
+
     function editTodoDueDate(id) {
       const item = todoItems.find(item => item.id === id);
       if (item) {
@@ -2814,8 +2848,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const addContainer = document.getElementById('todo-add-container');
         addContainer.innerHTML = `
           <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
-          <input type="date" id="todo-due-date" title="Due date (optional)">
           <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
+          <input type="date" id="todo-due-date" title="Due date (optional)">
         `;
         addContainer.style.display = 'flex';
         
@@ -4312,6 +4346,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
           // Update URL based on current mode
           updateURL(showingTodoHistory ? 'todo-history' : 'todo');
+          
           renderTodoListFullscreen();
         };
         
@@ -4346,6 +4381,45 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
         
         content.appendChild(addContainer);
+        
+        // Add Sort button below the input (only for current todos, not history)
+        if (!showingTodoHistory) {
+          const sortButtonContainer = document.createElement('div');
+          sortButtonContainer.style.cssText = `
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0;
+          `;
+          
+          const sortBtn = document.createElement('button');
+          sortBtn.textContent = 'Sort by Due Date';
+          sortBtn.title = 'Sort by due date, then alphabetically';
+          sortBtn.style.cssText = `
+            padding: 8px 16px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s ease;
+          `;
+          
+          sortBtn.onmouseover = () => {
+            sortBtn.style.background = '#5a67d8';
+          };
+          
+          sortBtn.onmouseout = () => {
+            sortBtn.style.background = 'var(--primary-color)';
+          };
+          
+          sortBtn.onclick = () => {
+            sortTodosByDueDate();
+          };
+          
+          sortButtonContainer.appendChild(sortBtn);
+          content.appendChild(sortButtonContainer);
+        }
         
         // Add task list
         const taskList = document.createElement('ul');
