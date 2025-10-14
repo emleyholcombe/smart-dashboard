@@ -2746,11 +2746,13 @@ SORTING BEHAVIOR:
 ================
 
 **SORTING PRIORITY (Top to Bottom):**
-1. 🔴 **Overdue tasks** (earliest overdue first)
+1. 🔴 **Overdue tasks** (most overdue at top - earliest dates first)
 2. 🟠 **Due today tasks** 
 3. 🟡 **Due tomorrow tasks**
-4. 🔵 **Future due date tasks** (earliest first)
+4. 🔵 **Future due date tasks** (closest dates first)
 5. 📝 **No due date tasks** (alphabetical A-Z)
+
+**Note**: "Top" means first visible items in the list, "Bottom" means last visible items in the list.
 
 **EXAMPLE SORTED ORDER:**
 1. "Buy groceries" (overdue: Oct 12)

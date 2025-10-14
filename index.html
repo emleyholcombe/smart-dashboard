@@ -1050,15 +1050,15 @@
     }
 
     .person-avatar.emley {
-      background: #ec4899; /* Pink */
+      background: #d946ef; /* Softer magenta-pink that complements the gradient */
     }
 
     .person-avatar.nate {
-      background: #3b82f6; /* Blue */
+      background: #6366f1; /* Indigo-blue that harmonizes with primary color */
     }
 
     .person-avatar.family {
-      background: #a855f7; /* Light purple - mix of pink and blue */
+      background: #8b5cf6; /* Violet-purple that bridges the gradient colors */
     }
 
     .add-item-container input[type="date"] {
@@ -1497,7 +1497,6 @@
       </div>
       <div class="add-item-container" id="todo-secondary-container" style="margin-top: 0.5rem;">
         <select id="todo-assigned-to" title="Assign to person">
-          <option value="">Unassigned</option>
           <option value="emley">Emley</option>
           <option value="nate">Nate</option>
           <option value="family" selected>Family</option>
@@ -2546,7 +2545,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                   style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); 
                          border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); 
                          font-size: 14px; margin-bottom: 12px; box-sizing: border-box;">
-            <option value="">Unassigned</option>
             <option value="emley" ${item.assignedTo === 'emley' ? 'selected' : ''}>Emley</option>
             <option value="nate" ${item.assignedTo === 'nate' ? 'selected' : ''}>Nate</option>
             <option value="family" ${item.assignedTo === 'family' ? 'selected' : ''}>Family</option>
@@ -2697,9 +2695,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             taskItemClass = 'due-tomorrow';
           }
           
-          const avatarHtml = item.assignedTo ? 
-            `<span class="person-avatar ${item.assignedTo}" onclick="editTodoAssignment(${item.id})" title="Click to change assignment - Currently: ${item.assignedTo === 'emley' ? 'Emley' : item.assignedTo === 'nate' ? 'Nate' : 'Family'}" style="cursor: pointer;">${item.assignedTo === 'emley' ? 'E' : item.assignedTo === 'nate' ? 'N' : 'F'}</span>` : 
-            `<span class="person-avatar family" onclick="editTodoAssignment(${item.id})" title="Click to assign task" style="cursor: pointer; opacity: 0.3;">F</span>`;
+          const assignedTo = item.assignedTo || 'family'; // Default to family if not assigned
+          const avatarHtml = `<span class="person-avatar ${assignedTo}" onclick="editTodoAssignment(${item.id})" title="Click to change assignment - Currently: ${assignedTo === 'emley' ? 'Emley' : assignedTo === 'nate' ? 'Nate' : 'Family'}" style="cursor: pointer;">${assignedTo === 'emley' ? 'E' : assignedTo === 'nate' ? 'N' : 'F'}</span>`;
           
           return `
             <li class="task-item ${taskItemClass}">
@@ -2830,9 +2827,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       dialog.innerHTML = `
         <h3 style="margin: 0 0 16px 0; color: var(--text-primary);">Change Assignment</h3>
         <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-          <button onclick="updateAssignment(${id}, '')" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; text-align: left;">
-            Unassigned
-          </button>
           <button onclick="updateAssignment(${id}, 'emley')" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px;">
             <span class="person-avatar emley" style="width: 16px; height: 16px; font-size: 10px;">E</span>
             Emley
@@ -2868,7 +2862,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function updateAssignment(id, newAssignment) {
       const item = todoItems.find(item => item.id === id);
       if (item) {
-        item.assignedTo = newAssignment || null;
+        item.assignedTo = newAssignment || 'family'; // Default to family if somehow empty
         saveTodoItems();
         
         // Render the appropriate view
@@ -2948,8 +2942,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       });
       
       // Update order properties to reflect new sorting
+      // Higher order values appear first in the list
       todoItems.forEach((item, index) => {
-        item.order = Date.now() - (todoItems.length - index);
+        item.order = Date.now() + (todoItems.length - index);
       });
       
       saveTodoItems();
@@ -3063,7 +3058,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         if (secondContainer) {
           secondContainer.innerHTML = `
             <select id="todo-assigned-to" title="Assign to person">
-              <option value="">Unassigned</option>
               <option value="emley">Emley</option>
               <option value="nate">Nate</option>
               <option value="family" selected>Family</option>
@@ -4597,7 +4591,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           addContainer.innerHTML = `
             <input type="text" id="fullscreen-todo-input" placeholder="Add new task..." maxlength="100">
             <select id="fullscreen-todo-assigned-to" title="Assign to person">
-              <option value="">Unassigned</option>
               <option value="emley">Emley</option>
               <option value="nate">Nate</option>
               <option value="family" selected>Family</option>
@@ -4941,9 +4934,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             taskItemClass = 'due-tomorrow';
           }
           
-          const avatarHtml = item.assignedTo ? 
-            `<span class="person-avatar ${item.assignedTo}" onclick="editTodoAssignment(${item.id})" title="Click to change assignment - Currently: ${item.assignedTo === 'emley' ? 'Emley' : item.assignedTo === 'nate' ? 'Nate' : 'Family'}" style="cursor: pointer;">${item.assignedTo === 'emley' ? 'E' : item.assignedTo === 'nate' ? 'N' : 'F'}</span>` : 
-            `<span class="person-avatar family" onclick="editTodoAssignment(${item.id})" title="Click to assign task" style="cursor: pointer; opacity: 0.3;">F</span>`;
+          const assignedTo = item.assignedTo || 'family'; // Default to family if not assigned
+          const avatarHtml = `<span class="person-avatar ${assignedTo}" onclick="editTodoAssignment(${item.id})" title="Click to change assignment - Currently: ${assignedTo === 'emley' ? 'Emley' : assignedTo === 'nate' ? 'Nate' : 'Family'}" style="cursor: pointer;">${assignedTo === 'emley' ? 'E' : assignedTo === 'nate' ? 'N' : 'F'}</span>`;
           
           return `
             <li class="task-item ${taskItemClass}">
