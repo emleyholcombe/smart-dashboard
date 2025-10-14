@@ -2774,12 +2774,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           });
         }
         
-        // Prevent dragging from anywhere else on the item
-        item.addEventListener('dragstart', (e) => {
-          if (e.target !== dragHandle) {
-            e.preventDefault();
-          }
-        });
+        // Make sure only drag handle is draggable
+        item.draggable = false;
         
         item.addEventListener('dragover', (e) => {
           e.preventDefault();
@@ -2894,13 +2890,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           });
         }
         
-        // Prevent dragging from anywhere else on the item
-        item.addEventListener('dragstart', (e) => {
-          if (e.target !== dragHandle) {
-            e.preventDefault();
-          }
-        });
-        
+        // Make sure only drag handle is draggable
+        item.draggable = false;
         
         item.addEventListener('dragover', (e) => {
           e.preventDefault();
