@@ -2232,6 +2232,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       renderMealsList();
       console.log('Lists rendered.');
       
+      // Handle URL parameters AFTER data is loaded and lists are rendered
+      console.log('🔗 Handling URL parameters...');
+      handleURLParameters();
+      console.log('✅ URL parameters handled');
+      
       // Monitor online status
       window.addEventListener('online', () => {
         isOnline = true;
@@ -4561,13 +4566,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
     }
 
-    // Handle URL parameters on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      handleURLParameters();
-    });
+    // URL parameters are now handled in the main DOMContentLoaded event above
 
     // Handle browser back/forward buttons
-    window.addEventListener('popstate', function(event) {
+    window.addEventListener('popstate', async function(event) {
+      // Ensure data is loaded before handling URL parameters
+      if (!todoItems || !groceryItems || !mealItems) {
+        console.log('🔄 Data not loaded, loading before handling URL...');
+        await loadAllData();
+      }
       handleURLParameters();
     });
 
