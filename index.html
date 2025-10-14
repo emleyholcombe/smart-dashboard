@@ -512,12 +512,15 @@
 
     .fullscreen-content {
       flex: 1;
-      padding: 2rem;
-      overflow: auto;
+      padding: 1rem 2rem;
+      overflow: hidden;
       background: var(--card-background);
-      margin: 1rem;
+      margin: 0.5rem;
       border-radius: 20px;
       box-shadow: var(--shadow-xl);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
     .hidden {
@@ -821,12 +824,38 @@
       display: flex;
       align-items: center;
       padding: 16px 0;
-      padding-left: 56px !important;
+      padding-left: 56px;
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       gap: 12px;
       transition: all 0.2s ease;
       animation: slideIn 0.3s ease-out;
       position: relative;
+    }
+    
+    /* Ensure drag handle spacing in all contexts */
+    .task-list .task-item,
+    .fullscreen-mode .task-item {
+      padding-left: 56px;
+    }
+    
+    /* Fullscreen task list optimization */
+    .fullscreen-mode .task-list {
+      flex: 1;
+      overflow-y: auto;
+      margin: 0;
+      padding: 0;
+      min-height: 0;
+      max-height: none;
+    }
+    
+    .fullscreen-mode .add-item-container {
+      flex-shrink: 0;
+      margin-bottom: 1rem;
+    }
+    
+    /* Fullscreen header containers should not grow */
+    .fullscreen-content > div:first-child {
+      flex-shrink: 0;
     }
 
     @keyframes slideIn {
@@ -842,7 +871,7 @@
       background: rgba(102, 126, 234, 0.03);
       border-radius: 8px;
       margin: 0 -8px;
-      padding-left: 56px !important;
+      padding-left: 56px;
       padding-right: 8px;
     }
 
@@ -1112,8 +1141,8 @@
       }
 
       .fullscreen-content {
-        margin: 0.5rem;
-        padding: 1rem;
+        margin: 0.25rem;
+        padding: 0.75rem 1rem;
       }
 
       .auto-return-indicator {
