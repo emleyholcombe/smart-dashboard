@@ -1034,6 +1034,32 @@
       background: rgba(250, 204, 21, 0.02);
     }
 
+    .person-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: bold;
+      color: white;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .person-avatar.emley {
+      background: #ec4899; /* Pink */
+    }
+
+    .person-avatar.nate {
+      background: #3b82f6; /* Blue */
+    }
+
+    .person-avatar.family {
+      background: #a855f7; /* Light purple - mix of pink and blue */
+    }
+
     .add-item-container input[type="date"] {
       padding: 8px 12px;
       border: 1px solid var(--border-color);
@@ -1045,6 +1071,22 @@
     }
 
     .add-item-container input[type="date"]:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .add-item-container select {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 14px;
+      min-width: 100px;
+    }
+
+    .add-item-container select:focus {
       outline: none;
       border-color: var(--primary-color);
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -1451,6 +1493,12 @@
       <div class="add-item-container" id="todo-add-container">
         <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
         <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
+        <select id="todo-assigned-to" title="Assign to person">
+          <option value="">Unassigned</option>
+          <option value="emley">Emley</option>
+          <option value="nate">Nate</option>
+          <option value="family">Family</option>
+        </select>
         <input type="date" id="todo-due-date" title="Due date (optional)">
       </div>
       <ul id="todo-list" class="task-list">
@@ -2385,8 +2433,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function addTodoItem() {
       const input = document.getElementById('todo-input');
       const dueDateInput = document.getElementById('todo-due-date');
+      const assignedToInput = document.getElementById('todo-assigned-to');
       const text = input.value.trim();
       const dueDate = dueDateInput.value;
+      const assignedTo = assignedToInput.value;
       
       if (text) {
         const item = {
@@ -2395,7 +2445,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           completed: false,
           createdAt: new Date().toISOString(),
           order: Date.now(), // Add order property for sorting
-          dueDate: dueDate || null // Add due date if provided
+          dueDate: dueDate || null, // Add due date if provided
+          assignedTo: assignedTo || null // Add assignment if provided
         };
         
         todoItems.unshift(item); // Add to beginning of array
@@ -2404,6 +2455,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         renderTodoList();
         input.value = '';
         dueDateInput.value = '';
+        assignedToInput.value = '';
       }
     }
 
@@ -2487,6 +2539,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                  style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); 
                         border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); 
                         font-size: 14px; margin-bottom: 12px; box-sizing: border-box;">
+          <select id="edit-task-assigned-to" 
+                  style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); 
+                         border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); 
+                         font-size: 14px; margin-bottom: 12px; box-sizing: border-box;">
+            <option value="">Unassigned</option>
+            <option value="emley" ${item.assignedTo === 'emley' ? 'selected' : ''}>Emley</option>
+            <option value="nate" ${item.assignedTo === 'nate' ? 'selected' : ''}>Nate</option>
+            <option value="family" ${item.assignedTo === 'family' ? 'selected' : ''}>Family</option>
+          </select>
           <input type="date" id="edit-task-due-date" value="${item.dueDate || ''}" 
                  style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); 
                         border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); 
@@ -2512,14 +2573,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const saveBtn = document.getElementById('edit-save-btn');
         const cancelBtn = document.getElementById('edit-cancel-btn');
         const dueDateInput = document.getElementById('edit-task-due-date');
+        const assignedToInput = document.getElementById('edit-task-assigned-to');
         
         const handleSave = () => {
           const newText = textInput.value.trim();
           const newDueDate = dueDateInput.value;
+          const newAssignedTo = assignedToInput.value;
           
           if (newText) {
             item.text = newText;
             item.dueDate = newDueDate || null;
+            item.assignedTo = newAssignedTo || null;
             saveTodoItems();
             
             // Render the appropriate view (widget or fullscreen)
@@ -2630,11 +2694,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             taskItemClass = 'due-tomorrow';
           }
           
+          const avatarHtml = item.assignedTo ? 
+            `<span class="person-avatar ${item.assignedTo}" title="Assigned to ${item.assignedTo === 'emley' ? 'Emley' : item.assignedTo === 'nate' ? 'Nate' : 'Family'}">${item.assignedTo === 'emley' ? 'E' : item.assignedTo === 'nate' ? 'N' : 'F'}</span>` : 
+            '';
+          
           return `
             <li class="task-item ${taskItemClass}">
               <span class="drag-handle">☰</span>
             <input type="checkbox" class="task-checkbox" 
                    onchange="toggleTodoItem(${item.id})">
+            ${avatarHtml}
             <span class="task-text">${escapeHtml(item.text)}</span>
             ${dueDateDisplay ? `<span class="task-due-date ${dueDateClass}" onclick="editTodoDueDate(${item.id})" title="Click to edit due date">${dueDateDisplay}</span>` : ''}
             <div class="task-actions">
@@ -2726,21 +2795,61 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function sortTodosByDueDate() {
-      // Sort todos by due date first (overdue, today, tomorrow, future), then alphabetically for items without due dates
+      // Sort todos: overdue (most overdue first) → today → tomorrow → future (closest first) → no dates (A-Z)
       todoItems.sort((a, b) => {
         const aHasDueDate = a.dueDate && a.dueDate.trim() !== '';
         const bHasDueDate = b.dueDate && b.dueDate.trim() !== '';
         
-        // If both have due dates, sort by due date
+        // If both have due dates, sort by priority: overdue → today → tomorrow → future
         if (aHasDueDate && bHasDueDate) {
-          return new Date(a.dueDate) - new Date(b.dueDate);
+          const aDate = new Date(a.dueDate);
+          const bDate = new Date(b.dueDate);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          const aIsOverdue = isTaskOverdue(a.dueDate);
+          const bIsOverdue = isTaskOverdue(b.dueDate);
+          const aIsToday = isTaskDueToday(a.dueDate);
+          const bIsToday = isTaskDueToday(b.dueDate);
+          const aIsTomorrow = isTaskDueTomorrow(a.dueDate);
+          const bIsTomorrow = isTaskDueTomorrow(b.dueDate);
+          
+          // Both overdue - most overdue first (earliest date first)
+          if (aIsOverdue && bIsOverdue) {
+            return aDate - bDate;
+          }
+          
+          // One overdue, one not - overdue comes first
+          if (aIsOverdue && !bIsOverdue) return -1;
+          if (!aIsOverdue && bIsOverdue) return 1;
+          
+          // Both due today - sort by date (shouldn't matter much, but consistent)
+          if (aIsToday && bIsToday) {
+            return aDate - bDate;
+          }
+          
+          // One today, one not overdue - today comes first
+          if (aIsToday && !bIsOverdue) return -1;
+          if (bIsToday && !aIsOverdue) return 1;
+          
+          // Both due tomorrow - sort by date
+          if (aIsTomorrow && bIsTomorrow) {
+            return aDate - bDate;
+          }
+          
+          // One tomorrow, one future - tomorrow comes first
+          if (aIsTomorrow && !bIsOverdue && !bIsToday) return -1;
+          if (bIsTomorrow && !aIsOverdue && !aIsToday) return 1;
+          
+          // Both future dates - closest first
+          return aDate - bDate;
         }
         
         // If only one has a due date, prioritize the one with due date
         if (aHasDueDate && !bHasDueDate) return -1;
         if (!aHasDueDate && bHasDueDate) return 1;
         
-        // If neither has a due date, sort alphabetically by text
+        // If neither has a due date, sort alphabetically A-Z
         return a.text.toLowerCase().localeCompare(b.text.toLowerCase());
       });
       
@@ -2849,6 +2958,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         addContainer.innerHTML = `
           <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
           <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
+          <select id="todo-assigned-to" title="Assign to person">
+            <option value="">Unassigned</option>
+            <option value="emley">Emley</option>
+            <option value="nate">Nate</option>
+            <option value="family">Family</option>
+          </select>
           <input type="date" id="todo-due-date" title="Due date (optional)">
         `;
         addContainer.style.display = 'flex';
@@ -4375,6 +4490,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         } else {
           addContainer.innerHTML = `
             <input type="text" id="fullscreen-todo-input" placeholder="Add new task..." maxlength="100">
+            <select id="fullscreen-todo-assigned-to" title="Assign to person">
+              <option value="">Unassigned</option>
+              <option value="emley">Emley</option>
+              <option value="nate">Nate</option>
+              <option value="family">Family</option>
+            </select>
             <input type="date" id="fullscreen-todo-due-date" title="Due date (optional)">
             <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
           `;
@@ -4626,8 +4747,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function addTodoItemFullscreen() {
       const input = document.getElementById('fullscreen-todo-input');
       const dueDateInput = document.getElementById('fullscreen-todo-due-date');
+      const assignedToInput = document.getElementById('fullscreen-todo-assigned-to');
       const text = input.value.trim();
       const dueDate = dueDateInput ? dueDateInput.value : null;
+      const assignedTo = assignedToInput ? assignedToInput.value : null;
       
       if (text) {
         const item = {
@@ -4636,7 +4759,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           completed: false,
           createdAt: new Date().toISOString(),
           order: Date.now(),
-          dueDate: dueDate || null
+          dueDate: dueDate || null,
+          assignedTo: assignedTo || null
         };
         
         todoItems.unshift(item);
@@ -4645,6 +4769,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         renderTodoListFullscreen();
         input.value = '';
         if (dueDateInput) dueDateInput.value = '';
+        if (assignedToInput) assignedToInput.value = '';
       }
     }
 
@@ -4710,11 +4835,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             taskItemClass = 'due-tomorrow';
           }
           
+          const avatarHtml = item.assignedTo ? 
+            `<span class="person-avatar ${item.assignedTo}" title="Assigned to ${item.assignedTo === 'emley' ? 'Emley' : item.assignedTo === 'nate' ? 'Nate' : 'Family'}">${item.assignedTo === 'emley' ? 'E' : item.assignedTo === 'nate' ? 'N' : 'F'}</span>` : 
+            '';
+          
           return `
             <li class="task-item ${taskItemClass}">
               <span class="drag-handle">☰</span>
               <input type="checkbox" class="task-checkbox" 
                      onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
+              ${avatarHtml}
               <span class="task-text">${escapeHtml(item.text)}</span>
               ${dueDateDisplay ? `<span class="task-due-date ${dueDateClass}" onclick="editTodoDueDate(${item.id})" title="Click to edit due date">${dueDateDisplay}</span>` : ''}
               <div class="task-actions">
