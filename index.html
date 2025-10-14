@@ -2960,7 +2960,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
           // Only allow dragging from the drag handle
           dragHandle.addEventListener('dragstart', (e) => {
-            console.log('TODO HISTORY DRAG START:', dateGroup, index);
             draggedItem = item;
             draggedIndex = index;
             draggedList = { groups, listType: 'todoHistory', dateGroup };
@@ -3024,33 +3023,23 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             const targetDateGroup = item.getAttribute('data-date-group');
             
             // Only allow drop within same date group
-            console.log('TODO HISTORY DROP:', draggedList.dateGroup, 'vs', targetDateGroup);
             if (draggedList.dateGroup === targetDateGroup) {
               const dropIndex = Array.from(listItems).indexOf(item);
-              console.log('TODO HISTORY DROP INDEXES:', draggedIndex, 'to', dropIndex);
               
               if (draggedIndex !== dropIndex) {
                 // Find the items in the specific date group
                 const dateGroupItems = groups[targetDateGroup];
-                console.log('Date group items:', dateGroupItems.length);
-                console.log('Date group item IDs:', dateGroupItems.map(i => i.id));
-                
                 // Get the actual item being dragged
                 const draggedItemId = parseFloat(draggedItem.getAttribute('data-item-id'));
                 const targetItemId = parseFloat(item.getAttribute('data-item-id'));
-                
-                console.log('Dragged item ID:', draggedItemId, 'Target item ID:', targetItemId);
                 
                 // Find positions within the date group using the group items directly
                 const draggedGroupIndex = dateGroupItems.findIndex(i => i.id === draggedItemId);
                 const targetGroupIndex = dateGroupItems.findIndex(i => i.id === targetItemId);
                 
-                console.log('Group indexes - dragged:', draggedGroupIndex, 'target:', targetGroupIndex);
-                
                 if (draggedGroupIndex !== -1 && targetGroupIndex !== -1) {
                   // Reorder within the date group
                   reorderItems(dateGroupItems, draggedGroupIndex, targetGroupIndex);
-                  console.log('After reorder, date group items:', dateGroupItems.map(i => i.text));
                   
                   // Update the main todoHistory array with new order
                   dateGroupItems.forEach(groupItem => {
@@ -3060,13 +3049,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                     }
                   });
                   
-                  console.log('Updated todoHistory orders, saving and re-rendering...');
                   saveTodoHistory();
                   if (document.getElementById('fullscreen-container')) {
-                    console.log('Re-rendering fullscreen');
                     renderTodoListFullscreen();
                   } else {
-                    console.log('Re-rendering widget');
                     renderTodoList();
                   }
                 }
@@ -3986,6 +3972,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           showTodoHistory();
           titleSpan.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
           historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
+          // Update URL based on current mode
+          updateURL(showingTodoHistory ? 'todo-history' : 'todo');
           renderTodoListFullscreen();
         };
         
@@ -4112,6 +4100,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           // Update button text and title after toggle
           titleSpan.textContent = showingMealHistory ? 'Meals History' : 'Meals';
           historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
+          // Update URL based on current mode
+          updateURL(showingMealHistory ? 'meals-history' : 'meals');
           renderMealsListFullscreen();
         };
         
@@ -4187,6 +4177,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       fullscreenDiv.appendChild(fullscreenHeader);
       fullscreenDiv.appendChild(content);
       document.body.appendChild(fullscreenDiv);
+      
+      // Update URL based on widget type and current mode
+      if (widgetType === 'todo') {
+        updateURL(showingTodoHistory ? 'todo-history' : 'todo');
+      } else if (widgetType === 'meals') {
+        updateURL(showingMealHistory ? 'meals-history' : 'meals');
+      } else {
+        updateURL(widgetType); // grocery, calendar, etc.
+      }
       
       // Start inactivity detection
       setupInactivityDetection();
