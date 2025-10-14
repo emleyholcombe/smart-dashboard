@@ -2960,6 +2960,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
           // Only allow dragging from the drag handle
           dragHandle.addEventListener('dragstart', (e) => {
+            console.log('TODO HISTORY DRAG START:', dateGroup, index);
             draggedItem = item;
             draggedIndex = index;
             draggedList = { groups, listType: 'todoHistory', dateGroup };
@@ -3023,8 +3024,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             const targetDateGroup = item.getAttribute('data-date-group');
             
             // Only allow drop within same date group
+            console.log('TODO HISTORY DROP:', draggedList.dateGroup, 'vs', targetDateGroup);
             if (draggedList.dateGroup === targetDateGroup) {
               const dropIndex = Array.from(listItems).indexOf(item);
+              console.log('TODO HISTORY DROP INDEXES:', draggedIndex, 'to', dropIndex);
               
               if (draggedIndex !== dropIndex) {
                 // Find the items in the specific date group
