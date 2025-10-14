@@ -2702,15 +2702,22 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             'No tasks found matching your search criteria.' : 
             'No completed tasks yet.';
           list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
+          list.style.marginTop = '1rem'; // Add spacing even for empty state
           return;
         }
         
         const groups = groupTodosByDate(filteredHistory);
         list.innerHTML = renderTodoHistoryGrouped(groups);
         
+        // Add extra top margin when showing history to prevent overlap with avatar filters
+        list.style.marginTop = '1rem';
+        
         // Set up drag and drop for history items (within date groups only)
         setTimeout(() => setupTodoHistoryDragAndDrop(list, groups), 0);
       } else {
+        // Reset margin when not showing history
+        list.style.marginTop = '';
+        
         // Only show uncompleted items (completed items are immediately moved to history)
         let activeItems = todoItems.filter(item => !item.completed);
         
