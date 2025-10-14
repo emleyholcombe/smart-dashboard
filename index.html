@@ -3036,8 +3036,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                 console.log('Date group item IDs:', dateGroupItems.map(i => i.id));
                 
                 // Get the actual item being dragged
-                const draggedItemId = parseInt(draggedItem.getAttribute('data-item-id'));
-                const targetItemId = parseInt(item.getAttribute('data-item-id'));
+                const draggedItemId = parseFloat(draggedItem.getAttribute('data-item-id'));
+                const targetItemId = parseFloat(item.getAttribute('data-item-id'));
                 
                 console.log('Dragged item ID:', draggedItemId, 'Target item ID:', targetItemId);
                 
