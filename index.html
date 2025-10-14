@@ -3593,6 +3593,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       main.classList.remove('hidden');
       header.classList.remove('hidden');
       
+      // Update URL to dashboard view
+      updateURL('dashboard');
+      
       // Re-render lists to sync any changes made in fullscreen
       renderTodoList();
       renderGroceryList();
@@ -3778,28 +3781,43 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         reader.readAsText(file);
       }
     }
+    // URL Management Functions
+    function updateURL(view) {
+      const url = new URL(window.location);
+      if (view === 'home') {
+        url.searchParams.delete('view');
+      } else {
+        url.searchParams.set('view', view);
+      }
+      window.history.pushState({}, '', url);
+    }
+
     // Navigation Functions
     function showLandingPage() {
       document.getElementById('landing-page').style.display = 'flex';
       document.getElementById('dashboard').style.display = 'none';
       closeFullscreen();
+      updateURL('home');
     }
 
     function showDashboard() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
+      updateURL('dashboard');
     }
 
     function showFullscreenCalendar() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       openFullscreen('calendar');
+      updateURL('calendar');
     }
 
     function showFullscreenTodo() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       openFullscreen('todo');
+      updateURL('todo');
     }
 
     function showFullscreenTodoHistory() {
@@ -3807,18 +3825,21 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       document.getElementById('dashboard').style.display = 'block';
       showingTodoHistory = true;
       openFullscreen('todo');
+      updateURL('todo-history');
     }
 
     function showFullscreenGrocery() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       openFullscreen('grocery');
+      updateURL('grocery');
     }
 
     function showFullscreenMeals() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       openFullscreen('meals');
+      updateURL('meals');
     }
 
     function showFullscreenMealsHistory() {
@@ -3830,6 +3851,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       updateMealsButtonState();
       
       openFullscreen('meals');
+      updateURL('meals-history');
     }
 
     function updateMealsButtonState() {
@@ -3849,32 +3871,67 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       switch(view) {
         case 'dashboard':
-          showDashboard();
+          // Show dashboard without updating URL (already in URL)
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
           break;
         case 'calendar':
-          showFullscreenCalendar();
+          // Show fullscreen calendar without updating URL
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          openFullscreen('calendar');
           break;
         case 'todo':
-          showFullscreenTodo();
+          // Show fullscreen todo without updating URL
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          openFullscreen('todo');
+          break;
+        case 'todo-history':
+          // Show fullscreen todo history without updating URL
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          showingTodoHistory = true;
+          openFullscreen('todo');
           break;
         case 'grocery':
-          showFullscreenGrocery();
+          // Show fullscreen grocery without updating URL
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          openFullscreen('grocery');
           break;
         case 'meals':
-          showFullscreenMeals();
+          // Show fullscreen meals without updating URL
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          openFullscreen('meals');
           break;
         case 'meals-history':
-          showFullscreenMealsHistory();
+          // Show fullscreen meals history without updating URL
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          showingMealHistory = true;
+          updateMealsButtonState();
+          openFullscreen('meals');
           break;
         case 'home':
+        case null:
+        case undefined:
         default:
           // Landing page is already shown by default
+          document.getElementById('landing-page').style.display = 'flex';
+          document.getElementById('dashboard').style.display = 'none';
           break;
       }
     }
 
     // Handle URL parameters on page load
     document.addEventListener('DOMContentLoaded', function() {
+      handleURLParameters();
+    });
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', function(event) {
       handleURLParameters();
     });
 
