@@ -616,22 +616,34 @@
 
     .drag-handle {
       position: absolute;
-      left: -10px;
+      left: 8px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-secondary);
-      font-size: 14px;
-      opacity: 0;
-      transition: opacity 0.2s ease;
+      font-size: 16px;
+      opacity: 0.6;
+      transition: all 0.2s ease;
       cursor: grab;
+      padding: 4px;
+      border-radius: 4px;
+      user-select: none;
     }
 
-    .task-item:hover .drag-handle {
+    .drag-handle:hover {
       opacity: 1;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--primary-color);
     }
 
     .drag-handle:active {
       cursor: grabbing;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Adjust task item padding to make room for drag handle */
+    .task-item {
+      padding-left: 40px;
+      position: relative;
     }
 
     .task-list {
@@ -649,13 +661,16 @@
       font-weight: 500;
       cursor: pointer;
       transition: all 0.3s ease;
-      margin-left: 2rem;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
       min-width: 80px;
       text-align: center;
     }
 
     .fullscreen-history-button:hover {
-      transform: translateY(-1px);
+      transform: translateY(-50%) translateY(-1px);
       box-shadow: var(--shadow-md);
     }
 
@@ -2300,7 +2315,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         list.innerHTML = activeItems.map(item => `
           <li class="task-item">
-            <span class="drag-handle">⋮⋮</span>
+            <span class="drag-handle">☰</span>
             <input type="checkbox" class="task-checkbox" 
                    onchange="toggleTodoItem(${item.id})">
             <span class="task-text">${escapeHtml(item.text)}</span>
@@ -2438,7 +2453,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         sortedItems.forEach(item => {
           html += `
             <li class="task-item history-item" data-date-group="${dateKey}">
-              <span class="drag-handle">⋮⋮</span>
+              <span class="drag-handle">☰</span>
               <span class="task-text">${escapeHtml(item.text)}</span>
               <div class="task-actions">
                 <button class="edit-btn" onclick="reAddTodoFromHistory(${item.id})" title="Add back to current list">↩️</button>
@@ -2678,6 +2693,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       listItems.forEach((item, index) => {
         item.draggable = true;
         
+        // Make drag handle more prominent when dragging is available
+        const dragHandle = item.querySelector('.drag-handle');
+        if (dragHandle) {
+          dragHandle.title = 'Drag to reorder';
+        }
+        
         item.addEventListener('dragstart', (e) => {
           draggedItem = item;
           draggedIndex = index;
@@ -2783,6 +2804,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       listItems.forEach((item, index) => {
         item.draggable = true;
         const dateGroup = item.getAttribute('data-date-group');
+        
+        // Make drag handle more prominent when dragging is available
+        const dragHandle = item.querySelector('.drag-handle');
+        if (dragHandle) {
+          dragHandle.title = 'Drag to reorder within this date';
+        }
         
         item.addEventListener('dragstart', (e) => {
           draggedItem = item;
@@ -3047,7 +3074,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
         return `
           <li class="task-item ${item.completed ? 'completed' : ''}">
-            <span class="drag-handle">⋮⋮</span>
+            <span class="drag-handle">☰</span>
             ${showingMealHistory ? '' : `<input type="checkbox" class="task-checkbox" 
                    ${item.completed ? 'checked' : ''} 
                    onchange="toggleMealItem(${item.id})">`}
@@ -3339,7 +3366,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
         return `
           <li class="task-item ${item.completed ? 'completed' : ''}">
-            <span class="drag-handle">⋮⋮</span>
+            <span class="drag-handle">☰</span>
             ${showingMealHistory ? '' : `<input type="checkbox" class="task-checkbox" 
                    ${item.completed ? 'checked' : ''} 
                    onchange="toggleMealItem(${item.id}); renderMealsListFullscreen();">`}
@@ -3765,8 +3792,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         // Add header with history toggle
         const headerContainer = document.createElement('div');
-        headerContainer.style.display = 'flex';
-        headerContainer.style.alignItems = 'center';
+        headerContainer.style.position = 'relative';
         headerContainer.style.marginBottom = '1.5rem';
         
         const titleSpan = document.createElement('span');
@@ -3891,8 +3917,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         // Add header with history toggle
         const headerContainer = document.createElement('div');
-        headerContainer.style.display = 'flex';
-        headerContainer.style.alignItems = 'center';
+        headerContainer.style.position = 'relative';
         headerContainer.style.marginBottom = '1.5rem';
         
         const titleSpan = document.createElement('span');
@@ -4077,7 +4102,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         list.innerHTML = activeItems.map(item => `
           <li class="task-item">
-            <span class="drag-handle">⋮⋮</span>
+            <span class="drag-handle">☰</span>
             <input type="checkbox" class="task-checkbox" 
                    onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
             <span class="task-text">${escapeHtml(item.text)}</span>
