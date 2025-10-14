@@ -1496,12 +1496,12 @@
         <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
       </div>
       <div class="add-item-container" id="todo-secondary-container" style="margin-top: 0.5rem;">
+        <input type="date" id="todo-due-date" title="Due date (optional)">
         <select id="todo-assigned-to" title="Assign to person">
           <option value="emley">Emley</option>
           <option value="nate">Nate</option>
           <option value="family" selected>Family</option>
         </select>
-        <input type="date" id="todo-due-date" title="Due date (optional)">
       </div>
       <ul id="todo-list" class="task-list">
         <!-- Dynamic content will be loaded here -->
@@ -3057,12 +3057,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const secondContainer = document.getElementById('todo-secondary-container');
         if (secondContainer) {
           secondContainer.innerHTML = `
+            <input type="date" id="todo-due-date" title="Due date (optional)">
             <select id="todo-assigned-to" title="Assign to person">
               <option value="emley">Emley</option>
               <option value="nate">Nate</option>
               <option value="family" selected>Family</option>
             </select>
-            <input type="date" id="todo-due-date" title="Due date (optional)">
           `;
           secondContainer.style.display = 'flex';
         }
@@ -3117,9 +3117,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const sortedItems = sortItemsByOrder([...groups[dateKey]]);
         
         sortedItems.forEach(item => {
+          const assignedTo = item.assignedTo || 'family'; // Default to family if not assigned
+          const avatarHtml = `<span class="person-avatar ${assignedTo}" title="Was assigned to ${assignedTo === 'emley' ? 'Emley' : assignedTo === 'nate' ? 'Nate' : 'Family'}">${assignedTo === 'emley' ? 'E' : assignedTo === 'nate' ? 'N' : 'F'}</span>`;
+          
           html += `
             <li class="task-item history-item" data-date-group="${dateKey}" data-item-id="${item.id}">
               <span class="drag-handle">☰</span>
+              ${avatarHtml}
               <span class="task-text">${escapeHtml(item.text)}</span>
               <div class="task-actions">
                 <button class="edit-btn" onclick="reAddTodoFromHistory(${item.id})" title="Add back to current list">↩️</button>
@@ -4514,11 +4518,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       } else {
         addContainer.innerHTML = `
           <input type="text" id="fullscreen-todo-input" placeholder="Add new task..." maxlength="100">
-          <select id="fullscreen-todo-assigned-to" title="Assign to person">
-            <option value="emley">Emley</option>
-            <option value="nate">Nate</option>
-            <option value="family" selected>Family</option>
-          </select>
           <input type="date" id="fullscreen-todo-due-date" title="Due date (optional)">
           <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
         `;
@@ -4528,12 +4527,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const taskList = content.querySelector('#fullscreen-todo-list');
       content.insertBefore(addContainer, taskList);
       
-      // Add Sort button for current todos only
+      // Add Sort button and assignment dropdown for current todos only
       if (!showingTodoHistory) {
         const sortButtonContainer = document.createElement('div');
         sortButtonContainer.style.cssText = `
           display: flex;
           justify-content: center;
+          align-items: center;
+          gap: 1rem;
           margin: 1rem 0;
         `;
         
@@ -4563,7 +4564,28 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           sortTodosByDueDate();
         };
         
+        // Create assignment dropdown
+        const assignmentSelect = document.createElement('select');
+        assignmentSelect.id = 'fullscreen-todo-assigned-to';
+        assignmentSelect.title = 'Default assignment for new tasks';
+        assignmentSelect.style.cssText = `
+          padding: 8px 12px;
+          border: 1px solid var(--border-color);
+          border-radius: 6px;
+          background: var(--bg-secondary);
+          color: var(--text-primary);
+          font-size: 14px;
+          min-width: 100px;
+        `;
+        
+        assignmentSelect.innerHTML = `
+          <option value="emley">Emley</option>
+          <option value="nate">Nate</option>
+          <option value="family" selected>Family</option>
+        `;
+        
         sortButtonContainer.appendChild(sortBtn);
+        sortButtonContainer.appendChild(assignmentSelect);
         content.insertBefore(sortButtonContainer, taskList);
       }
       
@@ -4713,11 +4735,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         } else {
           addContainer.innerHTML = `
             <input type="text" id="fullscreen-todo-input" placeholder="Add new task..." maxlength="100">
-            <select id="fullscreen-todo-assigned-to" title="Assign to person">
-              <option value="emley">Emley</option>
-              <option value="nate">Nate</option>
-              <option value="family" selected>Family</option>
-            </select>
             <input type="date" id="fullscreen-todo-due-date" title="Due date (optional)">
             <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
           `;
@@ -4725,12 +4742,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         content.appendChild(addContainer);
         
-        // Add Sort button below the input (only for current todos, not history)
+        // Add Sort button and assignment dropdown below the input (only for current todos, not history)
         if (!showingTodoHistory) {
           const sortButtonContainer = document.createElement('div');
           sortButtonContainer.style.cssText = `
             display: flex;
             justify-content: center;
+            align-items: center;
+            gap: 1rem;
             margin: 1rem 0;
           `;
           
@@ -4760,7 +4779,28 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             sortTodosByDueDate();
           };
           
+          // Create assignment dropdown
+          const assignmentSelect = document.createElement('select');
+          assignmentSelect.id = 'fullscreen-todo-assigned-to';
+          assignmentSelect.title = 'Default assignment for new tasks';
+          assignmentSelect.style.cssText = `
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            min-width: 100px;
+          `;
+          
+          assignmentSelect.innerHTML = `
+            <option value="emley">Emley</option>
+            <option value="nate">Nate</option>
+            <option value="family" selected>Family</option>
+          `;
+          
           sortButtonContainer.appendChild(sortBtn);
+          sortButtonContainer.appendChild(assignmentSelect);
           content.appendChild(sortButtonContainer);
         }
         
