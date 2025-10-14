@@ -638,6 +638,27 @@
       position: relative;
     }
 
+    /* Fullscreen History Button Styles */
+    .fullscreen-history-button {
+      background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 1.2rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-left: 2rem;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .fullscreen-history-button:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
     .meal-url-input {
       width: 100%;
       padding: 8px 12px;
@@ -3304,7 +3325,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return;
       }
       
-      list.innerHTML = items.map(item => {
+      // Sort by order and ensure all items have order property
+      updateItemOrders(items);
+      const sortedItems = sortItemsByOrder([...items]);
+      
+      list.innerHTML = sortedItems.map(item => {
         const mealText = item.url ? 
           `<a href="${item.url}" target="_blank" class="meal-link">${escapeHtml(item.text)}</a>` : 
           escapeHtml(item.text);
@@ -3314,6 +3339,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
         return `
           <li class="task-item ${item.completed ? 'completed' : ''}">
+            <span class="drag-handle">⋮⋮</span>
             ${showingMealHistory ? '' : `<input type="checkbox" class="task-checkbox" 
                    ${item.completed ? 'checked' : ''} 
                    onchange="toggleMealItem(${item.id}); renderMealsListFullscreen();">`}
@@ -3327,6 +3353,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           </li>
         `;
       }).join('');
+      
+      // Set up drag and drop
+      const listType = showingMealHistory ? 'mealHistory' : 'meals';
+      setTimeout(() => setupDragAndDrop(list, items, listType), 0);
     }
 
     // Fullscreen meals history function
@@ -3736,7 +3766,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Add header with history toggle
         const headerContainer = document.createElement('div');
         headerContainer.style.display = 'flex';
-        headerContainer.style.justifyContent = 'space-between';
         headerContainer.style.alignItems = 'center';
         headerContainer.style.marginBottom = '1.5rem';
         
@@ -3746,7 +3775,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         titleSpan.style.fontWeight = '600';
         
         const historyBtn = document.createElement('button');
-        historyBtn.className = 'history-button';
+        historyBtn.className = 'fullscreen-history-button';
         historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
         historyBtn.onclick = () => {
           showTodoHistory();
@@ -3863,7 +3892,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Add header with history toggle
         const headerContainer = document.createElement('div');
         headerContainer.style.display = 'flex';
-        headerContainer.style.justifyContent = 'space-between';
         headerContainer.style.alignItems = 'center';
         headerContainer.style.marginBottom = '1.5rem';
         
@@ -3873,7 +3901,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         titleSpan.style.fontWeight = '600';
         
         const historyBtn = document.createElement('button');
-        historyBtn.className = 'history-button';
+        historyBtn.className = 'fullscreen-history-button';
         historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
         historyBtn.onclick = () => {
           showMealsHistory();
@@ -4036,14 +4064,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         setTimeout(() => setupTodoHistoryDragAndDrop(list, groups), 0);
       } else {
         // Only show uncompleted items (completed items are immediately moved to history)
-        const activeItems = todoItems.filter(item => !item.completed);
+        let activeItems = todoItems.filter(item => !item.completed);
         
         if (activeItems.length === 0) {
           list.innerHTML = '<li class="empty-state">No tasks yet. Add one above!</li>';
           return;
         }
+        
+        // Sort by order and ensure all items have order property
+        updateItemOrders(activeItems);
+        activeItems = sortItemsByOrder(activeItems);
+        
         list.innerHTML = activeItems.map(item => `
           <li class="task-item">
+            <span class="drag-handle">⋮⋮</span>
             <input type="checkbox" class="task-checkbox" 
                    onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
             <span class="task-text">${escapeHtml(item.text)}</span>
@@ -4053,6 +4087,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             </div>
           </li>
         `).join('');
+        
+        // Set up drag and drop
+        setTimeout(() => setupDragAndDrop(list, activeItems, 'todo'), 0);
       }
     }
 
