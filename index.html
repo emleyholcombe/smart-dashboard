@@ -3956,6 +3956,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Configure based on widget type
       if (widgetType === 'calendar') {
         title.textContent = 'Calendar';
+        title.onclick = closeFullscreen;
+        title.style.cursor = 'pointer';
         const iframe = document.createElement('iframe');
         iframe.src = 'https://calendar.google.com/calendar/embed?height=800&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=AGENDA&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0&showCalendars=1';
         iframe.style.width = '100%';
@@ -3966,6 +3968,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
       } else if (widgetType === 'todo') {
         title.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
+        title.onclick = closeFullscreen;
+        title.style.cursor = 'pointer';
         
         // Add History/Current button to the left of Home button in header
         const historyBtn = document.createElement('button');
@@ -4053,6 +4057,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
       } else if (widgetType === 'grocery') {
         title.textContent = 'Grocery List';
+        title.onclick = closeFullscreen;
+        title.style.cursor = 'pointer';
         
         // Add input container
         const addContainer = document.createElement('div');
@@ -4084,6 +4090,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
       } else if (widgetType === 'meals') {
         title.textContent = showingMealHistory ? 'Meals History' : 'Meals';
+        title.onclick = closeFullscreen;
+        title.style.cursor = 'pointer';
         
         // Add History/Current button to the left of Home button in header
         const historyBtn = document.createElement('button');
