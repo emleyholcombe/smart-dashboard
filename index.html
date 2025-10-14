@@ -3960,14 +3960,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       } else if (widgetType === 'todo') {
         title.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
         
-        // Add History/Current button in the content area (where black header was)
-        const buttonContainer = document.createElement('div');
-        buttonContainer.style.display = 'flex';
-        buttonContainer.style.justifyContent = 'center';
-        buttonContainer.style.marginBottom = '1.5rem';
-        
+        // Add History/Current button to the left of Home button in header
         const historyBtn = document.createElement('button');
-        historyBtn.className = 'fullscreen-history-button';
+        historyBtn.className = 'back-button'; // Use same styling as other header buttons
         historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
         historyBtn.onclick = () => {
           showTodoHistory();
@@ -3979,8 +3974,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           renderTodoListFullscreen();
         };
         
-        buttonContainer.appendChild(historyBtn);
-        content.appendChild(buttonContainer);
+        // Insert the history button at the beginning of the button container
+        buttonContainer.insertBefore(historyBtn, homeButton);
         
         // Add appropriate input container based on mode
         const addContainer = document.createElement('div');
@@ -4083,14 +4078,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       } else if (widgetType === 'meals') {
         title.textContent = showingMealHistory ? 'Meals History' : 'Meals';
         
-        // Add History/Current button in the content area (where black header was)
-        const buttonContainer = document.createElement('div');
-        buttonContainer.style.display = 'flex';
-        buttonContainer.style.justifyContent = 'center';
-        buttonContainer.style.marginBottom = '1.5rem';
-        
+        // Add History/Current button to the left of Home button in header
         const historyBtn = document.createElement('button');
-        historyBtn.className = 'fullscreen-history-button';
+        historyBtn.className = 'back-button'; // Use same styling as other header buttons
         historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
         historyBtn.onclick = () => {
           showMealsHistory();
@@ -4102,8 +4092,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           renderMealsListFullscreen();
         };
         
-        buttonContainer.appendChild(historyBtn);
-        content.appendChild(buttonContainer);
+        // Insert the history button at the beginning of the button container
+        buttonContainer.insertBefore(historyBtn, homeButton);
         
         // Add search bar for history mode
         if (showingMealHistory) {
