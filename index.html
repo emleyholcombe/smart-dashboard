@@ -995,9 +995,43 @@
       box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
     }
 
+    .task-due-date.due-today {
+      background: rgba(251, 146, 60, 0.1);
+      color: #ea580c;
+      border: 1px solid rgba(251, 146, 60, 0.2);
+    }
+
+    .task-due-date.due-today:hover {
+      background: rgba(251, 146, 60, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(251, 146, 60, 0.2);
+    }
+
+    .task-due-date.due-tomorrow {
+      background: rgba(250, 204, 21, 0.1);
+      color: #d97706;
+      border: 1px solid rgba(250, 204, 21, 0.2);
+    }
+
+    .task-due-date.due-tomorrow:hover {
+      background: rgba(250, 204, 21, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(250, 204, 21, 0.2);
+    }
+
     .task-item.overdue {
       border-left: 3px solid #dc2626;
       background: rgba(239, 68, 68, 0.02);
+    }
+
+    .task-item.due-today {
+      border-left: 3px solid #ea580c;
+      background: rgba(251, 146, 60, 0.02);
+    }
+
+    .task-item.due-tomorrow {
+      border-left: 3px solid #d97706;
+      background: rgba(250, 204, 21, 0.02);
     }
 
     .add-item-container input[type="date"] {
@@ -1415,9 +1449,9 @@
         <button onclick="showTodoHistory()" class="history-button">History</button>
       </div>
       <div class="add-item-container" id="todo-add-container">
-        <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
         <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
         <input type="date" id="todo-due-date" title="Due date (optional)">
+        <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
       </div>
       <ul id="todo-list" class="task-list">
         <!-- Dynamic content will be loaded here -->
@@ -2487,7 +2521,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             item.text = newText;
             item.dueDate = newDueDate || null;
             saveTodoItems();
-            renderTodoList();
+            
+            // Render the appropriate view (widget or fullscreen)
+            if (document.getElementById('fullscreen-container')) {
+              renderTodoListFullscreen();
+            } else {
+              renderTodoList();
+            }
           }
           document.body.removeChild(modal);
         };
@@ -2501,6 +2541,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         // Handle Enter key in text input
         textInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            handleSave();
+          }
+        });
+        
+        // Handle Enter key in date input
+        dueDateInput.addEventListener('keypress', (e) => {
           if (e.key === 'Enter') {
             handleSave();
           }
@@ -2566,10 +2613,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         list.innerHTML = activeItems.map(item => {
           const dueDateDisplay = item.dueDate ? formatDueDate(item.dueDate) : '';
           const isOverdue = item.dueDate && isTaskOverdue(item.dueDate);
-          const dueDateClass = isOverdue ? 'overdue' : '';
+          const isDueToday = item.dueDate && isTaskDueToday(item.dueDate);
+          const isDueTomorrow = item.dueDate && isTaskDueTomorrow(item.dueDate);
+          
+          let dueDateClass = '';
+          let taskItemClass = '';
+          
+          if (isOverdue) {
+            dueDateClass = 'overdue';
+            taskItemClass = 'overdue';
+          } else if (isDueToday) {
+            dueDateClass = 'due-today';
+            taskItemClass = 'due-today';
+          } else if (isDueTomorrow) {
+            dueDateClass = 'due-tomorrow';
+            taskItemClass = 'due-tomorrow';
+          }
           
           return `
-            <li class="task-item ${dueDateClass}">
+            <li class="task-item ${taskItemClass}">
               <span class="drag-handle">☰</span>
             <input type="checkbox" class="task-checkbox" 
                    onchange="toggleTodoItem(${item.id})">
@@ -2631,6 +2693,36 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       dueDate.setHours(0, 0, 0, 0);
       
       return dueDate.getTime() < today.getTime();
+    }
+
+    function isTaskDueToday(dateString) {
+      // Parse date as local date to avoid timezone issues
+      const dateParts = dateString.split('-');
+      const dueDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]); // Year, Month (0-indexed), Day
+      
+      const today = new Date();
+      
+      // Reset time to compare dates only
+      today.setHours(0, 0, 0, 0);
+      dueDate.setHours(0, 0, 0, 0);
+      
+      return dueDate.getTime() === today.getTime();
+    }
+
+    function isTaskDueTomorrow(dateString) {
+      // Parse date as local date to avoid timezone issues
+      const dateParts = dateString.split('-');
+      const dueDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]); // Year, Month (0-indexed), Day
+      
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      
+      // Reset time to compare dates only
+      tomorrow.setHours(0, 0, 0, 0);
+      dueDate.setHours(0, 0, 0, 0);
+      
+      return dueDate.getTime() === tomorrow.getTime();
     }
 
     function editTodoDueDate(id) {
@@ -2721,9 +2813,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Restore original add container
         const addContainer = document.getElementById('todo-add-container');
         addContainer.innerHTML = `
-          <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
           <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
           <input type="date" id="todo-due-date" title="Due date (optional)">
+          <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
         `;
         addContainer.style.display = 'flex';
         
@@ -4247,9 +4339,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           `;
         } else {
           addContainer.innerHTML = `
-            <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
             <input type="text" id="fullscreen-todo-input" placeholder="Add new task..." maxlength="100">
             <input type="date" id="fullscreen-todo-due-date" title="Due date (optional)">
+            <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
           `;
         }
         
@@ -4527,10 +4619,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         list.innerHTML = activeItems.map(item => {
           const dueDateDisplay = item.dueDate ? formatDueDate(item.dueDate) : '';
           const isOverdue = item.dueDate && isTaskOverdue(item.dueDate);
-          const dueDateClass = isOverdue ? 'overdue' : '';
+          const isDueToday = item.dueDate && isTaskDueToday(item.dueDate);
+          const isDueTomorrow = item.dueDate && isTaskDueTomorrow(item.dueDate);
+          
+          let dueDateClass = '';
+          let taskItemClass = '';
+          
+          if (isOverdue) {
+            dueDateClass = 'overdue';
+            taskItemClass = 'overdue';
+          } else if (isDueToday) {
+            dueDateClass = 'due-today';
+            taskItemClass = 'due-today';
+          } else if (isDueTomorrow) {
+            dueDateClass = 'due-tomorrow';
+            taskItemClass = 'due-tomorrow';
+          }
           
           return `
-            <li class="task-item ${dueDateClass}">
+            <li class="task-item ${taskItemClass}">
               <span class="drag-handle">☰</span>
               <input type="checkbox" class="task-checkbox" 
                      onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">

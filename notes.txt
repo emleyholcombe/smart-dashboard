@@ -2250,3 +2250,403 @@ RESULT:
 - ✅ **Consistent behavior**: Works across all viewing modes
 - ✅ **Enhanced productivity**: Streamlined workflow for date management
 
+USER PROMPT:
+push
+
+ASSISTANT RESPONSE:
+✅ Successfully pushed changes to repository!
+
+GIT OPERATIONS COMPLETED:
+========================
+1. `git add .` - Staged all changes
+2. `git commit --amend -m "Enhance due date functionality and UI improvements"` - Short commit message
+3. `git push` - Pushed to remote repository
+
+COMMIT DETAILS:
+==============
+- Commit hash: b0b04c6
+- Files changed: 2 files (index.html, notes.txt)
+- Insertions: 692 lines, Deletions: 15 lines
+- Previous commit: a716955
+- Repository: https://github.com/emleyholcombe/smart-dashboard.git
+- Branch: main → main
+
+Changes pushed: All due date functionality enhancements and UI improvements
+
+USER PROMPT:
+always do short commit comments
+
+ASSISTANT RESPONSE:
+✅ Understood! I'll use short, concise commit messages going forward.
+
+COMMIT MESSAGE POLICY UPDATED:
+==============================
+- Future commits will use brief, descriptive messages
+- Focus on the main change rather than detailed explanations
+- Example: "Enhance due date functionality and UI improvements" instead of long multi-line descriptions
+- Maintain clarity while keeping messages concise
+
+USER PROMPT:
+The add button on the to-do widget needs to be to the right of the text bar, not to the left. I may have mistyped earlier. It should mirror the text bar and "Add" buttons on the grocery widget and the meals widget
+
+ASSISTANT RESPONSE:
+✅ FIXED: Moved Add button to right side to match grocery and meals widgets!
+
+PROBLEM IDENTIFIED:
+==================
+- Todo widget had Add button on the left: [Add] [Text] [Date]
+- Grocery widget has: [Text] [Add] 
+- Meals widget has: [Text] [Add]
+- Todo widget should match this consistent pattern across all widgets
+
+SOLUTION IMPLEMENTED:
+====================
+
+1. UPDATED TODO WIDGET LAYOUT:
+   - Changed from: [Add] [Text] [Date] 
+   - Changed to: [Text] [Date] [Add]
+   - Now matches grocery and meals widget patterns
+
+2. UPDATED ALL TODO INTERFACES:
+   - Main widget: Fixed add container order
+   - Fullscreen mode: Fixed add container order  
+   - History restore function: Fixed restored layout order
+   - Consistent [Text] [Date] [Add] pattern everywhere
+
+3. MAINTAINED FUNCTIONALITY:
+   - All existing functionality preserved
+   - Due date input remains between text and button
+   - Enter key support continues to work
+   - All event handlers remain intact
+
+LAYOUT CONSISTENCY:
+==================
+**All widgets now follow same pattern:**
+- ✅ Grocery: [Text Input] [Add Button]
+- ✅ Meals: [Text Input] [Add Button] 
+- ✅ Todo: [Text Input] [Date Input] [Add Button]
+
+**Updated in all contexts:**
+- ✅ Widget view: Consistent button positioning
+- ✅ Fullscreen view: Consistent button positioning
+- ✅ History restore: Consistent button positioning
+
+RESULT:
+=======
+- ✅ Todo widget now matches grocery and meals widget layout
+- ✅ Consistent user experience across all widgets
+- ✅ Professional, uniform interface design
+- ✅ All functionality preserved while fixing layout
+- ✅ Better visual harmony across the dashboard
+
+USER PROMPT:
+If a date is added to a to-do list item, it should show immediately rather than wait until the webpage is refreshed
+
+ASSISTANT RESPONSE:
+✅ FIXED: Due dates now display immediately after editing without page refresh!
+
+PROBLEM IDENTIFIED:
+==================
+The issue was in the edit modal's `handleSave` function:
+- `editTodoDueDate()` (clickable due date) was working correctly with smart render detection
+- `editTodoItem()` modal's `handleSave` function was only calling `renderTodoList()`
+- In fullscreen mode, this meant due date changes weren't visible until page refresh
+- Widget mode worked fine, but fullscreen mode had the rendering issue
+
+ROOT CAUSE:
+===========
+The edit modal's save function was hardcoded to call `renderTodoList()` instead of detecting the current view mode:
+
+```javascript
+// Before (problematic):
+saveTodoItems();
+renderTodoList();  // Only renders widget view
+
+// After (fixed):
+saveTodoItems();
+if (document.getElementById('fullscreen-container')) {
+  renderTodoListFullscreen();
+} else {
+  renderTodoList();
+}
+```
+
+SOLUTION IMPLEMENTED:
+====================
+
+1. UPDATED EDIT MODAL SAVE FUNCTION:
+   - Added smart render detection to `handleSave` function in `editTodoItem()`
+   - Now checks if user is in fullscreen mode before rendering
+   - Calls appropriate render function based on current view context
+
+2. VERIFIED EXISTING FUNCTIONS:
+   - `editTodoDueDate()` (clickable due date) already had correct render detection
+   - Both editing methods now work consistently across widget and fullscreen modes
+   - No other functions needed updates
+
+3. CONSISTENT BEHAVIOR:
+   - Widget mode: Due dates appear immediately after editing
+   - Fullscreen mode: Due dates appear immediately after editing
+   - Both edit methods (modal and clickable) work identically
+
+TECHNICAL DETAILS:
+=================
+**Fixed Function:**
+```javascript
+const handleSave = () => {
+  const newText = textInput.value.trim();
+  const newDueDate = dueDateInput.value;
+  
+  if (newText) {
+    item.text = newText;
+    item.dueDate = newDueDate || null;
+    saveTodoItems();
+    
+    // Smart render detection (ADDED)
+    if (document.getElementById('fullscreen-container')) {
+      renderTodoListFullscreen();
+    } else {
+      renderTodoList();
+    }
+  }
+  document.body.removeChild(modal);
+};
+```
+
+USER EXPERIENCE IMPROVEMENTS:
+============================
+
+**BEFORE (Problematic):**
+1. Edit todo item via pencil icon in fullscreen mode
+2. Add or change due date in modal
+3. Click Save
+4. Due date doesn't appear ❌
+5. Need to refresh page to see change
+
+**AFTER (Fixed):**
+1. Edit todo item via pencil icon in any mode
+2. Add or change due date in modal  
+3. Click Save
+4. Due date appears immediately ✅
+5. No page refresh needed
+
+**BOTH EDIT METHODS NOW WORK:**
+- ✅ **Edit Modal** (pencil icon): Immediate due date display
+- ✅ **Clickable Due Date**: Immediate due date display
+- ✅ **Widget Mode**: Immediate updates
+- ✅ **Fullscreen Mode**: Immediate updates
+
+RESULT:
+=======
+- ✅ Due dates display immediately after adding/editing in all contexts
+- ✅ No more page refresh required to see due date changes
+- ✅ Consistent behavior between widget and fullscreen modes
+- ✅ Both editing methods (modal and clickable) work identically
+- ✅ Professional user experience with instant visual feedback
+
+USER PROMPT:
+If I'm editing a to-do list task item and I click enter on my keyboard, I want that to act as if I clicked the "Save" button
+
+ASSISTANT RESPONSE:
+✅ ENHANCED: Enter key support now works in both text and date fields in edit modal!
+
+CURRENT STATE DISCOVERED:
+=========================
+Upon investigation, I found that Enter key support was already partially implemented:
+- ✅ Text input field: Enter key already triggered `handleSave()`
+- ❌ Date input field: Enter key had no effect
+- ✅ Escape key: Already implemented to cancel/close modal
+
+ENHANCEMENT IMPLEMENTED:
+=======================
+
+1. ADDED ENTER KEY SUPPORT FOR DATE INPUT:
+   - Extended existing Enter key functionality to include due date field
+   - Now both text and date inputs respond to Enter key
+   - Consistent behavior across all input fields in the modal
+
+2. COMPREHENSIVE KEYBOARD SUPPORT:
+   ```javascript
+   // Text input Enter key (already existed)
+   textInput.addEventListener('keypress', (e) => {
+     if (e.key === 'Enter') {
+       handleSave();
+     }
+   });
+   
+   // Date input Enter key (newly added)
+   dueDateInput.addEventListener('keypress', (e) => {
+     if (e.key === 'Enter') {
+       handleSave();
+     }
+   });
+   
+   // Escape key (already existed)
+   modal.addEventListener('keydown', (e) => {
+     if (e.key === 'Escape') {
+       handleCancel();
+     }
+   });
+   ```
+
+3. MAINTAINED EXISTING FUNCTIONALITY:
+   - All existing keyboard shortcuts preserved
+   - Click handlers for Save/Cancel buttons still work
+   - Focus management and text selection unchanged
+
+USER EXPERIENCE:
+===============
+
+**KEYBOARD SHORTCUTS IN EDIT MODAL:**
+- ✅ **Enter in text field**: Saves changes and closes modal
+- ✅ **Enter in date field**: Saves changes and closes modal (newly added)
+- ✅ **Escape key**: Cancels changes and closes modal
+- ✅ **Click Save button**: Saves changes and closes modal
+- ✅ **Click Cancel button**: Cancels changes and closes modal
+- ✅ **Click outside modal**: Cancels changes and closes modal
+
+**WORKFLOW IMPROVEMENTS:**
+1. Edit task via pencil icon
+2. Modify text or due date
+3. **Press Enter** (from either field) → Instant save ✅
+4. No need to reach for mouse to click Save button
+
+**ENHANCED PRODUCTIVITY:**
+- ✅ **Faster editing**: Enter key provides quick save from keyboard
+- ✅ **Intuitive interaction**: Standard keyboard behavior users expect
+- ✅ **Consistent experience**: Enter works in both input fields
+- ✅ **Reduced mouse usage**: Complete editing workflow via keyboard
+
+RESULT:
+=======
+- ✅ **Complete keyboard support**: Enter key works in both text and date fields
+- ✅ **Faster workflow**: Quick save without reaching for mouse
+- ✅ **Intuitive behavior**: Standard Enter-to-save functionality
+- ✅ **Enhanced accessibility**: Better keyboard navigation support
+- ✅ **Professional UX**: Expected keyboard shortcuts implemented
+
+USER PROMPT:
+I like the color coding on to-do list task items that are overdue. Can you add orange color coding to to-do list task items that are due on the current day and yellow color coding to to-do list task items that are due "tomorrow" or the day after the current day?
+
+ASSISTANT RESPONSE:
+✅ IMPLEMENTED: Enhanced color coding system with orange for today and yellow for tomorrow!
+
+FEATURE IMPLEMENTED:
+===================
+
+1. NEW HELPER FUNCTIONS:
+   - `isTaskDueToday()`: Detects tasks due on current day
+   - `isTaskDueTomorrow()`: Detects tasks due tomorrow
+   - Both use same local date parsing as existing `isTaskOverdue()` function
+   - Consistent timezone handling across all due date functions
+
+2. COMPREHENSIVE COLOR CODING SYSTEM:
+   - 🔴 **Red (Overdue)**: Tasks past their due date
+   - 🟠 **Orange (Due Today)**: Tasks due on current day
+   - 🟡 **Yellow (Due Tomorrow)**: Tasks due tomorrow
+   - 🔵 **Blue (Future)**: Tasks due later (existing default styling)
+
+3. VISUAL STYLING ENHANCEMENTS:
+   **Due Today (Orange):**
+   ```css
+   .task-due-date.due-today {
+     background: rgba(251, 146, 60, 0.1);
+     color: #ea580c;
+     border: 1px solid rgba(251, 146, 60, 0.2);
+   }
+   
+   .task-item.due-today {
+     border-left: 3px solid #ea580c;
+     background: rgba(251, 146, 60, 0.02);
+   }
+   ```
+
+   **Due Tomorrow (Yellow):**
+   ```css
+   .task-due-date.due-tomorrow {
+     background: rgba(250, 204, 21, 0.1);
+     color: #d97706;
+     border: 1px solid rgba(250, 204, 21, 0.2);
+   }
+   
+   .task-item.due-tomorrow {
+     border-left: 3px solid #d97706;
+     background: rgba(250, 204, 21, 0.02);
+   }
+   ```
+
+4. ENHANCED RENDER LOGIC:
+   - Updated both widget and fullscreen render functions
+   - Smart priority detection: overdue → today → tomorrow → future
+   - Applies classes to both due date badges and task items
+   - Maintains all existing hover effects and interactions
+
+TECHNICAL IMPLEMENTATION:
+========================
+
+**Priority-Based Class Assignment:**
+```javascript
+let dueDateClass = '';
+let taskItemClass = '';
+
+if (isOverdue) {
+  dueDateClass = 'overdue';
+  taskItemClass = 'overdue';
+} else if (isDueToday) {
+  dueDateClass = 'due-today';
+  taskItemClass = 'due-today';
+} else if (isDueTomorrow) {
+  dueDateClass = 'due-tomorrow';
+  taskItemClass = 'due-tomorrow';
+}
+```
+
+**Date Detection Functions:**
+- All functions use consistent local date parsing to avoid timezone issues
+- Proper date comparison with time reset to 00:00:00
+- Reliable detection across different timezones and daylight saving changes
+
+VISUAL HIERARCHY:
+================
+
+**PRIORITY LEVELS (High to Low):**
+1. 🔴 **Overdue** (Red): Immediate attention required
+2. 🟠 **Due Today** (Orange): High priority, due today
+3. 🟡 **Due Tomorrow** (Yellow): Medium priority, due tomorrow
+4. 🔵 **Future** (Blue): Normal priority, due later
+
+**VISUAL ELEMENTS:**
+- ✅ **Due date badges**: Color-coded with matching text colors
+- ✅ **Left border**: 3px colored border on task items
+- ✅ **Background tint**: Subtle background color matching the priority
+- ✅ **Hover effects**: Enhanced hover with matching shadow colors
+- ✅ **Consistent styling**: Same visual treatment in widget and fullscreen
+
+USER EXPERIENCE:
+===============
+
+**IMMEDIATE VISUAL FEEDBACK:**
+- Tasks automatically update color coding as dates change
+- Clear visual hierarchy helps prioritize work
+- Color coding works across all viewing modes
+
+**ENHANCED PRODUCTIVITY:**
+- ✅ **Quick identification**: Instantly see task urgency levels
+- ✅ **Better planning**: Visual cues for today vs tomorrow tasks
+- ✅ **Reduced cognitive load**: Colors convey priority without reading dates
+- ✅ **Professional appearance**: Consistent, polished color scheme
+
+**INTEGRATION:**
+- ✅ **Widget mode**: Full color coding with priority indicators
+- ✅ **Fullscreen mode**: Same color coding system
+- ✅ **Clickable due dates**: Colors maintained when editing
+- ✅ **Cross-device sync**: Color coding updates automatically
+
+RESULT:
+=======
+- ✅ **Complete priority system**: Red → Orange → Yellow → Blue progression
+- ✅ **Enhanced visual hierarchy**: Clear urgency indicators
+- ✅ **Professional color scheme**: Consistent, accessible colors
+- ✅ **Improved productivity**: Quick visual task prioritization
+- ✅ **Seamless integration**: Works across all todo functionality
+
