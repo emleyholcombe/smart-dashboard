@@ -3975,6 +3975,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
         historyBtn.onclick = () => {
           showTodoHistory();
+          // Update both the white header and the black header
+          title.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
           titleSpan.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
           historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
           // Update URL based on current mode
@@ -4102,7 +4104,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
         historyBtn.onclick = () => {
           showMealsHistory();
-          // Update button text and title after toggle
+          // Update both the white header and the black header
+          title.textContent = showingMealHistory ? 'Meals History' : 'Meals';
           titleSpan.textContent = showingMealHistory ? 'Meals History' : 'Meals';
           historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
           // Update URL based on current mode
