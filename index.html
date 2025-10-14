@@ -330,12 +330,13 @@
 
     .todo-widget #todo-add-container {
       /* Fixed height for add container to prevent size changes */
-      min-height: 80px;
-      max-height: 120px;
+      min-height: 60px;
+      max-height: 80px;
       flex-shrink: 0;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       justify-content: flex-start;
+      align-items: flex-start;
     }
 
     .grocery-widget {
@@ -1494,12 +1495,12 @@
         <input type="text" id="todo-input" placeholder="Add new task..." maxlength="100">
         <button onclick="addTodoItem()" id="add-todo-btn">Add</button>
       </div>
-      <div class="add-item-container" style="margin-top: 0.5rem;">
+      <div class="add-item-container" id="todo-secondary-container" style="margin-top: 0.5rem;">
         <select id="todo-assigned-to" title="Assign to person">
           <option value="">Unassigned</option>
           <option value="emley">Emley</option>
           <option value="nate">Nate</option>
-          <option value="family">Family</option>
+          <option value="family" selected>Family</option>
         </select>
         <input type="date" id="todo-due-date" title="Due date (optional)">
       </div>
@@ -2448,7 +2449,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           createdAt: new Date().toISOString(),
           order: Date.now(), // Add order property for sorting
           dueDate: dueDate || null, // Add due date if provided
-          assignedTo: assignedTo || null // Add assignment if provided
+          assignedTo: assignedTo || 'family' // Auto-assign to family if no selection
         };
         
         todoItems.unshift(item); // Add to beginning of array
@@ -2697,8 +2698,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           }
           
           const avatarHtml = item.assignedTo ? 
-            `<span class="person-avatar ${item.assignedTo}" title="Assigned to ${item.assignedTo === 'emley' ? 'Emley' : item.assignedTo === 'nate' ? 'Nate' : 'Family'}">${item.assignedTo === 'emley' ? 'E' : item.assignedTo === 'nate' ? 'N' : 'F'}</span>` : 
-            '';
+            `<span class="person-avatar ${item.assignedTo}" onclick="editTodoAssignment(${item.id})" title="Click to change assignment - Currently: ${item.assignedTo === 'emley' ? 'Emley' : item.assignedTo === 'nate' ? 'Nate' : 'Family'}" style="cursor: pointer;">${item.assignedTo === 'emley' ? 'E' : item.assignedTo === 'nate' ? 'N' : 'F'}</span>` : 
+            `<span class="person-avatar family" onclick="editTodoAssignment(${item.id})" title="Click to assign task" style="cursor: pointer; opacity: 0.3;">F</span>`;
           
           return `
             <li class="task-item ${taskItemClass}">
@@ -2794,6 +2795,97 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       dueDate.setHours(0, 0, 0, 0);
       
       return dueDate.getTime() === tomorrow.getTime();
+    }
+
+    function editTodoAssignment(id) {
+      const item = todoItems.find(item => item.id === id);
+      if (!item) return;
+      
+      // Create a simple modal for assignment selection
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+      `;
+      
+      const dialog = document.createElement('div');
+      dialog.style.cssText = `
+        background: var(--bg-primary);
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        max-width: 300px;
+        width: 90%;
+        border: 1px solid var(--border-color);
+      `;
+      
+      dialog.innerHTML = `
+        <h3 style="margin: 0 0 16px 0; color: var(--text-primary);">Change Assignment</h3>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+          <button onclick="updateAssignment(${id}, '')" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; text-align: left;">
+            Unassigned
+          </button>
+          <button onclick="updateAssignment(${id}, 'emley')" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px;">
+            <span class="person-avatar emley" style="width: 16px; height: 16px; font-size: 10px;">E</span>
+            Emley
+          </button>
+          <button onclick="updateAssignment(${id}, 'nate')" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px;">
+            <span class="person-avatar nate" style="width: 16px; height: 16px; font-size: 10px;">N</span>
+            Nate
+          </button>
+          <button onclick="updateAssignment(${id}, 'family')" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px;">
+            <span class="person-avatar family" style="width: 16px; height: 16px; font-size: 10px;">F</span>
+            Family
+          </button>
+        </div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button onclick="closeAssignmentModal()" style="padding: 8px 16px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer;">Cancel</button>
+        </div>
+      `;
+      
+      modal.appendChild(dialog);
+      document.body.appendChild(modal);
+      
+      // Store modal reference for closing
+      window.currentAssignmentModal = modal;
+      
+      // Close on background click
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeAssignmentModal();
+        }
+      });
+    }
+    
+    function updateAssignment(id, newAssignment) {
+      const item = todoItems.find(item => item.id === id);
+      if (item) {
+        item.assignedTo = newAssignment || null;
+        saveTodoItems();
+        
+        // Render the appropriate view
+        if (document.getElementById('fullscreen-container')) {
+          renderTodoListFullscreen();
+        } else {
+          renderTodoList();
+        }
+      }
+      closeAssignmentModal();
+    }
+    
+    function closeAssignmentModal() {
+      if (window.currentAssignmentModal) {
+        document.body.removeChild(window.currentAssignmentModal);
+        window.currentAssignmentModal = null;
+      }
     }
 
     function sortTodosByDueDate() {
@@ -2917,8 +3009,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         // Replace add container with search interface
         const addContainer = document.getElementById('todo-add-container');
-        const secondContainer = addContainer.nextElementSibling;
-        if (secondContainer && secondContainer.classList.contains('add-item-container')) {
+        const secondContainer = document.getElementById('todo-secondary-container');
+        if (secondContainer) {
           secondContainer.style.display = 'none';
         }
         addContainer.innerHTML = `
@@ -2967,14 +3059,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         `;
         
         // Restore the second container for assignment and date
-        const secondContainer = addContainer.nextElementSibling;
-        if (secondContainer && secondContainer.classList.contains('add-item-container')) {
+        const secondContainer = document.getElementById('todo-secondary-container');
+        if (secondContainer) {
           secondContainer.innerHTML = `
             <select id="todo-assigned-to" title="Assign to person">
               <option value="">Unassigned</option>
               <option value="emley">Emley</option>
               <option value="nate">Nate</option>
-              <option value="family">Family</option>
+              <option value="family" selected>Family</option>
             </select>
             <input type="date" id="todo-due-date" title="Due date (optional)">
           `;
@@ -4508,7 +4600,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <option value="">Unassigned</option>
               <option value="emley">Emley</option>
               <option value="nate">Nate</option>
-              <option value="family">Family</option>
+              <option value="family" selected>Family</option>
             </select>
             <input type="date" id="fullscreen-todo-due-date" title="Due date (optional)">
             <button onclick="addTodoItemFullscreen()" id="fullscreen-add-todo-btn">Add</button>
@@ -4774,7 +4866,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           createdAt: new Date().toISOString(),
           order: Date.now(),
           dueDate: dueDate || null,
-          assignedTo: assignedTo || null
+          assignedTo: assignedTo || 'family'
         };
         
         todoItems.unshift(item);
@@ -4850,8 +4942,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           }
           
           const avatarHtml = item.assignedTo ? 
-            `<span class="person-avatar ${item.assignedTo}" title="Assigned to ${item.assignedTo === 'emley' ? 'Emley' : item.assignedTo === 'nate' ? 'Nate' : 'Family'}">${item.assignedTo === 'emley' ? 'E' : item.assignedTo === 'nate' ? 'N' : 'F'}</span>` : 
-            '';
+            `<span class="person-avatar ${item.assignedTo}" onclick="editTodoAssignment(${item.id})" title="Click to change assignment - Currently: ${item.assignedTo === 'emley' ? 'Emley' : item.assignedTo === 'nate' ? 'Nate' : 'Family'}" style="cursor: pointer;">${item.assignedTo === 'emley' ? 'E' : item.assignedTo === 'nate' ? 'N' : 'F'}</span>` : 
+            `<span class="person-avatar family" onclick="editTodoAssignment(${item.id})" title="Click to assign task" style="cursor: pointer; opacity: 0.3;">F</span>`;
           
           return `
             <li class="task-item ${taskItemClass}">

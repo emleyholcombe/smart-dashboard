@@ -2917,3 +2917,46 @@ Changes pushed: Todo sorting functionality and consistent button layout improvem
 - Assignment persists through editing, drag-and-drop reordering, and cross-device sync
 - Fullscreen and widget views both support the assignment feature consistently
 
+## Auto-Assignment & Clickable Avatars Implementation
+
+**User Request:** Auto-assign all new todo items to "Family" and make avatars clickable for easy reassignment.
+
+**Changes Made:**
+- **Auto-Assignment Logic**: Modified `addTodoItem()` and `addTodoItemFullscreen()` to default `assignedTo` to 'family'
+- **Default Dropdown Selection**: Set "Family" as selected option in all assignment dropdowns (widget, fullscreen, history restoration)
+- **Clickable Avatar System**: Added `editTodoAssignment()` function with modal interface for changing assignments
+- **Avatar Click Handlers**: Updated avatar rendering to include `onclick="editTodoAssignment(${item.id})"` with pointer cursor
+- **Assignment Modal**: Created clean modal with visual avatar buttons for each assignment option
+- **Unassigned Task Handling**: Show faded "F" avatar for unassigned tasks that's also clickable
+- **Immediate Updates**: Assignment changes reflect instantly without page refresh
+
+**Technical Implementation:**
+- `updateAssignment()` function handles assignment changes and re-renders appropriate view
+- Modal includes visual avatars next to each option for better UX
+- Background click and Cancel button for easy modal dismissal
+- Works consistently in both widget and fullscreen modes
+
+## Todo Widget Layout Fixes
+
+**User Request:** Fix todo widget layout to match grocery/meals widgets with proper text input width and button positioning.
+
+**Issues Found & Fixed:**
+1. **Button Position**: Add button was below text input instead of on same line
+2. **Text Input Width**: Todo widget text input was shorter than grocery/meals widgets
+3. **CSS Override**: Specific `.todo-widget #todo-add-container` rule was forcing `flex-direction: column`
+
+**Changes Made:**
+- **Container Structure**: Split into two containers - main input/button container and secondary assignment/date container
+- **CSS Fix**: Changed todo widget container from `flex-direction: column` to `flex-direction: row`
+- **Height Adjustments**: Reduced min/max heights to match other widgets (60px/80px vs 80px/120px)
+- **ID Management**: Added `todo-secondary-container` ID for reliable targeting in history mode
+- **History Mode Handling**: Updated `showTodoHistory()` to properly hide/show both containers
+
+**Final Layout:**
+```
+[Text Input ————————————————————] [Add]  ← Same line, full width
+[Assignment Dropdown] [Date Input]        ← Second line
+```
+
+**Result**: Todo widget now perfectly matches grocery/meals widget layout with full-width text input and properly positioned Add button.
+
