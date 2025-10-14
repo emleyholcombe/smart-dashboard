@@ -2729,7 +2729,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function reorderItems(items, fromIndex, toIndex) {
-      console.log('REORDER ITEMS: from', fromIndex, 'to', toIndex, 'in array of', items.length, 'items');
       const item = items.splice(fromIndex, 1)[0];
       items.splice(toIndex, 0, item);
       
@@ -2738,7 +2737,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       items.forEach((item, index) => {
         item.order = baseOrder - index;
       });
-      console.log('REORDER COMPLETE: new order values assigned');
     }
 
     // Drag and Drop functionality
@@ -2748,19 +2746,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     function setupDragAndDrop(listElement, items, listType) {
       const listItems = listElement.querySelectorAll('.task-item');
-      console.log(`Setting up drag and drop for ${listType}:`, listItems.length, 'items');
       
       listItems.forEach((item, index) => {
         // Make drag handle more prominent when dragging is available
         const dragHandle = item.querySelector('.drag-handle');
-        console.log(`Item ${index}:`, dragHandle ? 'has drag handle' : 'NO DRAG HANDLE');
         if (dragHandle) {
           dragHandle.title = 'Drag to reorder';
           dragHandle.draggable = true;
           
           // Only allow dragging from the drag handle
           dragHandle.addEventListener('dragstart', (e) => {
-            console.log('DRAG START:', listType, index);
             draggedItem = item;
             draggedIndex = index;
             draggedList = { items, listType };
@@ -2789,7 +2784,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         item.addEventListener('dragenter', (e) => {
           e.preventDefault();
-          console.log('DRAG ENTER:', index);
           if (draggedItem && draggedItem !== item) {
             item.classList.add('drag-over');
           }
@@ -2801,12 +2795,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         item.addEventListener('drop', (e) => {
           e.preventDefault();
-          console.log('DROP EVENT triggered on item:', index);
           item.classList.remove('drag-over');
           
           if (draggedItem && draggedItem !== item && draggedList) {
             const dropIndex = Array.from(listItems).indexOf(item);
-            console.log('DROP: moving from', draggedIndex, 'to', dropIndex);
             
             if (draggedIndex !== dropIndex) {
               // Reorder the items
@@ -2816,27 +2808,48 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               switch (draggedList.listType) {
                 case 'todo':
                   saveTodoItems();
-                  renderTodoList();
+                  // Check if we're in fullscreen mode
+                  if (document.getElementById('fullscreen-container')) {
+                    renderTodoListFullscreen();
+                  } else {
+                    renderTodoList();
+                  }
                   break;
                 case 'todoHistory':
                   saveTodoHistory();
-                  renderTodoList();
+                  if (document.getElementById('fullscreen-container')) {
+                    renderTodoListFullscreen();
+                  } else {
+                    renderTodoList();
+                  }
                   break;
                 case 'grocery':
                   saveGroceryItems();
-                  renderGroceryList();
+                  if (document.getElementById('fullscreen-container')) {
+                    renderGroceryListFullscreen();
+                  } else {
+                    renderGroceryList();
+                  }
                   break;
                 case 'meals':
                   saveMealItems();
                   // Sync order to history for current meals
                   syncMealOrderToHistory();
-                  renderMealsList();
+                  if (document.getElementById('fullscreen-container')) {
+                    renderMealsListFullscreen();
+                  } else {
+                    renderMealsList();
+                  }
                   break;
                 case 'mealHistory':
                   saveMealHistory();
                   // Sync order to current meals for history
                   syncHistoryOrderToMeal();
-                  renderMealsList();
+                  if (document.getElementById('fullscreen-container')) {
+                    renderMealsListFullscreen();
+                  } else {
+                    renderMealsList();
+                  }
                   break;
               }
             }
@@ -2961,7 +2974,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                   });
                   
                   saveTodoHistory();
-                  renderTodoList();
+                  if (document.getElementById('fullscreen-container')) {
+                    renderTodoListFullscreen();
+                  } else {
+                    renderTodoList();
+                  }
                 }
               }
             }
