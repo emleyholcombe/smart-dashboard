@@ -3032,6 +3032,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               if (draggedIndex !== dropIndex) {
                 // Find the items in the specific date group
                 const dateGroupItems = groups[targetDateGroup];
+                console.log('Date group items:', dateGroupItems.length);
                 
                 // Get the actual item being dragged
                 const draggedItemId = parseInt(draggedItem.getAttribute('data-item-id'));
@@ -3041,13 +3042,19 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                 const targetItemId = parseInt(item.getAttribute('data-item-id'));
                 const targetHistoryItem = todoHistory.find(h => h.id === targetItemId);
                 
+                console.log('Dragged item ID:', draggedItemId, 'Target item ID:', targetItemId);
+                console.log('Found dragged item:', !!draggedHistoryItem, 'Found target item:', !!targetHistoryItem);
+                
                 if (draggedHistoryItem && targetHistoryItem) {
                   // Find positions within the date group
                   const draggedGroupIndex = dateGroupItems.findIndex(i => i.id === draggedHistoryItem.id);
                   const targetGroupIndex = dateGroupItems.findIndex(i => i.id === targetHistoryItem.id);
                   
+                  console.log('Group indexes - dragged:', draggedGroupIndex, 'target:', targetGroupIndex);
+                  
                   // Reorder within the date group
                   reorderItems(dateGroupItems, draggedGroupIndex, targetGroupIndex);
+                  console.log('After reorder, date group items:', dateGroupItems.map(i => i.text));
                   
                   // Update the main todoHistory array with new order
                   dateGroupItems.forEach(groupItem => {
@@ -3057,10 +3064,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                     }
                   });
                   
+                  console.log('Updated todoHistory orders, saving and re-rendering...');
                   saveTodoHistory();
                   if (document.getElementById('fullscreen-container')) {
+                    console.log('Re-rendering fullscreen');
                     renderTodoListFullscreen();
                   } else {
+                    console.log('Re-rendering widget');
                     renderTodoList();
                   }
                 }
