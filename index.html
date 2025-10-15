@@ -7237,15 +7237,41 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           .then((registration) => {
             console.log('PWA: Service Worker registered successfully:', registration.scope);
             
-            // Check for updates
+            // Check for updates immediately and every 30 seconds
+            const checkForUpdates = () => {
+              registration.update().then(() => {
+                console.log('PWA: Checked for updates');
+              });
+            };
+            
+            // Check immediately
+            checkForUpdates();
+            
+            // Check every 30 seconds
+            setInterval(checkForUpdates, 30000);
+            
+            // Handle updates
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
+              console.log('PWA: New service worker found, installing...');
+              
               newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.log('PWA: New content available, please refresh');
-                  // You could show a notification to the user here
+                if (newWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                    console.log('PWA: New content available, reloading...');
+                    // Auto-reload to get new content
+                    window.location.reload();
+                  } else {
+                    console.log('PWA: Content cached for offline use');
+                  }
                 }
               });
+            });
+            
+            // Handle controller change (new service worker activated)
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+              console.log('PWA: New service worker activated, reloading...');
+              window.location.reload();
             });
           })
           .catch((error) => {
