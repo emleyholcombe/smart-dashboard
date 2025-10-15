@@ -7371,12 +7371,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
     }
 
-    // PWA-specific features
+    // PWA-specific features (temporarily disabled for debugging)
     function enablePWAFeatures() {
-      // Add app-like behaviors
-      addMobileOptimizations();
+      // Temporarily disable all PWA customizations to debug layout issue
+      console.log('PWA features temporarily disabled for debugging');
+      // Only keep essential features
       addHapticFeedback();
-      addAppSpecificUI();
+      // addMobileOptimizations(); // DISABLED
+      // addAppSpecificUI(); // DISABLED  
       addSwipeGestures();
     }
 
