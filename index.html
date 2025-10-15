@@ -3517,7 +3517,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
     };
 
-    function categorizeGroceryItem(itemText) {
+    function categorizeGroceryItem(itemText, manualCategory = null) {
+      // If manual category is set, use it
+      if (manualCategory) {
+        return manualCategory;
+      }
+      
       const text = itemText.toLowerCase();
       
       // Priority rules - check these first before general keyword matching
@@ -3581,7 +3586,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const grouped = {};
       
       items.forEach(item => {
-        const category = categorizeGroceryItem(item.text);
+        const category = categorizeGroceryItem(item.text, item.manualCategory);
         if (!grouped[category]) {
           grouped[category] = [];
         }
@@ -3589,6 +3594,21 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       });
       
       return grouped;
+    }
+
+    // Function to handle dropping grocery items into different categories
+    function handleGroceryCategoryDrop(draggedItemId, targetCategory) {
+      const item = groceryItems.find(item => item.id === draggedItemId);
+      if (item && targetCategory) {
+        item.manualCategory = targetCategory;
+        saveGroceryItems();
+        renderGroceryList();
+        
+        // Also update fullscreen view if it's open
+        if (document.getElementById('fullscreen-grocery-list')) {
+          renderGroceryListFullscreen();
+        }
+      }
     }
 
     // Grocery List Functions
@@ -3670,6 +3690,32 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                         font-size: 14px; box-sizing: border-box;">
         </div>
 
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Category:</label>
+          <select id="edit-grocery-category" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; 
+                         font-size: 14px; box-sizing: border-box; background: white;">
+            <option value="">Auto-categorize</option>
+            <option value="Produce" ${item.manualCategory === 'Produce' ? 'selected' : ''}>Produce</option>
+            <option value="Bakery" ${item.manualCategory === 'Bakery' ? 'selected' : ''}>Bakery</option>
+            <option value="Deli" ${item.manualCategory === 'Deli' ? 'selected' : ''}>Deli</option>
+            <option value="Meat & Seafood" ${item.manualCategory === 'Meat & Seafood' ? 'selected' : ''}>Meat & Seafood</option>
+            <option value="Dairy" ${item.manualCategory === 'Dairy' ? 'selected' : ''}>Dairy</option>
+            <option value="Canned & Packaged Goods" ${item.manualCategory === 'Canned & Packaged Goods' ? 'selected' : ''}>Canned & Packaged Goods</option>
+            <option value="Dry Goods & Baking" ${item.manualCategory === 'Dry Goods & Baking' ? 'selected' : ''}>Dry Goods & Baking</option>
+            <option value="Snacks & Candy" ${item.manualCategory === 'Snacks & Candy' ? 'selected' : ''}>Snacks & Candy</option>
+            <option value="Cereal & Breakfast" ${item.manualCategory === 'Cereal & Breakfast' ? 'selected' : ''}>Cereal & Breakfast</option>
+            <option value="Pasta, Rice & International Foods" ${item.manualCategory === 'Pasta, Rice & International Foods' ? 'selected' : ''}>Pasta, Rice & International Foods</option>
+            <option value="Frozen Foods" ${item.manualCategory === 'Frozen Foods' ? 'selected' : ''}>Frozen Foods</option>
+            <option value="Beverages" ${item.manualCategory === 'Beverages' ? 'selected' : ''}>Beverages</option>
+            <option value="Health & Beauty" ${item.manualCategory === 'Health & Beauty' ? 'selected' : ''}>Health & Beauty</option>
+            <option value="Cleaning & Household" ${item.manualCategory === 'Cleaning & Household' ? 'selected' : ''}>Cleaning & Household</option>
+            <option value="Pet Supplies" ${item.manualCategory === 'Pet Supplies' ? 'selected' : ''}>Pet Supplies</option>
+            <option value="Floral Department" ${item.manualCategory === 'Floral Department' ? 'selected' : ''}>Floral Department</option>
+            <option value="Pharmacy" ${item.manualCategory === 'Pharmacy' ? 'selected' : ''}>Pharmacy</option>
+            <option value="Other" ${item.manualCategory === 'Other' ? 'selected' : ''}>Other</option>
+          </select>
+        </div>
+
         <div style="margin-bottom: 20px;">
           <label style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: #555; cursor: pointer;">
             <input type="checkbox" id="edit-grocery-optional" ${item.isOptional ? 'checked' : ''} 
@@ -3692,6 +3738,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Get input elements
       const textInput = document.getElementById('edit-grocery-text');
       const sourceInput = document.getElementById('edit-grocery-source');
+      const categorySelect = document.getElementById('edit-grocery-category');
       const optionalCheckbox = document.getElementById('edit-grocery-optional');
       const saveBtn = document.getElementById('grocery-edit-save-btn');
       const cancelBtn = document.getElementById('grocery-edit-cancel-btn');
@@ -3708,11 +3755,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
 
         const newSource = sourceInput.value.trim();
+        const newCategory = categorySelect.value || null;
         const isOptional = optionalCheckbox.checked;
         
         // Update item
         item.text = newText;
         item.recipeSource = newSource || null;
+        item.manualCategory = newCategory;
         item.isOptional = isOptional;
         
           saveGroceryItems();
@@ -3799,8 +3848,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       categoryOrder.forEach(category => {
         const items = groupedItems[category];
         if (items && items.length > 0) {
-          // Add category header
-          html += `<li class="category-header" style="
+          // Add category header as drop zone
+          html += `<li class="category-header" 
+                      data-category="${category}"
+                      ondragover="event.preventDefault(); this.style.background='#e3f2fd';" 
+                      ondragleave="this.style.background='#f8f9fa';"
+                      ondrop="event.preventDefault(); this.style.background='#f8f9fa'; handleGroceryCategoryDrop(event.dataTransfer.getData('text/plain'), '${category}');"
+                      style="
             font-weight: bold; 
             color: var(--primary-color); 
             background: #f8f9fa; 
@@ -3809,6 +3863,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             border-radius: 4px;
             list-style: none;
             border-left: 4px solid var(--primary-color);
+            cursor: pointer;
           ">${category}</li>`;
           
           // Add items in this category
@@ -3817,7 +3872,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
             
             html += `
-        <li class="task-item">
+              <li class="task-item" draggable="true" 
+                  ondragstart="event.dataTransfer.setData('text/plain', ${item.id}); event.target.style.opacity='0.5';"
+                  ondragend="event.target.style.opacity='1';">
           <span class="drag-handle">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
@@ -6239,8 +6296,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       categoryOrder.forEach(category => {
         const items = groupedItems[category];
         if (items && items.length > 0) {
-          // Add category header
-          html += `<li class="category-header" style="
+          // Add category header as drop zone
+          html += `<li class="category-header" 
+                      data-category="${category}"
+                      ondragover="event.preventDefault(); this.style.background='#e3f2fd';" 
+                      ondragleave="this.style.background='#f8f9fa';"
+                      ondrop="event.preventDefault(); this.style.background='#f8f9fa'; handleGroceryCategoryDrop(event.dataTransfer.getData('text/plain'), '${category}');"
+                      style="
             font-weight: bold; 
             color: var(--primary-color); 
             background: #f8f9fa; 
@@ -6249,6 +6311,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             border-radius: 4px;
             list-style: none;
             border-left: 4px solid var(--primary-color);
+            cursor: pointer;
           ">${category}</li>`;
           
           // Add items in this category
@@ -6257,7 +6320,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
             
             html += `
-        <li class="task-item">
+              <li class="task-item" draggable="true" 
+                  ondragstart="event.dataTransfer.setData('text/plain', ${item.id}); event.target.style.opacity='0.5';"
+                  ondragend="event.target.style.opacity='1';">
           <span class="drag-handle">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
