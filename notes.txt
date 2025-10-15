@@ -3509,12 +3509,90 @@ FILES ADDED/MODIFIED:
 - generate-icons.html (new) - Icon generation utility
 - index.html (modified) - Added PWA meta tags and service worker registration
 
+PWA vs DESKTOP CUSTOMIZATION - October 15, 2025
+==============================================
+
+DETECTION CAPABILITIES:
+- Automatic PWA vs browser mode detection
+- Device type detection (mobile, tablet, desktop)
+- Display mode detection (standalone vs browser)
+- iOS standalone mode detection
+- Real-time mode switching and adaptation
+
+PWA-SPECIFIC FEATURES:
+1. **Mobile-Optimized UI**:
+   - Larger touch targets (44px minimum)
+   - Increased padding and margins
+   - 16px font size to prevent iOS zoom
+   - Rounded corners for app-like feel
+   - Bottom navigation bar for mobile
+
+2. **App-Like Behaviors**:
+   - Haptic feedback on button clicks
+   - Swipe gestures (swipe right to go back)
+   - Status bar indicator at top
+   - App version indicator
+   - No install prompt (hidden in PWA mode)
+
+3. **Visual Enhancements**:
+   - Gradient headers in fullscreen mode
+   - Fixed bottom navigation on mobile
+   - App-specific color schemes
+   - Native app styling
+
+DESKTOP/BROWSER-SPECIFIC FEATURES:
+1. **Desktop Optimizations**:
+   - Hover effects on widgets and buttons
+   - Keyboard shortcuts (Ctrl/Cmd + T/G/M/C)
+   - Enhanced visual feedback
+   - Install prompt visible
+
+2. **Browser Features**:
+   - Standard web interactions
+   - Mouse-optimized interface
+   - Desktop-specific layouts
+   - Browser chrome visible
+
+KEYBOARD SHORTCUTS (Desktop Only):
+- Ctrl/Cmd + T: Open Todo List
+- Ctrl/Cmd + G: Open Grocery List  
+- Ctrl/Cmd + M: Open Meals
+- Ctrl/Cmd + C: Open Todo Calendar
+
+MOBILE GESTURES (PWA Only):
+- Swipe right: Go back from fullscreen views
+- Haptic feedback: Short vibration on button taps
+- Touch-optimized: All interactive elements 44px+
+
+TECHNICAL IMPLEMENTATION:
+- CSS classes: .pwa-mode, .browser-mode, .mobile-device, .desktop-device
+- JavaScript detection: window.matchMedia('(display-mode: standalone)')
+- iOS detection: window.navigator.standalone
+- Device detection: User agent parsing
+- Dynamic styling: Runtime CSS injection
+
+CUSTOMIZATION EXAMPLES:
+```css
+/* PWA Mode */
+.pwa-mode .widget {
+  border-radius: 12px;
+  margin: 8px;
+}
+
+/* Browser Mode */
+.browser-mode .widget:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+```
+
 NEXT STEPS FOR FULL PWA:
 1. Generate and add all required icon files using generate-icons.html
 2. Test installation on iOS Safari and Android Chrome
 3. Verify offline functionality works as expected
-4. Optional: Add push notification server integration
-5. Optional: Implement background sync for data updates
+4. Test PWA vs desktop customizations
+5. Optional: Add push notification server integration
+6. Optional: Implement background sync for data updates
 
 CURRENT PROJECT STATE:
 ======================

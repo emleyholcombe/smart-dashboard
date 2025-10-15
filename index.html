@@ -7315,6 +7315,268 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       console.log('PWA: App is running in standalone mode');
       hideInstallButton();
     }
+
+    // PWA Detection and Customization
+    function detectPWAMode() {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      const isIOSStandalone = window.navigator.standalone === true;
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isTablet = /iPad|Android(?!.*Mobile)/i.test(navigator.userAgent);
+      
+      return {
+        isPWA: isStandalone || isIOSStandalone,
+        isStandalone: isStandalone,
+        isIOSStandalone: isIOSStandalone,
+        isMobile: isMobile,
+        isTablet: isTablet,
+        isDesktop: !isMobile && !isTablet,
+        displayMode: isStandalone ? 'standalone' : 'browser'
+      };
+    }
+
+    // Apply PWA-specific customizations
+    function applyPWACustomizations() {
+      const pwaInfo = detectPWAMode();
+      console.log('PWA Detection:', pwaInfo);
+      
+      // Add CSS classes for different modes
+      document.body.classList.add(pwaInfo.isPWA ? 'pwa-mode' : 'browser-mode');
+      document.body.classList.add(pwaInfo.isMobile ? 'mobile-device' : 'desktop-device');
+      document.body.classList.add(`display-${pwaInfo.displayMode}`);
+      
+      // Store PWA info globally for other functions to use
+      window.pwaInfo = pwaInfo;
+      
+      if (pwaInfo.isPWA) {
+        console.log('🚀 Running as PWA - Applying app-specific features');
+        enablePWAFeatures();
+      } else {
+        console.log('🌐 Running in browser - Standard web experience');
+        enableBrowserFeatures();
+      }
+    }
+
+    // PWA-specific features
+    function enablePWAFeatures() {
+      // Add app-like behaviors
+      addMobileOptimizations();
+      addHapticFeedback();
+      addAppSpecificUI();
+      addSwipeGestures();
+    }
+
+    // Browser-specific features  
+    function enableBrowserFeatures() {
+      // Add browser-specific features
+      addDesktopOptimizations();
+      addKeyboardShortcuts();
+      addBrowserSpecificUI();
+    }
+
+    // Mobile/PWA optimizations
+    function addMobileOptimizations() {
+      // Larger touch targets for mobile
+      const style = document.createElement('style');
+      style.textContent = `
+        .pwa-mode button {
+          min-height: 44px !important;
+          min-width: 44px !important;
+          padding: 12px 16px !important;
+        }
+        
+        .pwa-mode .nav-button {
+          padding: 20px !important;
+          margin: 8px !important;
+        }
+        
+        .pwa-mode input, .pwa-mode textarea, .pwa-mode select {
+          font-size: 16px !important; /* Prevents zoom on iOS */
+          padding: 12px !important;
+        }
+        
+        .pwa-mode .widget {
+          margin: 8px !important;
+          border-radius: 12px !important;
+        }
+        
+        /* Hide elements that don't make sense in app mode */
+        .pwa-mode .install-prompt {
+          display: none !important;
+        }
+        
+        /* App-like header styling */
+        .pwa-mode .fullscreen-header {
+          background: linear-gradient(135deg, #1976d2, #42a5f5) !important;
+          color: white !important;
+          padding: 20px !important;
+          border-radius: 0 !important;
+        }
+        
+        /* Bottom navigation for mobile app */
+        .pwa-mode.mobile-device .navigation-grid {
+          position: fixed !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          background: white !important;
+          border-top: 1px solid #ddd !important;
+          padding: 10px !important;
+          z-index: 1000 !important;
+          box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important;
+        }
+        
+        .pwa-mode.mobile-device .nav-button {
+          flex-direction: column !important;
+          font-size: 12px !important;
+          padding: 8px 4px !important;
+        }
+        
+        .pwa-mode.mobile-device .nav-icon {
+          font-size: 20px !important;
+          margin-bottom: 4px !important;
+        }
+        
+        .pwa-mode.mobile-device .dashboard {
+          padding-bottom: 100px !important; /* Space for bottom nav */
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Desktop/Browser optimizations
+    function addDesktopOptimizations() {
+      const style = document.createElement('style');
+      style.textContent = `
+        .browser-mode .widget {
+          transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        }
+        
+        .browser-mode .widget:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+        
+        .browser-mode .nav-button:hover {
+          transform: scale(1.05) !important;
+        }
+        
+        /* Show install button in browser mode */
+        .browser-mode .install-prompt {
+          display: block !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Haptic feedback for PWA
+    function addHapticFeedback() {
+      if (!window.pwaInfo?.isPWA) return;
+      
+      // Add haptic feedback to buttons
+      document.addEventListener('click', (e) => {
+        if (e.target.matches('button, .nav-button, .clickable')) {
+          // Haptic feedback (iOS only)
+          if (navigator.vibrate) {
+            navigator.vibrate(10); // Short vibration
+          }
+        }
+      });
+    }
+
+    // App-specific UI elements
+    function addAppSpecificUI() {
+      // Add status indicator for PWA
+      const statusBar = document.createElement('div');
+      statusBar.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4caf50, #2196f3);
+        z-index: 10000;
+        opacity: 0.8;
+      `;
+      document.body.appendChild(statusBar);
+      
+      // Add app version indicator
+      const versionIndicator = document.createElement('div');
+      versionIndicator.textContent = 'PWA v1.0';
+      versionIndicator.style.cssText = `
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        font-size: 10px;
+        color: #999;
+        z-index: 1000;
+        pointer-events: none;
+      `;
+      document.body.appendChild(versionIndicator);
+    }
+
+    // Browser-specific UI elements
+    function addBrowserSpecificUI() {
+      // Add browser-specific indicators or features
+      console.log('Browser mode - standard web features enabled');
+    }
+
+    // Keyboard shortcuts for desktop
+    function addKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          switch(e.key) {
+            case 't':
+              e.preventDefault();
+              showFullscreenTodo();
+              break;
+            case 'g':
+              e.preventDefault();
+              showFullscreenGrocery();
+              break;
+            case 'm':
+              e.preventDefault();
+              showFullscreenMeals();
+              break;
+            case 'c':
+              e.preventDefault();
+              showFullscreenTodoCalendar();
+              break;
+          }
+        }
+      });
+    }
+
+    // Swipe gestures for PWA
+    function addSwipeGestures() {
+      if (!window.pwaInfo?.isPWA) return;
+      
+      let startX, startY, endX, endY;
+      
+      document.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      });
+      
+      document.addEventListener('touchend', (e) => {
+        endX = e.changedTouches[0].clientX;
+        endY = e.changedTouches[0].clientY;
+        
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        
+        // Swipe right to go back (if in fullscreen mode)
+        if (deltaX > 50 && Math.abs(deltaY) < 100) {
+          if (document.getElementById('fullscreen-overlay').style.display === 'flex') {
+            closeFullscreen();
+          }
+        }
+      });
+    }
+
+    // Initialize PWA customizations when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(applyPWACustomizations, 100);
+    });
   </script>
 
   </div> <!-- Close dashboard div -->
