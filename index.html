@@ -3989,6 +3989,126 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
     }
 
+    // Recipe ingredient extraction function
+    async function extractIngredientsFromUrl(url) {
+      if (!url || !url.trim()) return [];
+
+      try {
+        // Use a CORS proxy to fetch the recipe page
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const html = data.contents;
+        
+        // Create a temporary DOM parser
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Try to extract from JSON-LD structured data (most common for recipes)
+        const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+        for (const script of jsonLdScripts) {
+          try {
+            const jsonData = JSON.parse(script.textContent);
+            const ingredients = extractIngredientsFromJsonLd(jsonData);
+            if (ingredients.length > 0) {
+              return ingredients;
+            }
+          } catch (e) {
+            // Continue to next script if parsing fails
+            continue;
+          }
+        }
+        
+        // Fallback: Try to extract from common HTML patterns
+        return extractIngredientsFromHtml(doc);
+        
+      } catch (error) {
+        console.error('Error fetching recipe:', error);
+        throw error;
+      }
+    }
+
+    // Extract ingredients from JSON-LD structured data
+    function extractIngredientsFromJsonLd(jsonData) {
+      const ingredients = [];
+      
+      // Handle array of objects
+      if (Array.isArray(jsonData)) {
+        for (const item of jsonData) {
+          const extracted = extractIngredientsFromJsonLd(item);
+          ingredients.push(...extracted);
+        }
+        return ingredients;
+      }
+      
+      // Handle single object
+      if (jsonData && typeof jsonData === 'object') {
+        // Check if this is a Recipe object
+        if (jsonData['@type'] === 'Recipe' || jsonData.recipeIngredient) {
+          const recipeIngredients = jsonData.recipeIngredient || [];
+          return recipeIngredients.map(ingredient => {
+            // Clean up the ingredient text
+            if (typeof ingredient === 'string') {
+              return ingredient.trim();
+            } else if (ingredient && ingredient.text) {
+              return ingredient.text.trim();
+            }
+            return '';
+          }).filter(ing => ing.length > 0);
+        }
+        
+        // Recursively search in nested objects
+        for (const key in jsonData) {
+          if (jsonData.hasOwnProperty(key) && typeof jsonData[key] === 'object') {
+            const extracted = extractIngredientsFromJsonLd(jsonData[key]);
+            ingredients.push(...extracted);
+          }
+        }
+      }
+      
+      return ingredients;
+    }
+
+    // Fallback: Extract ingredients from HTML patterns
+    function extractIngredientsFromHtml(doc) {
+      const ingredients = [];
+      
+      // Common selectors for ingredients
+      const selectors = [
+        '.recipe-ingredient',
+        '.ingredient',
+        '.ingredients li',
+        '.recipe-ingredients li',
+        '[class*="ingredient"]',
+        '.entry-content li', // Some blogs use this
+        '.recipe-card-ingredients li'
+      ];
+      
+      for (const selector of selectors) {
+        const elements = doc.querySelectorAll(selector);
+        if (elements.length > 0) {
+          elements.forEach(el => {
+            const text = el.textContent.trim();
+            if (text && text.length > 0 && text.length < 200) { // Reasonable length filter
+              ingredients.push(text);
+            }
+          });
+          
+          // If we found ingredients with this selector, return them
+          if (ingredients.length > 0) {
+            return ingredients.slice(0, 20); // Limit to 20 ingredients
+          }
+        }
+      }
+      
+      return ingredients;
+    }
+
     function editMealIngredients(id, isHistory = false) {
       const items = isHistory ? mealHistory : mealItems;
       const item = items.find(item => item.id === id);
@@ -4025,11 +4145,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         <div id="ingredients-container">
           ${ingredientsList}
         </div>
-        <button type="button" id="add-ingredient-btn" 
-                style="width: 100%; padding: 8px; margin: 16px 0; background: #f0f0f0; 
-                       border: 1px dashed #ccc; border-radius: 4px; cursor: pointer;">
-          + Add Ingredient
-        </button>
+        <div style="display: flex; gap: 8px; margin: 16px 0;">
+          <button type="button" id="add-ingredient-btn" 
+                  style="flex: 1; padding: 8px; background: #f0f0f0; 
+                         border: 1px dashed #ccc; border-radius: 4px; cursor: pointer;">
+            + Add Ingredient
+          </button>
+          ${item.url ? `<button type="button" id="auto-fill-btn" 
+                  style="padding: 8px 12px; background: var(--primary-color); color: white;
+                         border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">
+            🔗 Auto-fill from URL
+          </button>` : ''}
+        </div>
         <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
           <button id="ingredients-cancel-btn" style="padding: 8px 16px; border: 1px solid #ddd; 
                   border-radius: 6px; background: white; cursor: pointer;">Cancel</button>
@@ -4043,6 +4170,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
       // Add ingredient functionality
       const addBtn = document.getElementById('add-ingredient-btn');
+      const autoFillBtn = document.getElementById('auto-fill-btn');
       const container = document.getElementById('ingredients-container');
       
       addBtn.addEventListener('click', () => {
@@ -4060,6 +4188,45 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         container.appendChild(newItem);
         newItem.querySelector('input').focus();
       });
+
+      // Auto-fill from URL functionality
+      if (autoFillBtn) {
+        autoFillBtn.addEventListener('click', async () => {
+          autoFillBtn.disabled = true;
+          autoFillBtn.textContent = '🔄 Loading...';
+          
+          try {
+            const ingredients = await extractIngredientsFromUrl(item.url);
+            if (ingredients && ingredients.length > 0) {
+              // Clear existing ingredients
+              container.innerHTML = '';
+              
+              // Add extracted ingredients
+              ingredients.forEach((ingredient, index) => {
+                const newItem = document.createElement('div');
+                newItem.className = 'ingredient-item';
+                newItem.style.cssText = 'display: flex; align-items: center; margin-bottom: 8px; gap: 8px;';
+                newItem.innerHTML = `
+                  <input type="text" value="${escapeHtml(ingredient)}" 
+                         style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                         data-index="${index}">
+                  <button type="button" onclick="this.parentElement.remove()" 
+                          style="padding: 4px 8px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;">×</button>
+                `;
+                container.appendChild(newItem);
+              });
+            } else {
+              alert('Could not extract ingredients from this URL. The website might not support automatic parsing.');
+            }
+          } catch (error) {
+            console.error('Error extracting ingredients:', error);
+            alert('Failed to extract ingredients. Please check the URL and try again.');
+          } finally {
+            autoFillBtn.disabled = false;
+            autoFillBtn.innerHTML = '🔗 Auto-fill from URL';
+          }
+        });
+      }
 
       // Handle save
       const saveBtn = document.getElementById('ingredients-save-btn');
