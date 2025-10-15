@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PWA Icon Generator</title>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .icon-preview {
+      display: inline-block;
+      margin: 10px;
+      text-align: center;
+    }
+    .icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1976d2, #42a5f5);
+      color: white;
+      font-weight: bold;
+      border-radius: 20%;
+      margin-bottom: 5px;
+    }
+    button {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+    .instructions {
+      background: #e3f2fd;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Bennett Hub PWA Icon Generator</h1>
+    
+    <div class="instructions">
+      <h3>📋 Instructions:</h3>
+      <ol>
+        <li>Click "Generate All Icons" to create all required PWA icons</li>
+        <li>Right-click each icon and "Save image as..." to download</li>
+        <li>Save them with the exact filenames shown (e.g., "icon-192.png")</li>
+        <li>Place all icons in your project root directory</li>
+      </ol>
+    </div>
+
+    <button onclick="generateAllIcons()">🚀 Generate All Icons</button>
+    <button onclick="downloadAllIcons()">💾 Download All Icons</button>
+    
+    <div id="icons-container"></div>
+  </div>
+
+  <script>
+    const iconSizes = [16, 32, 72, 96, 128, 144, 152, 167, 180, 192, 384, 512];
+    
+    function generateIcon(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      
+      // Create gradient background
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#1976d2');
+      gradient.addColorStop(1, '#42a5f5');
+      
+      // Draw rounded rectangle background
+      const radius = size * 0.2;
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, radius);
+      ctx.fill();
+      
+      // Draw "BH" text (Bennett Hub)
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${size * 0.35}px Inter, Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('BH', size / 2, size / 2);
+      
+      return canvas;
+    }
+    
+    function generateAllIcons() {
+      const container = document.getElementById('icons-container');
+      container.innerHTML = '<h2>📱 Generated PWA Icons</h2>';
+      
+      iconSizes.forEach(size => {
+        const canvas = generateIcon(size);
+        const preview = document.createElement('div');
+        preview.className = 'icon-preview';
+        
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        img.style.width = Math.min(size, 128) + 'px';
+        img.style.height = Math.min(size, 128) + 'px';
+        img.style.border = '2px solid #ddd';
+        img.style.borderRadius = '8px';
+        
+        const label = document.createElement('div');
+        label.textContent = `icon-${size}.png`;
+        label.style.fontSize = '12px';
+        label.style.color = '#666';
+        
+        const downloadBtn = document.createElement('button');
+        downloadBtn.textContent = '💾';
+        downloadBtn.style.fontSize = '12px';
+        downloadBtn.style.padding = '4px 8px';
+        downloadBtn.onclick = () => downloadIcon(canvas, size);
+        
+        preview.appendChild(img);
+        preview.appendChild(label);
+        preview.appendChild(downloadBtn);
+        container.appendChild(preview);
+      });
+      
+      // Generate favicon.ico
+      const faviconCanvas = generateIcon(32);
+      const faviconPreview = document.createElement('div');
+      faviconPreview.className = 'icon-preview';
+      
+      const faviconImg = document.createElement('img');
+      faviconImg.src = faviconCanvas.toDataURL('image/png');
+      faviconImg.style.width = '32px';
+      faviconImg.style.height = '32px';
+      faviconImg.style.border = '2px solid #ddd';
+      faviconImg.style.borderRadius = '4px';
+      
+      const faviconLabel = document.createElement('div');
+      faviconLabel.textContent = 'favicon.ico';
+      faviconLabel.style.fontSize = '12px';
+      faviconLabel.style.color = '#666';
+      
+      const faviconBtn = document.createElement('button');
+      faviconBtn.textContent = '💾';
+      faviconBtn.style.fontSize = '12px';
+      faviconBtn.style.padding = '4px 8px';
+      faviconBtn.onclick = () => downloadIcon(faviconCanvas, 'favicon', 'ico');
+      
+      faviconPreview.appendChild(faviconImg);
+      faviconPreview.appendChild(faviconLabel);
+      faviconPreview.appendChild(faviconBtn);
+      container.appendChild(faviconPreview);
+    }
+    
+    function downloadIcon(canvas, size, format = 'png') {
+      const link = document.createElement('a');
+      link.download = format === 'ico' ? 'favicon.ico' : `icon-${size}.png`;
+      link.href = canvas.toDataURL(`image/${format === 'ico' ? 'png' : format}`);
+      link.click();
+    }
+    
+    function downloadAllIcons() {
+      iconSizes.forEach(size => {
+        setTimeout(() => {
+          const canvas = generateIcon(size);
+          downloadIcon(canvas, size);
+        }, size * 10); // Stagger downloads
+      });
+      
+      // Download favicon
+      setTimeout(() => {
+        const faviconCanvas = generateIcon(32);
+        downloadIcon(faviconCanvas, 'favicon', 'ico');
+      }, 5000);
+    }
+    
+    // Add roundRect polyfill for older browsers
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+        this.beginPath();
+        this.moveTo(x + radius, y);
+        this.lineTo(x + width - radius, y);
+        this.quadraticCurveTo(x + width, y, x + width, y + radius);
+        this.lineTo(x + width, y + height - radius);
+        this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        this.lineTo(x + radius, y + height);
+        this.quadraticCurveTo(x, y + height, x, y + height - radius);
+        this.lineTo(x, y + radius);
+        this.quadraticCurveTo(x, y, x + radius, y);
+        this.closePath();
+      };
+    }
+  </script>
+</body>
+</html>
