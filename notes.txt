@@ -3311,11 +3311,11 @@ COMMITS:
 
 ### **CALENDAR FUNCTIONALITY**:
 - **3-Month Display**: Previous, current, and next months in responsive grid
-- **Dual Mode Support**: Current todos vs History todos
+- **Comprehensive View**: Shows ALL relevant todos regardless of access point
 - **Smart Data Integration**:
-  - ✅ **Completed Tasks**: Green badges on `completedAt` dates
-  - ⚠️ **Due Tasks**: Orange badges on `dueDate` for uncompleted items
-  - **Filtering**: Only shows relevant todos (completed OR uncompleted with due dates)
+  - ✅ **Completed Tasks**: Green badges on `completedAt` dates from todoHistory
+  - ⚠️ **Due Tasks**: Orange badges on `dueDate` for uncompleted items from todoItems
+  - **Unified Display**: Combines current and historical data for complete overview
 
 ### **VISUAL FEATURES**:
 - **Modal Interface**: Large overlay calendar with click-outside-to-close
@@ -3326,16 +3326,16 @@ COMMITS:
 
 ### **TECHNICAL IMPLEMENTATION**:
 - **Functions Added**:
-  - `openTodoCalendar(isHistoryMode)`: Creates modal calendar view
-  - `renderTodoCalendar(isHistoryMode)`: Renders 3-month calendar grid
+  - `openTodoCalendar()`: Creates modal calendar view (no mode parameter needed)
+  - `renderTodoCalendar()`: Renders comprehensive 3-month calendar grid
   - `renderCalendarMonth()`: Generates individual month with todo data
 - **Data Processing**: Groups todos by ISO date strings for efficient lookup
-- **Dynamic Button Behavior**: Calendar buttons adapt to current/history mode
+- **Unified Data Source**: Combines todoHistory and todoItems for complete view
 - **Integration**: Works with existing todo system (due dates, completion tracking)
 
 ### **USER EXPERIENCE**:
 - **Easy Access**: Calendar buttons in all relevant locations
-- **Context Aware**: Shows appropriate data based on current mode
+- **Comprehensive View**: Always shows complete picture regardless of access point
 - **Visual Clarity**: Clear distinction between completed and due tasks
 - **Responsive**: Adapts to different screen sizes
 - **Intuitive**: Hover for details, click outside to close

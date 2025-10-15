@@ -1465,7 +1465,7 @@
           <span class="nav-label">To-Do</span>
         </button>
         
-        <button class="nav-button" onclick="openTodoCalendar(false)">
+        <button class="nav-button" onclick="openTodoCalendar()">
           <span class="nav-icon">📅</span>
           <span class="nav-label">To-Do Calendar</span>
         </button>
@@ -3203,7 +3203,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         historyButton.textContent = 'Current';
         headerTitle.textContent = 'To-Do History';
         if (calendarButton) {
-          calendarButton.onclick = () => openTodoCalendar(true); // true for history mode
+          calendarButton.onclick = () => openTodoCalendar(); // comprehensive view always
         }
         
         // Update header onclick to open fullscreen history
@@ -3258,7 +3258,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         historyButton.textContent = 'History';
         headerTitle.textContent = 'To-Do List';
         if (calendarButton) {
-          calendarButton.onclick = () => openTodoCalendar(false); // false for current mode
+          calendarButton.onclick = () => openTodoCalendar(); // comprehensive view always
         }
         
         // Restore original header onclick behavior
@@ -6042,7 +6042,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const calendarBtn = document.createElement('button');
         calendarBtn.className = 'back-button'; // Use same styling as other header buttons
         calendarBtn.textContent = '📅 Calendar';
-        calendarBtn.onclick = () => openTodoCalendar(showingTodoHistory);
+        calendarBtn.onclick = () => openTodoCalendar();
         
         // Add History/Current button to the left of Home button in header
         const historyBtn = document.createElement('button');
@@ -6506,7 +6506,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     // Todo Calendar Functions
-    function openTodoCalendar(isHistoryMode = false) {
+    function openTodoCalendar() {
       // Create modal for calendar view
       const modal = document.createElement('div');
       modal.className = 'modal-overlay';
@@ -6536,10 +6536,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       `;
       
-      const title = isHistoryMode ? 'To-Do History Calendar' : 'To-Do Calendar';
       dialog.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h2 style="margin: 0; color: var(--primary-color);">${title}</h2>
+          <h2 style="margin: 0; color: var(--primary-color);">To-Do Calendar</h2>
           <button onclick="this.closest('.modal-overlay').remove()" 
                   style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">×</button>
         </div>
@@ -6552,7 +6551,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       document.body.appendChild(modal);
       
       // Render the calendar
-      renderTodoCalendar(isHistoryMode);
+      renderTodoCalendar();
       
       // Close modal when clicking outside
       modal.addEventListener('click', (e) => {
@@ -6562,7 +6561,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       });
     }
 
-    function renderTodoCalendar(isHistoryMode = false) {
+    function renderTodoCalendar() {
       const container = document.getElementById('todo-calendar-container');
       if (!container) return;
       
@@ -6582,21 +6581,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         });
       }
       
-      // Get todo data based on mode
-      const todoData = isHistoryMode ? todoHistory : todoItems;
-      
-      // Group todos by date
+      // Group todos by date - combine ALL data for comprehensive view
       const todosByDate = {};
       
-      todoData.forEach(todo => {
-        // Add completed todos on their completion date
+      // Add completed todos from history on their completion date
+      todoHistory.forEach(todo => {
         if (todo.completed && todo.completedAt) {
           const completedDate = new Date(todo.completedAt).toISOString().split('T')[0];
           if (!todosByDate[completedDate]) todosByDate[completedDate] = [];
           todosByDate[completedDate].push({...todo, type: 'completed'});
         }
-        
-        // Add uncompleted todos with due dates on their due date
+      });
+      
+      // Add uncompleted todos from current list with due dates on their due date
+      todoItems.forEach(todo => {
         if (!todo.completed && todo.dueDate) {
           if (!todosByDate[todo.dueDate]) todosByDate[todo.dueDate] = [];
           todosByDate[todo.dueDate].push({...todo, type: 'due'});
