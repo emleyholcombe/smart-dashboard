@@ -3318,27 +3318,30 @@ COMMITS:
   - **Unified Display**: Combines current and historical data for complete overview
 
 ### **VISUAL FEATURES**:
-- **Modal Interface**: Large overlay calendar with click-outside-to-close
+- **Fullscreen Interface**: Dedicated fullscreen view like other widgets
 - **Today Highlighting**: Current date highlighted in blue
 - **Task Badges**: Color-coded with hover tooltips showing full text
 - **Text Truncation**: Long task names truncated with "..." for compact display
 - **Professional Design**: Clean grid layout with proper month headers
+- **Navigation**: Back button, home button, and auto-return functionality
 
 ### **TECHNICAL IMPLEMENTATION**:
 - **Functions Added**:
-  - `openTodoCalendar()`: Creates modal calendar view (no mode parameter needed)
-  - `renderTodoCalendar()`: Renders comprehensive 3-month calendar grid
+  - `showFullscreenTodoCalendar()`: Opens fullscreen calendar view
+  - `renderTodoCalendarFullscreen()`: Renders comprehensive 3-month calendar grid
   - `renderCalendarMonth()`: Generates individual month with todo data
+- **Fullscreen Integration**: Uses openFullscreen('todo-calendar') system
 - **Data Processing**: Groups todos by ISO date strings for efficient lookup
 - **Unified Data Source**: Combines todoHistory and todoItems for complete view
-- **Integration**: Works with existing todo system (due dates, completion tracking)
+- **URL Support**: Handles 'todo-calendar' URL parameter for direct access
 
 ### **USER EXPERIENCE**:
 - **Easy Access**: Calendar buttons in all relevant locations
 - **Comprehensive View**: Always shows complete picture regardless of access point
 - **Visual Clarity**: Clear distinction between completed and due tasks
 - **Responsive**: Adapts to different screen sizes
-- **Intuitive**: Hover for details, click outside to close
+- **Fullscreen Experience**: Dedicated view with proper navigation controls
+- **Consistent Interface**: Matches other widget fullscreen patterns
 
 **FILES MODIFIED**:
 - `index.html`: Added calendar functions and UI integration
