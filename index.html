@@ -3533,12 +3533,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                         font-size: 14px; box-sizing: border-box;">
         </div>
 
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 16px;">
           <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Recipe Source (optional):</label>
           <input type="text" id="edit-grocery-source" value="${escapeHtml(item.recipeSource || '')}" 
                  placeholder="e.g., Butter Chicken, Pasta Recipe..." 
                  style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; 
                         font-size: 14px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: #555; cursor: pointer;">
+            <input type="checkbox" id="edit-grocery-optional" ${item.isOptional ? 'checked' : ''} 
+                   style="margin: 0;">
+            Mark as optional ingredient
+          </label>
         </div>
 
         <div style="display: flex; gap: 12px; justify-content: flex-end;">
@@ -3555,6 +3563,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Get input elements
       const textInput = document.getElementById('edit-grocery-text');
       const sourceInput = document.getElementById('edit-grocery-source');
+      const optionalCheckbox = document.getElementById('edit-grocery-optional');
       const saveBtn = document.getElementById('grocery-edit-save-btn');
       const cancelBtn = document.getElementById('grocery-edit-cancel-btn');
 
@@ -3570,13 +3579,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
 
         const newSource = sourceInput.value.trim();
+        const isOptional = optionalCheckbox.checked;
         
         // Update item
         item.text = newText;
         item.recipeSource = newSource || null;
+        item.isOptional = isOptional;
         
-          saveGroceryItems();
-          renderGroceryList();
+        saveGroceryItems();
+        renderGroceryList();
         
         // Also update fullscreen view if it's open
         if (document.getElementById('fullscreen-grocery-list')) {
@@ -3630,7 +3641,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const sortedItems = sortItemsByOrder([...groceryItems]);
       
       list.innerHTML = sortedItems.map(item => {
-        const recipeSource = item.recipeSource ? `<div class="recipe-source" style="font-size: 0.8em; color: #666; margin-top: 2px;">From: ${escapeHtml(item.recipeSource)}</div>` : '';
+        const recipeSource = item.recipeSource ? `<div class="recipe-source" style="font-size: 0.8em; color: #666; margin-top: 2px;">For: ${escapeHtml(item.recipeSource)}</div>` : '';
         const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
         
         return `
@@ -6023,7 +6034,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const sortedItems = sortItemsByOrder([...groceryItems]);
       
       list.innerHTML = sortedItems.map(item => {
-        const recipeSource = item.recipeSource ? `<div class="recipe-source" style="font-size: 0.8em; color: #666; margin-top: 2px;">From: ${escapeHtml(item.recipeSource)}</div>` : '';
+        const recipeSource = item.recipeSource ? `<div class="recipe-source" style="font-size: 0.8em; color: #666; margin-top: 2px;">For: ${escapeHtml(item.recipeSource)}</div>` : '';
         const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
         
         return `
