@@ -2488,8 +2488,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // Handle URL parameters AFTER data is loaded and lists are rendered
       console.log('🔗 Handling URL parameters...');
-      handleURLParameters();
-      console.log('✅ URL parameters handled');
+      console.log('Current URL:', window.location.href);
+      console.log('URL search params:', window.location.search);
+      const urlParams = new URLSearchParams(window.location.search);
+      console.log('View parameter:', urlParams.get('view'));
+      
+      // TEMPORARILY DISABLE URL parameter handling for debugging
+      // handleURLParameters();
+      console.log('✅ URL parameters handling DISABLED for debugging');
       
       // Monitor online status
       window.addEventListener('online', () => {
