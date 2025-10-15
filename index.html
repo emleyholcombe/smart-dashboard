@@ -3601,7 +3601,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // 9. Baking measurements
       const bakingMeasurements = ['cup', 'cups', 'lb', 'pound', 'ounce', 'oz'];
-      const bakingIngredients = ['flour', 'sugar', 'brown sugar', 'powdered sugar', 'baking powder', 'baking soda', 'vanilla extract', 'oil', 'butter'];
+      const bakingIngredients = ['flour', 'sugar', 'brown sugar', 'powdered sugar', 'baking powder', 'baking soda', 'vanilla extract', 'oil'];
       if (bakingMeasurements.some(measurement => text.includes(measurement)) &&
           bakingIngredients.some(ingredient => text.includes(ingredient))) {
         return 'Dry Goods & Baking';
