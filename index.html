@@ -3528,19 +3528,27 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       updateItemOrders(groceryItems);
       const sortedItems = sortItemsByOrder([...groceryItems]);
       
-      list.innerHTML = sortedItems.map(item => `
+      list.innerHTML = sortedItems.map(item => {
+        const recipeSource = item.recipeSource ? `<div class="recipe-source" style="font-size: 0.8em; color: #666; margin-top: 2px;">From: ${escapeHtml(item.recipeSource)}</div>` : '';
+        const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
+        
+        return `
         <li class="task-item">
           <span class="drag-handle">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id})">
-          <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
+            <div style="flex: 1;">
+              <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}${optionalIndicator}</span>
+              ${recipeSource}
+            </div>
           <div class="task-actions">
             <button class="edit-btn" onclick="editGroceryItem(${item.id})" title="Edit">✏️</button>
             <button class="delete-btn" onclick="deleteGroceryItem(${item.id})" title="Delete">🗑️</button>
           </div>
         </li>
-      `).join('');
+        `;
+      }).join('');
       
       // Set up drag and drop
       setTimeout(() => setupDragAndDrop(list, groceryItems, 'grocery'), 0);
@@ -4142,6 +4150,72 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       return ingredients;
     }
 
+    // Grocery list integration functions
+    function addIngredientToGroceryList(ingredient, recipeName, showAlert = true) {
+      if (!ingredient || !ingredient.trim()) return false;
+      
+      const cleanIngredient = ingredient.trim();
+      
+      // Check if ingredient already exists in grocery list
+      const existingItem = groceryItems.find(item => 
+        item.text.toLowerCase() === cleanIngredient.toLowerCase()
+      );
+      
+      if (existingItem) {
+        if (showAlert) {
+          alert(`"${cleanIngredient}" is already in your grocery list.`);
+        }
+        return false;
+      }
+      
+      // Detect if ingredient is optional (contains "optional" or is in parentheses)
+      const isOptional = /\(optional\)|\boptional\b/i.test(cleanIngredient);
+      
+      // Create new grocery item with recipe source
+      const groceryItem = {
+        id: Date.now() + Math.random(), // Ensure unique ID
+        text: cleanIngredient,
+        completed: false,
+        createdAt: new Date().toISOString(),
+        order: Date.now(),
+        recipeSource: recipeName,
+        isOptional: isOptional
+      };
+      
+      groceryItems.unshift(groceryItem);
+      updateItemOrders(groceryItems);
+      saveGroceryItems();
+      renderGroceryList();
+      
+      // Also update fullscreen view if it's open
+      if (document.getElementById('fullscreen-grocery-list')) {
+        renderGroceryListFullscreen();
+      }
+      
+      if (showAlert) {
+        alert(`Added "${cleanIngredient}" to grocery list from "${recipeName}"`);
+      }
+      
+      return true;
+    }
+
+    function addIngredientToGroceryListFromInput(button) {
+      const input = button.parentElement.querySelector('input');
+      const ingredient = input.value.trim();
+      
+      if (!ingredient) {
+        alert('Please enter an ingredient first.');
+        input.focus();
+        return;
+      }
+      
+      // Get recipe name from the modal
+      const nameInput = document.getElementById('edit-meal-name');
+      const recipeName = nameInput ? nameInput.value.trim() || 'Unknown Recipe' : 'Unknown Recipe';
+      
+      addIngredientToGroceryList(ingredient, recipeName);
+    }
+
     function editMealRecipe(id, isHistory = false) {
       const items = isHistory ? mealHistory : mealItems;
       const item = items.find(item => item.id === id);
@@ -4168,6 +4242,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           <input type="text" value="${escapeHtml(ingredient)}" 
                  style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                  data-index="${index}">
+          <button type="button" onclick="addIngredientToGroceryList('${escapeHtml(ingredient)}', '${escapeHtml(item.text)}')" 
+                  style="padding: 4px 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                  title="Add to grocery list">🛒</button>
           <button type="button" onclick="this.parentElement.remove()" 
                   style="padding: 4px 8px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;">×</button>
         </div>`
@@ -4208,6 +4285,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               🔗 Auto-fill from URL
             </button>
           </div>
+          <div style="margin-top: 8px;">
+            <button type="button" id="add-all-to-grocery-btn" 
+                    style="width: 100%; padding: 8px; background: #28a745; color: white;
+                           border: none; border-radius: 4px; cursor: pointer;">
+              🛒 Add All Ingredients to Grocery List
+            </button>
+          </div>
         </div>
 
         <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
@@ -4224,6 +4308,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add ingredient functionality
       const addBtn = document.getElementById('add-ingredient-btn');
       const autoFillBtn = document.getElementById('auto-fill-btn');
+      const addAllToGroceryBtn = document.getElementById('add-all-to-grocery-btn');
       const container = document.getElementById('ingredients-container');
       const nameInput = document.getElementById('edit-meal-name');
       const urlInput = document.getElementById('edit-meal-url');
@@ -4241,11 +4326,42 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           <input type="text" placeholder="Enter ingredient..." 
                  style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                  data-index="${newIndex}">
+          <button type="button" onclick="addIngredientToGroceryListFromInput(this)" 
+                  style="padding: 4px 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                  title="Add to grocery list">🛒</button>
           <button type="button" onclick="this.parentElement.remove()" 
                   style="padding: 4px 8px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;">×</button>
         `;
         container.appendChild(newItem);
         newItem.querySelector('input').focus();
+      });
+
+      // Add all ingredients to grocery list
+      addAllToGroceryBtn.addEventListener('click', () => {
+        const inputs = container.querySelectorAll('input[type="text"]');
+        const ingredients = Array.from(inputs)
+          .map(input => input.value.trim())
+          .filter(value => value.length > 0);
+        
+        if (ingredients.length === 0) {
+          alert('No ingredients to add to grocery list.');
+          return;
+        }
+        
+        const recipeName = nameInput.value.trim() || 'Unknown Recipe';
+        let addedCount = 0;
+        
+        ingredients.forEach(ingredient => {
+          if (addIngredientToGroceryList(ingredient, recipeName, false)) {
+            addedCount++;
+          }
+        });
+        
+        if (addedCount > 0) {
+          alert(`Added ${addedCount} ingredient${addedCount > 1 ? 's' : ''} to grocery list from "${recipeName}"`);
+        } else {
+          alert('All ingredients are already in your grocery list.');
+        }
       });
 
       // Auto-fill from URL functionality
@@ -4276,6 +4392,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                   <input type="text" value="${escapeHtml(ingredient)}" 
                          style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                          data-index="${index}">
+                  <button type="button" onclick="addIngredientToGroceryListFromInput(this)" 
+                          style="padding: 4px 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                          title="Add to grocery list">🛒</button>
                   <button type="button" onclick="this.parentElement.remove()" 
                           style="padding: 4px 8px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;">×</button>
                 `;
@@ -4316,6 +4435,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                   <input type="text" value="${escapeHtml(ingredient)}" 
                          style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
                          data-index="${index}">
+                  <button type="button" onclick="addIngredientToGroceryListFromInput(this)" 
+                          style="padding: 4px 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                          title="Add to grocery list">🛒</button>
                   <button type="button" onclick="this.parentElement.remove()" 
                           style="padding: 4px 8px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;">×</button>
                 `;
@@ -5807,19 +5929,27 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       updateItemOrders(groceryItems);
       const sortedItems = sortItemsByOrder([...groceryItems]);
       
-      list.innerHTML = sortedItems.map(item => `
+      list.innerHTML = sortedItems.map(item => {
+        const recipeSource = item.recipeSource ? `<div class="recipe-source" style="font-size: 0.8em; color: #666; margin-top: 2px;">From: ${escapeHtml(item.recipeSource)}</div>` : '';
+        const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
+        
+        return `
         <li class="task-item">
           <span class="drag-handle">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id}); renderGroceryListFullscreen();">
-          <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}</span>
+            <div style="flex: 1;">
+              <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}${optionalIndicator}</span>
+              ${recipeSource}
+            </div>
           <div class="task-actions">
             <button class="edit-btn" onclick="editGroceryItem(${item.id}); renderGroceryListFullscreen();" title="Edit">✏️</button>
             <button class="delete-btn" onclick="deleteGroceryItem(${item.id}); renderGroceryListFullscreen();" title="Delete">🗑️</button>
           </div>
         </li>
-      `).join('');
+        `;
+      }).join('');
       
       // Set up drag and drop
       setTimeout(() => setupDragAndDrop(list, groceryItems, 'grocery'), 0);
