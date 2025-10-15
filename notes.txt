@@ -3349,17 +3349,56 @@ COMMITS:
 
 **COMMITS**:
 - "Add comprehensive todo calendar view functionality" (c7f7850)
-- "Add To-Do Calendar button to home screen and update documentation" (pending)
+- "Add To-Do Calendar button to home screen and update documentation" (f313e1f)
+- "Make todo calendar comprehensive - show all data regardless of access point" (3065d77)
+- "Convert todo calendar to fullscreen view instead of modal popup" (3b78c32)
+- "Switch placement of To-Do Calendar and To-Do History buttons on home screen" (e2c922b)
+- "Fix calendar button overlap issue in todo widget" (be8a98b)
+- "Fix missing completed flag in todo history items for calendar display" (9e3473f)
+- "Add one-time migration to fix existing history items for calendar display" (acd82a7)
+- "Add calendar navigation with current month default view" (2eaf010)
+
+## **CALENDAR NAVIGATION & BUG FIXES** 📅
+
+**RECENT ENHANCEMENTS COMPLETED**:
+
+### **CALENDAR BUTTON OVERLAP FIX**:
+- **Issue**: Calendar button in todo widget was overlapped by title's clickable area
+- **Solution**: Added z-index: 10 to calendar button, constrained title clickable area with padding
+- **Result**: Calendar button now properly clickable without interference
+
+### **COMPLETED TASKS DISPLAY FIX**:
+- **Issue**: Completed tasks not showing on calendar (missing completed: true flag in history)
+- **Root Cause**: toggleTodoItem() created history items without completed property
+- **Solution**: Added completed: true to historyItem object + one-time migration for existing data
+- **Result**: Calendar now shows both completed (green ✓) and due (orange !) tasks
+
+### **CALENDAR NAVIGATION ENHANCEMENT**:
+- **Default View**: Current month only (not 3-month spread) for better focus
+- **Navigation Controls**: Previous Month, Today, Next Month buttons
+- **Auto-Reset**: Always opens to current month when accessing calendar
+- **State Management**: calendarViewDate tracks current view with month-by-month navigation
+
+### **FULLSCREEN IMPLEMENTATION**:
+- **Converted**: Modal popup to dedicated fullscreen view matching other widgets
+- **Navigation**: Back button, home button, auto-return functionality
+- **URL Support**: ?view=todo-calendar parameter for direct access
+- **Consistency**: Matches todo, grocery, meals fullscreen patterns
+
+### **HOME SCREEN ORGANIZATION**:
+- **Button Order**: To-Do → To-Do History → To-Do Calendar (logical flow)
+- **Navigation**: Calendar accessible from widget buttons, fullscreen headers, and home screen
+- **User Flow**: Current tasks → Historical tasks → Calendar visualization
 
 CURRENT PROJECT STATE:
 ======================
-- Total commits today: 11+
-- Lines of code: 7000+ (index.html)
-- All functionality working and tested (including calendar view)
+- Total commits today: 20+
+- Lines of code: 7059 (index.html)
+- All functionality working and tested (including enhanced calendar)
 - Clean git history with descriptive commit messages
-- Comprehensive todo calendar system complete
+- Comprehensive todo calendar system with navigation complete
 - Enhanced grocery categorization with drag-and-drop
 - Robust recipe management with auto-fill capabilities
 - Seamless meal planning to grocery shopping workflow
-- Complete todo calendar integration with dual-mode support
+- Complete todo calendar integration with bug fixes and UX improvements
 
