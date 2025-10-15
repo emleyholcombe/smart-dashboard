@@ -3623,12 +3623,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const dragHandle = item.querySelector('.drag-handle');
         if (dragHandle) {
           dragHandle.title = 'Drag to reorder or move to different category';
+          dragHandle.draggable = true;
           
-          // Remove existing drag events to avoid conflicts
-          dragHandle.removeEventListener('dragstart', null);
-          dragHandle.removeEventListener('dragend', null);
+          // Clear any existing event listeners by cloning the element
+          const newDragHandle = dragHandle.cloneNode(true);
+          dragHandle.parentNode.replaceChild(newDragHandle, dragHandle);
+          const handle = newDragHandle;
           
-          dragHandle.addEventListener('dragstart', (e) => {
+          handle.addEventListener('dragstart', (e) => {
             const itemId = parseInt(e.target.closest('.task-item').getAttribute('data-item-id') || 
                                    e.target.closest('.task-item').querySelector('input[onchange*="toggleGroceryItem"]')
                                    ?.getAttribute('onchange')?.match(/\d+/)?.[0]);
@@ -3650,7 +3652,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             }
           });
           
-          dragHandle.addEventListener('dragend', (e) => {
+          handle.addEventListener('dragend', (e) => {
             item.classList.remove('dragging');
             item.style.opacity = '1';
             groceryDraggedItem = null;
@@ -3661,6 +3663,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             clearGroceryDropIndicators(listElement);
           });
         }
+        
+        // Make sure only drag handle is draggable
+        item.draggable = false;
         
         // Set up drop zones for reordering within categories
         item.addEventListener('dragover', (e) => {
@@ -4033,7 +4038,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             
             html += `
               <li class="task-item" data-item-id="${item.id}">
-          <span class="drag-handle" draggable="true">☰</span>
+          <span class="drag-handle">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id})">
@@ -6479,7 +6484,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             
             html += `
               <li class="task-item" data-item-id="${item.id}">
-          <span class="drag-handle" draggable="true">☰</span>
+          <span class="drag-handle">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id}); renderGroceryListFullscreen();">
