@@ -7500,23 +7500,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     // App-specific UI elements
     function addAppSpecificUI() {
-      // Add status indicator for PWA
-      const statusBar = document.createElement('div');
-      statusBar.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #8c5ec4, #b794f6);
-        z-index: 10000;
-        opacity: 0.8;
-      `;
-      document.body.appendChild(statusBar);
+      // Status bar removed for cleaner home screen appearance
       
       // Refresh button removed - using pull-to-refresh only for cleaner UI
       
-      // Add app version indicator with sync status
+      // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
       versionIndicator.textContent = 'PWA v1.0';
@@ -7524,15 +7512,29 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         position: fixed;
         bottom: 10px;
         left: 10px;
-        font-size: 10px;
-        color: #999;
+        font-size: 8px;
+        color: rgba(255, 255, 255, 0.3);
         z-index: 1000;
         cursor: pointer;
-        padding: 4px 8px;
-        background: rgba(255, 255, 255, 0.8);
+        padding: 2px 4px;
+        background: transparent;
         border-radius: 4px;
-        border: 1px solid #ddd;
+        opacity: 0.1;
+        transition: opacity 0.3s ease;
       `;
+      
+      // Make it more visible on hover for debugging
+      versionIndicator.addEventListener('mouseenter', () => {
+        versionIndicator.style.opacity = '0.8';
+        versionIndicator.style.background = 'rgba(255, 255, 255, 0.9)';
+        versionIndicator.style.color = '#666';
+      });
+      
+      versionIndicator.addEventListener('mouseleave', () => {
+        versionIndicator.style.opacity = '0.1';
+        versionIndicator.style.background = 'transparent';
+        versionIndicator.style.color = 'rgba(255, 255, 255, 0.3)';
+      });
       
       // Add click handler for debug info
       versionIndicator.addEventListener('click', () => {
@@ -7632,11 +7634,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           }
         }
         
-        // Reset refresh button
-        if (refreshButton) {
-          refreshButton.style.animation = '';
-          refreshButton.style.pointerEvents = 'auto';
-        }
+        // Refresh button removed - no reset needed
         
         // Add haptic feedback if available
         if (navigator.vibrate && window.pwaInfo?.isPWA) {
@@ -7653,11 +7651,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       }).catch((error) => {
         console.error('❌ Error refreshing app data:', error);
         
-        // Reset refresh button on error
-        if (refreshButton) {
-          refreshButton.style.animation = '';
-          refreshButton.style.pointerEvents = 'auto';
-        }
+        // Refresh button removed - no reset needed
       });
     }
 
