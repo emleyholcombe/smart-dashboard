@@ -2702,7 +2702,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             'No tasks found matching your search criteria.' : 
             'No completed tasks yet.';
           list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
-          list.style.setProperty('margin-top', '2.5rem', 'important'); // Add spacing even for empty state
+          list.style.setProperty('margin-top', '3rem', 'important'); // Add spacing even for empty state
           return;
         }
         
@@ -2710,7 +2710,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         list.innerHTML = renderTodoHistoryGrouped(groups);
         
         // Add extra top margin when showing history to prevent overlap with avatar filters
-        list.style.setProperty('margin-top', '2.5rem', 'important');
+        list.style.setProperty('margin-top', '3rem', 'important');
         
         // Set up drag and drop for history items (within date groups only)
         setTimeout(() => setupTodoHistoryDragAndDrop(list, groups), 0);
