@@ -150,10 +150,17 @@
       box-sizing: border-box;
     }
 
+    html {
+      background: var(--background) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      min-height: 100vh !important;
+    }
+
     body {
       margin: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--background);
+      background: var(--background) !important;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -163,6 +170,27 @@
       padding-bottom: env(safe-area-inset-bottom);
       margin-top: calc(-1 * env(safe-area-inset-top));
       margin-bottom: calc(-1 * env(safe-area-inset-bottom));
+    }
+    
+    /* iOS PWA Status Bar Fix - Applied immediately */
+    @media (display-mode: standalone) {
+      html, body {
+        background: linear-gradient(135deg, #8c5ec4 0%, #764ba2 100%) !important;
+        background-attachment: fixed !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient(135deg, #8c5ec4 0%, #764ba2 100%);
+        z-index: -1;
+      }
     }
 
     header {
@@ -7517,16 +7545,28 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           min-height: calc(100vh + env(safe-area-inset-top)) !important;
         }
         
-        /* Ensure no white space at top */
+        /* Ensure no white space at top - aggressive fix */
         .pwa-mode body::before {
           content: '';
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
-          height: env(safe-area-inset-top, 0);
-          background: #8c5ec4;
+          height: 100px; /* Cover any possible status bar height */
+          background: linear-gradient(135deg, #8c5ec4 0%, #764ba2 100%);
           z-index: -1;
+        }
+        
+        /* Force remove any default iOS styling */
+        .pwa-mode html, .pwa-mode body {
+          background: linear-gradient(135deg, #8c5ec4 0%, #764ba2 100%) !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        
+        /* Override any system styling */
+        .pwa-mode * {
+          -webkit-appearance: none !important;
         }
       `;
       document.head.appendChild(style);
