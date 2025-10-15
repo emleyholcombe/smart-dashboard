@@ -6646,22 +6646,22 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const todosByDate = {};
       
       // Add completed todos from history on their completion date
-      todoHistory.forEach(todo => {
-        // Items in todoHistory with completedAt should be considered completed
-        // (legacy items might not have completed: true flag)
-        if (todo.completedAt) {
-          const completedDate = new Date(todo.completedAt).toISOString().split('T')[0];
-          if (!todosByDate[completedDate]) todosByDate[completedDate] = [];
-          todosByDate[completedDate].push({...todo, completed: true, type: 'completed'});
-        }
+      let filteredHistory = todoHistory.filter(todo => todo.completedAt);
+      filteredHistory = filterCalendarTodosByAvatar(filteredHistory);
+      
+      filteredHistory.forEach(todo => {
+        const completedDate = new Date(todo.completedAt).toISOString().split('T')[0];
+        if (!todosByDate[completedDate]) todosByDate[completedDate] = [];
+        todosByDate[completedDate].push({...todo, completed: true, type: 'completed'});
       });
       
       // Add uncompleted todos from current list with due dates on their due date
-      todoItems.forEach(todo => {
-        if (!todo.completed && todo.dueDate) {
-          if (!todosByDate[todo.dueDate]) todosByDate[todo.dueDate] = [];
-          todosByDate[todo.dueDate].push({...todo, type: 'due'});
-        }
+      let filteredCurrent = todoItems.filter(todo => !todo.completed && todo.dueDate);
+      filteredCurrent = filterCalendarTodosByAvatar(filteredCurrent);
+      
+      filteredCurrent.forEach(todo => {
+        if (!todosByDate[todo.dueDate]) todosByDate[todo.dueDate] = [];
+        todosByDate[todo.dueDate].push({...todo, type: 'due'});
       });
       
         // Add navigation controls
@@ -6682,17 +6682,37 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               ← Previous Month
             </button>
             
-            <button onclick="navigateCalendar(0)" style="
-              background: #6c757d; 
-              color: white; 
-              border: none; 
-              border-radius: 6px; 
-              padding: 8px 16px; 
-              cursor: pointer; 
-              font-size: 14px;
-            ">
-              Today
-            </button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button onclick="navigateCalendar(0)" style="
+                background: #6c757d; 
+                color: white; 
+                border: none; 
+                border-radius: 6px; 
+                padding: 8px 16px; 
+                cursor: pointer; 
+                font-size: 14px;
+              ">
+                Today
+              </button>
+              
+              <div class="calendar-avatar-filters" style="display: flex; gap: 5px; margin-left: 10px;">
+                <span class="calendar-avatar-filter emley" data-avatar="emley" onclick="toggleCalendarAvatarFilter('emley')" title="Filter by Emley" style="
+                  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+                  cursor: pointer; font-weight: bold; font-size: 12px; border: 2px solid transparent; transition: all 0.2s;
+                  background: #e3f2fd; color: #1976d2;
+                ">E</span>
+                <span class="calendar-avatar-filter nate" data-avatar="nate" onclick="toggleCalendarAvatarFilter('nate')" title="Filter by Nate" style="
+                  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+                  cursor: pointer; font-weight: bold; font-size: 12px; border: 2px solid transparent; transition: all 0.2s;
+                  background: #f3e5f5; color: #7b1fa2;
+                ">N</span>
+                <span class="calendar-avatar-filter family" data-avatar="family" onclick="toggleCalendarAvatarFilter('family')" title="Filter by Family" style="
+                  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+                  cursor: pointer; font-weight: bold; font-size: 12px; border: 2px solid transparent; transition: all 0.2s;
+                  background: #e8f5e8; color: #388e3c;
+                ">F</span>
+              </div>
+            </div>
             
             <button onclick="navigateCalendar(1)" style="
               background: var(--primary-color); 
@@ -6720,6 +6740,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         calendarHTML += '</div>';
         container.innerHTML = calendarHTML;
+        
+        // Update filter button appearance after rendering
+        setTimeout(() => updateCalendarAvatarFilterButtons(), 0);
     }
 
     function navigateCalendar(direction) {
@@ -6763,6 +6786,53 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // For current tasks, directly open the edit modal
         editTodoItem(todoId);
       }
+    }
+
+    // Calendar-specific avatar filtering
+    let selectedCalendarAvatarFilters = [];
+
+    function toggleCalendarAvatarFilter(avatar) {
+      const index = selectedCalendarAvatarFilters.indexOf(avatar);
+      if (index > -1) {
+        // Remove filter if already selected
+        selectedCalendarAvatarFilters.splice(index, 1);
+      } else {
+        // Add filter if not selected
+        selectedCalendarAvatarFilters.push(avatar);
+      }
+      
+      // Update filter button appearance
+      updateCalendarAvatarFilterButtons();
+      
+      // Re-render the calendar with filters applied
+      renderTodoCalendarFullscreen();
+    }
+
+    function updateCalendarAvatarFilterButtons() {
+      const calendarFilters = document.querySelectorAll('.calendar-avatar-filter');
+      calendarFilters.forEach(button => {
+        const avatar = button.dataset.avatar;
+        if (selectedCalendarAvatarFilters.includes(avatar)) {
+          button.style.border = '2px solid var(--primary-color)';
+          button.style.transform = 'scale(1.1)';
+        } else {
+          button.style.border = '2px solid transparent';
+          button.style.transform = 'scale(1)';
+        }
+      });
+    }
+
+    function filterCalendarTodosByAvatar(items) {
+      // If no filters selected, show all items
+      if (selectedCalendarAvatarFilters.length === 0) {
+        return items;
+      }
+      
+      // Filter items based on selected avatars
+      return items.filter(item => {
+        const assignedTo = item.assignedTo || 'family'; // Default to family if not assigned
+        return selectedCalendarAvatarFilters.includes(assignedTo);
+      });
     }
 
     // Fullscreen grocery functions
