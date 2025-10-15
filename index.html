@@ -6631,11 +6631,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // Add completed todos from history on their completion date
       todoHistory.forEach(todo => {
+        console.log('Checking history item:', {
+          text: todo.text,
+          completed: todo.completed,
+          completedAt: todo.completedAt,
+          hasCompletedAt: !!todo.completedAt
+        });
+        
         if (todo.completed && todo.completedAt) {
           const completedDate = new Date(todo.completedAt).toISOString().split('T')[0];
           if (!todosByDate[completedDate]) todosByDate[completedDate] = [];
           todosByDate[completedDate].push({...todo, type: 'completed'});
           console.log('Added completed todo:', todo.text, 'on', completedDate);
+        } else {
+          console.log('Skipped history item - completed:', todo.completed, 'completedAt:', todo.completedAt);
         }
       });
       
