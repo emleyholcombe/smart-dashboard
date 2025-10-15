@@ -1540,8 +1540,8 @@
     <!-- To-Do List -->
     <div class="widget todo-widget" id="todo-widget">
       <div style="position: relative; text-align: center; margin-bottom: 1.5rem;">
-        <button onclick="showFullscreenTodoCalendar()" class="calendar-button" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); padding: 4px 8px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">📅 Calendar</button>
-        <h2 onclick="openFullscreen('todo')" style="margin: 0; cursor: pointer;">To-Do List</h2>
+        <button onclick="showFullscreenTodoCalendar()" class="calendar-button" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); padding: 4px 8px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; z-index: 10;">📅 Calendar</button>
+        <h2 onclick="openFullscreen('todo')" style="margin: 0; cursor: pointer; display: inline-block; padding: 0 80px;">To-Do List</h2>
         <button onclick="showTodoHistory()" class="history-button">History</button>
       </div>
       <div class="add-item-container" id="todo-add-container">
@@ -6034,7 +6034,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         content.appendChild(iframe);
         
       } else if (widgetType === 'todo-calendar') {
-        console.log('openFullscreen called with todo-calendar'); // Debug log
         title.textContent = 'To-Do Calendar';
         title.onclick = closeFullscreen;
         title.style.cursor = 'pointer';
@@ -6605,12 +6604,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function renderTodoCalendarFullscreen() {
-      console.log('renderTodoCalendarFullscreen called'); // Debug log
       const container = document.getElementById('fullscreen-todo-calendar-container');
-      if (!container) {
-        console.log('Container not found!'); // Debug log
-        return;
-      }
+      if (!container) return;
       
       // Get current date and calculate calendar bounds
       const today = new Date();
@@ -6859,7 +6854,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function showFullscreenTodoCalendar() {
-      console.log('showFullscreenTodoCalendar called'); // Debug log
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       openFullscreen('todo-calendar');
