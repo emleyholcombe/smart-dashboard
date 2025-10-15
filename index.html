@@ -2421,6 +2421,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Load data from cloud or localStorage
       await loadAllData();
       
+      // One-time migration to fix legacy history items
+      let needsSave = false;
+      todoHistory.forEach(item => {
+        if (item.completedAt && item.completed === undefined) {
+          item.completed = true;
+          needsSave = true;
+        }
+      });
+      
+      if (needsSave) {
+        saveTodoHistory();
+        console.log('Migrated legacy history items to include completed flag');
+      }
+      
       // Clean up old completed items first
       cleanupCompletedItems();
       
@@ -6629,10 +6643,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // Add completed todos from history on their completion date
       todoHistory.forEach(todo => {
-        if (todo.completed && todo.completedAt) {
+        // Items in todoHistory with completedAt should be considered completed
+        // (legacy items might not have completed: true flag)
+        if (todo.completedAt) {
           const completedDate = new Date(todo.completedAt).toISOString().split('T')[0];
           if (!todosByDate[completedDate]) todosByDate[completedDate] = [];
-          todosByDate[completedDate].push({...todo, type: 'completed'});
+          todosByDate[completedDate].push({...todo, completed: true, type: 'completed'});
         }
       });
       
