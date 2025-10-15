@@ -3483,7 +3483,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         keywords: ['canned', 'can of', 'soup', 'broth', 'stock', 'beans', 'chickpeas', 'lentils', 'tomatoes', 'tomato sauce', 'pasta sauce', 'marinara', 'salsa', 'diced tomatoes', 'tomato paste', 'coconut milk', 'canned fruit', 'canned vegetables', 'corn', 'green beans', 'peas', 'carrots', 'jar', 'bottle', 'packaged', 'boxed']
       },
       'Spices': {
-        keywords: ['spices', 'seasoning', 'herbs', 'dried herbs', 'cinnamon', 'paprika', 'cumin', 'chili powder', 'garlic powder', 'onion powder', 'turmeric', 'garam masala', 'coriander', 'cardamom', 'oregano', 'basil', 'thyme', 'rosemary', 'sage', 'parsley', 'cilantro', 'dill', 'mint', 'black pepper', 'white pepper', 'cayenne', 'nutmeg', 'cloves', 'allspice', 'bay leaves', 'curry powder', 'italian seasoning', 'mustard seed', 'celery seed', 'fennel', 'star anise', 'saffron', 'vanilla bean', 'ground', 'dried', 'fresh herbs']
+        keywords: ['spices', 'seasoning', 'dried herbs', 'cinnamon', 'paprika', 'cumin', 'chili powder', 'garlic powder', 'onion powder', 'turmeric', 'garam masala', 'coriander', 'cardamom', 'black pepper', 'white pepper', 'cayenne', 'nutmeg', 'cloves', 'allspice', 'bay leaves', 'curry powder', 'italian seasoning', 'mustard seed', 'celery seed', 'fennel', 'star anise', 'saffron', 'vanilla bean', 'ground', 'dried']
       },
       'Dry Goods & Baking': {
         keywords: ['flour', 'sugar', 'brown sugar', 'powdered sugar', 'baking powder', 'baking soda', 'vanilla', 'extract', 'oil', 'olive oil', 'vegetable oil', 'coconut oil', 'vinegar', 'salt', 'baking mix', 'pancake mix', 'cake mix', 'cornstarch', 'cocoa powder', 'chocolate chips', 'nuts', 'almonds', 'walnuts', 'pecans', 'peanuts']
@@ -3536,22 +3536,29 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return 'Canned & Packaged Goods';
       }
       
-      // 2. Spice measurements indicate Spices
-      const spiceMeasurements = ['teaspoon', 'tsp', 'tablespoon', 'tbsp', 'pinch of', 'dash of', 'ground ', 'dried ', 'fresh '];
+      // 2. Fresh herbs and spices go to Produce (fresh parsley, fresh ginger, etc.)
+      const freshHerbKeywords = ['parsley', 'cilantro', 'basil', 'thyme', 'rosemary', 'oregano', 'dill', 'mint', 'sage', 'chives', 'ginger', 'garlic', 'onion'];
+      if (text.includes('fresh') && freshHerbKeywords.some(herb => text.includes(herb))) {
+        return 'Produce';
+      }
+      
+      // 3. Spice measurements indicate Spices (but not fresh ones)
+      const spiceMeasurements = ['teaspoon', 'tsp', 'tablespoon', 'tbsp', 'pinch of', 'dash of', 'ground ', 'dried '];
       const spiceKeywords = ['turmeric', 'garam masala', 'cumin', 'coriander', 'cardamom', 'cinnamon', 'paprika', 'chili powder', 'curry powder', 'oregano', 'basil', 'thyme', 'rosemary', 'sage', 'parsley', 'cilantro', 'dill', 'mint', 'garlic powder', 'onion powder', 'black pepper', 'white pepper', 'cayenne', 'nutmeg', 'cloves', 'allspice', 'bay leaves'];
       
-      if (spiceMeasurements.some(measurement => text.includes(measurement)) || 
+      if ((spiceMeasurements.some(measurement => text.includes(measurement)) || 
           (spiceKeywords.some(spice => text.includes(spice)) && 
-           (text.includes('ground') || text.includes('dried') || text.includes('powder') || text.includes('teaspoon') || text.includes('tablespoon')))) {
+           (text.includes('ground') || text.includes('dried') || text.includes('powder') || text.includes('teaspoon') || text.includes('tablespoon')))) &&
+          !text.includes('fresh')) {
         return 'Spices';
       }
       
-      // 3. Frozen indicators
+      // 4. Frozen indicators
       if (text.includes('frozen')) {
         return 'Frozen Foods';
       }
       
-      // 4. Fresh meat indicators
+      // 5. Fresh meat indicators
       const meatPreparations = ['boneless', 'skinless', 'ground', 'chopped', 'diced', 'sliced', 'whole', 'fresh'];
       const meatTypes = ['chicken', 'beef', 'pork', 'lamb', 'turkey', 'duck', 'fish', 'salmon', 'tuna'];
       if (meatTypes.some(meat => text.includes(meat)) && 
@@ -3559,13 +3566,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return 'Meat & Seafood';
       }
       
-      // 5. Dairy with measurements
+      // 6. Dairy with measurements
       if ((text.includes('cup') || text.includes('oz') || text.includes('pint') || text.includes('quart') || text.includes('gallon')) &&
           (text.includes('milk') || text.includes('cream') || text.includes('yogurt') || text.includes('butter'))) {
         return 'Dairy';
       }
       
-      // 6. Baking measurements
+      // 7. Baking measurements
       const bakingMeasurements = ['cup', 'cups', 'lb', 'pound', 'ounce', 'oz'];
       const bakingIngredients = ['flour', 'sugar', 'brown sugar', 'powdered sugar', 'baking powder', 'baking soda', 'vanilla extract', 'oil', 'butter'];
       if (bakingMeasurements.some(measurement => text.includes(measurement)) &&
