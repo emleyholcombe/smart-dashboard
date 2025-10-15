@@ -1,22 +1,22 @@
 // Service Worker for Bennett Hub PWA
 const CACHE_NAME = 'bennett-hub-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-16.png',
-  '/icon-32.png',
-  '/icon-72.png',
-  '/icon-96.png',
-  '/icon-128.png',
-  '/icon-144.png',
-  '/icon-152.png',
-  '/icon-167.png',
-  '/icon-180.png',
-  '/icon-192.png',
-  '/icon-384.png',
-  '/icon-512.png',
-  '/favicon.ico'
+  '/smart-dashboard/',
+  '/smart-dashboard/index.html',
+  '/smart-dashboard/manifest.json',
+  '/smart-dashboard/icon-16.png',
+  '/smart-dashboard/icon-32.png',
+  '/smart-dashboard/icon-72.png',
+  '/smart-dashboard/icon-96.png',
+  '/smart-dashboard/icon-128.png',
+  '/smart-dashboard/icon-144.png',
+  '/smart-dashboard/icon-152.png',
+  '/smart-dashboard/icon-167.png',
+  '/smart-dashboard/icon-180.png',
+  '/smart-dashboard/icon-192.png',
+  '/smart-dashboard/icon-384.png',
+  '/smart-dashboard/icon-512.png',
+  '/smart-dashboard/favicon.ico'
 ];
 
 // Install event - cache resources
@@ -58,8 +58,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip cross-origin requests
+  // Skip cross-origin requests and requests outside our scope
   if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+  
+  // Only handle requests within our GitHub Pages path
+  if (!event.request.url.includes('/smart-dashboard/')) {
     return;
   }
 
@@ -93,7 +98,7 @@ self.addEventListener('fetch', (event) => {
       .catch(() => {
         // If both cache and network fail, show offline page for navigation requests
         if (event.request.destination === 'document') {
-          return caches.match('/index.html');
+          return caches.match('/smart-dashboard/index.html');
         }
       })
   );
@@ -138,6 +143,6 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   
   event.waitUntil(
-    clients.openWindow('/')
+    clients.openWindow('/smart-dashboard/')
   );
 });

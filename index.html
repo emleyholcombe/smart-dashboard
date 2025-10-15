@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/smart-dashboard/manifest.json">
   
   <!-- PWA Meta Tags -->
   <meta name="application-name" content="Bennett Hub">
@@ -22,15 +22,15 @@
   <meta name="theme-color" content="#1976d2">
   
   <!-- Apple Touch Icons -->
-  <link rel="apple-touch-icon" href="icon-152.png">
-  <link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
-  <link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
+  <link rel="apple-touch-icon" href="/smart-dashboard/icon-152.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/smart-dashboard/icon-152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/smart-dashboard/icon-180.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="/smart-dashboard/icon-167.png">
   
   <!-- Standard Favicon -->
-  <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="icon-16.png">
-  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/smart-dashboard/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/smart-dashboard/icon-16.png">
+  <link rel="shortcut icon" href="/smart-dashboard/favicon.ico">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
@@ -7212,7 +7212,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     // Register service worker for PWA functionality
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('/smart-dashboard/sw.js')
           .then((registration) => {
             console.log('PWA: Service Worker registered successfully:', registration.scope);
             
