@@ -3498,7 +3498,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         keywords: ['frozen', 'ice cream', 'frozen yogurt', 'sorbet', 'frozen fruit', 'frozen vegetables', 'frozen dinner', 'frozen pizza', 'frozen burrito', 'frozen meal', 'frozen chicken', 'frozen fish', 'frozen shrimp', 'frozen berries', 'frozen peas', 'frozen corn', 'frozen broccoli', 'frozen spinach', 'popsicle', 'ice', 'frozen bread', 'frozen pastry']
       },
       'Beverages': {
-        keywords: ['water', 'sparkling water', 'juice', 'orange juice', 'apple juice', 'cranberry juice', 'soda', 'cola', 'pepsi', 'coke', 'sprite', 'coffee', 'tea', 'green tea', 'black tea', 'herbal tea', 'energy drink', 'sports drink', 'beer', 'wine', 'alcohol', 'vodka', 'whiskey', 'rum', 'gin', 'champagne', 'kombucha', 'smoothie', 'protein shake', 'almond milk', 'oat milk', 'soy milk', 'coconut milk', 'rice milk']
+        keywords: ['water', 'sparkling water', 'juice', 'orange juice', 'apple juice', 'cranberry juice', 'soda', 'cola', 'pepsi', 'coke', 'sprite', 'coffee', 'green tea', 'black tea', 'herbal tea', 'energy drink', 'sports drink', 'beer', 'wine', 'alcohol', 'vodka', 'whiskey', 'rum', 'gin', 'champagne', 'kombucha', 'smoothie', 'protein shake', 'almond milk', 'oat milk', 'soy milk', 'coconut milk', 'rice milk']
       },
       'Health & Beauty': {
         keywords: ['shampoo', 'conditioner', 'soap', 'body wash', 'lotion', 'moisturizer', 'sunscreen', 'toothpaste', 'toothbrush', 'mouthwash', 'deodorant', 'perfume', 'cologne', 'makeup', 'lipstick', 'mascara', 'foundation', 'vitamins', 'supplements', 'medicine', 'advil', 'tylenol', 'aspirin', 'bandaids', 'first aid', 'contact solution', 'razor', 'shaving cream']
@@ -3520,6 +3520,52 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function categorizeGroceryItem(itemText) {
       const text = itemText.toLowerCase();
       
+      // Priority rules - check these first before general keyword matching
+      
+      // 1. Canned/Packaged indicators override everything
+      const canPackageIndicators = ['can of', 'canned', 'jar of', 'bottle of', 'packaged', 'boxed', '15-ounce can', '14-ounce can', 'oz can', 'fl oz'];
+      if (canPackageIndicators.some(indicator => text.includes(indicator))) {
+        return 'Canned & Packaged Goods';
+      }
+      
+      // 2. Spice measurements indicate Dry Goods & Baking
+      const spiceMeasurements = ['teaspoon', 'tsp', 'tablespoon', 'tbsp', 'pinch of', 'dash of', 'ground ', 'dried ', 'fresh '];
+      const spiceKeywords = ['turmeric', 'garam masala', 'cumin', 'coriander', 'cardamom', 'cinnamon', 'paprika', 'chili powder', 'curry powder', 'oregano', 'basil', 'thyme', 'rosemary', 'sage', 'parsley', 'cilantro', 'dill', 'mint', 'garlic powder', 'onion powder', 'black pepper', 'white pepper', 'cayenne', 'nutmeg', 'cloves', 'allspice', 'bay leaves'];
+      
+      if (spiceMeasurements.some(measurement => text.includes(measurement)) || 
+          (spiceKeywords.some(spice => text.includes(spice)) && 
+           (text.includes('ground') || text.includes('dried') || text.includes('powder') || text.includes('teaspoon') || text.includes('tablespoon')))) {
+        return 'Dry Goods & Baking';
+      }
+      
+      // 3. Frozen indicators
+      if (text.includes('frozen')) {
+        return 'Frozen Foods';
+      }
+      
+      // 4. Fresh meat indicators
+      const meatPreparations = ['boneless', 'skinless', 'ground', 'chopped', 'diced', 'sliced', 'whole', 'fresh'];
+      const meatTypes = ['chicken', 'beef', 'pork', 'lamb', 'turkey', 'duck', 'fish', 'salmon', 'tuna'];
+      if (meatTypes.some(meat => text.includes(meat)) && 
+          (meatPreparations.some(prep => text.includes(prep)) || text.includes('lb') || text.includes('pound'))) {
+        return 'Meat & Seafood';
+      }
+      
+      // 5. Dairy with measurements
+      if ((text.includes('cup') || text.includes('oz') || text.includes('pint') || text.includes('quart') || text.includes('gallon')) &&
+          (text.includes('milk') || text.includes('cream') || text.includes('yogurt') || text.includes('butter'))) {
+        return 'Dairy';
+      }
+      
+      // 6. Baking measurements
+      const bakingMeasurements = ['cup', 'cups', 'lb', 'pound', 'ounce', 'oz'];
+      const bakingIngredients = ['flour', 'sugar', 'brown sugar', 'powdered sugar', 'baking powder', 'baking soda', 'vanilla extract', 'oil', 'butter'];
+      if (bakingMeasurements.some(measurement => text.includes(measurement)) &&
+          bakingIngredients.some(ingredient => text.includes(ingredient))) {
+        return 'Dry Goods & Baking';
+      }
+      
+      // Now do general keyword matching for remaining items
       for (const [category, data] of Object.entries(groceryCategories)) {
         for (const keyword of data.keywords) {
           if (text.includes(keyword)) {
