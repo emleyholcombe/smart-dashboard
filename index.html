@@ -6034,6 +6034,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         content.appendChild(iframe);
         
       } else if (widgetType === 'todo-calendar') {
+        console.log('openFullscreen called with todo-calendar'); // Debug log
         title.textContent = 'To-Do Calendar';
         title.onclick = closeFullscreen;
         title.style.cursor = 'pointer';
@@ -6604,8 +6605,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function renderTodoCalendarFullscreen() {
+      console.log('renderTodoCalendarFullscreen called'); // Debug log
       const container = document.getElementById('fullscreen-todo-calendar-container');
-      if (!container) return;
+      if (!container) {
+        console.log('Container not found!'); // Debug log
+        return;
+      }
       
       // Get current date and calculate calendar bounds
       const today = new Date();
@@ -6854,6 +6859,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function showFullscreenTodoCalendar() {
+      console.log('showFullscreenTodoCalendar called'); // Debug log
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       openFullscreen('todo-calendar');
