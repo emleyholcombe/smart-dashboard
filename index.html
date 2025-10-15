@@ -2702,7 +2702,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             'No tasks found matching your search criteria.' : 
             'No completed tasks yet.';
           list.innerHTML = `<li class="empty-state">${emptyMessage}</li>`;
-          list.style.marginTop = '1rem'; // Add spacing even for empty state
+          list.style.setProperty('margin-top', '2.5rem', 'important'); // Add spacing even for empty state
           return;
         }
         
@@ -2710,13 +2710,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         list.innerHTML = renderTodoHistoryGrouped(groups);
         
         // Add extra top margin when showing history to prevent overlap with avatar filters
-        list.style.marginTop = '1rem';
+        list.style.setProperty('margin-top', '2.5rem', 'important');
         
         // Set up drag and drop for history items (within date groups only)
         setTimeout(() => setupTodoHistoryDragAndDrop(list, groups), 0);
       } else {
         // Reset margin when not showing history
-        list.style.marginTop = '';
+        list.style.removeProperty('margin-top');
         
         // Only show uncompleted items (completed items are immediately moved to history)
         let activeItems = todoItems.filter(item => !item.completed);
