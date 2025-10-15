@@ -3611,6 +3611,166 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
     }
 
+    // Enhanced drag-and-drop for categorized grocery lists
+    let groceryDraggedItem = null;
+    let groceryDraggedCategory = null;
+    let groceryDraggedIndex = null;
+
+    function setupGroceryDragAndDrop(listElement) {
+      const listItems = listElement.querySelectorAll('.task-item');
+      
+      listItems.forEach((item, globalIndex) => {
+        const dragHandle = item.querySelector('.drag-handle');
+        if (dragHandle) {
+          dragHandle.title = 'Drag to reorder or move to different category';
+          
+          // Remove existing drag events to avoid conflicts
+          dragHandle.removeEventListener('dragstart', null);
+          dragHandle.removeEventListener('dragend', null);
+          
+          dragHandle.addEventListener('dragstart', (e) => {
+            const itemId = parseInt(e.target.closest('.task-item').getAttribute('data-item-id') || 
+                                   e.target.closest('.task-item').querySelector('input[onchange*="toggleGroceryItem"]')
+                                   ?.getAttribute('onchange')?.match(/\d+/)?.[0]);
+            
+            if (itemId) {
+              groceryDraggedItem = groceryItems.find(item => item.id === itemId);
+              groceryDraggedCategory = categorizeGroceryItem(groceryDraggedItem.text, groceryDraggedItem.manualCategory);
+              
+              // Find index within the category
+              const categoryItems = groceryItems.filter(item => 
+                categorizeGroceryItem(item.text, item.manualCategory) === groceryDraggedCategory
+              );
+              groceryDraggedIndex = categoryItems.findIndex(item => item.id === itemId);
+              
+              item.classList.add('dragging');
+              item.style.opacity = '0.5';
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('text/plain', itemId.toString());
+            }
+          });
+          
+          dragHandle.addEventListener('dragend', (e) => {
+            item.classList.remove('dragging');
+            item.style.opacity = '1';
+            groceryDraggedItem = null;
+            groceryDraggedCategory = null;
+            groceryDraggedIndex = null;
+            
+            // Remove all drop indicators
+            clearGroceryDropIndicators(listElement);
+          });
+        }
+        
+        // Set up drop zones for reordering within categories
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+        });
+        
+        item.addEventListener('dragenter', (e) => {
+          e.preventDefault();
+          if (groceryDraggedItem && groceryDraggedItem.id !== parseInt(e.target.closest('.task-item')?.getAttribute('data-item-id') || 
+                                                                      e.target.closest('.task-item')?.querySelector('input[onchange*="toggleGroceryItem"]')
+                                                                      ?.getAttribute('onchange')?.match(/\d+/)?.[0])) {
+            updateGroceryDropIndicator(e, item, listElement);
+          }
+        });
+        
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (groceryDraggedItem) {
+            updateGroceryDropIndicator(e, item, listElement);
+          }
+        });
+        
+        item.addEventListener('dragleave', (e) => {
+          if (!item.contains(e.relatedTarget)) {
+            clearGroceryDropIndicators(listElement);
+          }
+        });
+        
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          clearGroceryDropIndicators(listElement);
+          
+          if (groceryDraggedItem) {
+            const targetItemId = parseInt(e.target.closest('.task-item')?.getAttribute('data-item-id') || 
+                                         e.target.closest('.task-item')?.querySelector('input[onchange*="toggleGroceryItem"]')
+                                         ?.getAttribute('onchange')?.match(/\d+/)?.[0]);
+            const targetItem = groceryItems.find(item => item.id === targetItemId);
+            
+            if (targetItem && targetItem.id !== groceryDraggedItem.id) {
+              const targetCategory = categorizeGroceryItem(targetItem.text, targetItem.manualCategory);
+              
+              // Check if we're dropping within the same category (reorder) or different category (move)
+              if (targetCategory === groceryDraggedCategory) {
+                // Reorder within same category
+                reorderGroceryItemsWithinCategory(groceryDraggedItem, targetItem, targetCategory);
+              } else {
+                // Move to different category - set manual category and place at end
+                groceryDraggedItem.manualCategory = targetCategory;
+              }
+              
+              saveGroceryItems();
+              renderGroceryList();
+              
+              // Also update fullscreen view if it's open
+              if (document.getElementById('fullscreen-grocery-list')) {
+                renderGroceryListFullscreen();
+              }
+            }
+          }
+        });
+      });
+    }
+
+    function updateGroceryDropIndicator(event, targetItem, listElement) {
+      clearGroceryDropIndicators(listElement);
+      
+      if (!groceryDraggedItem) return;
+      
+      const rect = targetItem.getBoundingClientRect();
+      const mouseY = event.clientY;
+      const itemMiddle = rect.top + rect.height / 2;
+      
+      if (mouseY < itemMiddle) {
+        targetItem.classList.add('drop-target-above');
+      } else {
+        targetItem.classList.add('drop-target-below');
+      }
+    }
+
+    function clearGroceryDropIndicators(listElement) {
+      const listItems = listElement.querySelectorAll('.task-item');
+      listItems.forEach(item => {
+        item.classList.remove('drop-target-above', 'drop-target-below');
+      });
+    }
+
+    function reorderGroceryItemsWithinCategory(draggedItem, targetItem, category) {
+      // Get all items in this category
+      const categoryItems = groceryItems.filter(item => 
+        categorizeGroceryItem(item.text, item.manualCategory) === category
+      );
+      
+      // Find current positions
+      const draggedIndex = categoryItems.findIndex(item => item.id === draggedItem.id);
+      const targetIndex = categoryItems.findIndex(item => item.id === targetItem.id);
+      
+      if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
+        // Remove dragged item and insert at new position
+        const [movedItem] = categoryItems.splice(draggedIndex, 1);
+        categoryItems.splice(targetIndex, 0, movedItem);
+        
+        // Update order values for items in this category
+        const baseOrder = Date.now();
+        categoryItems.forEach((item, index) => {
+          item.order = baseOrder - index;
+        });
+      }
+    }
+
     // Grocery List Functions
     function addGroceryItem() {
       const input = document.getElementById('grocery-input');
@@ -3872,10 +4032,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
             
             html += `
-              <li class="task-item" draggable="true" 
-                  ondragstart="event.dataTransfer.setData('text/plain', ${item.id}); event.target.style.opacity='0.5';"
-                  ondragend="event.target.style.opacity='1';">
-          <span class="drag-handle">☰</span>
+              <li class="task-item" data-item-id="${item.id}">
+          <span class="drag-handle" draggable="true">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id})">
@@ -3895,8 +4053,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       list.innerHTML = html;
       
-      // Set up drag and drop (note: this will be limited within categories)
-      setTimeout(() => setupDragAndDrop(list, groceryItems, 'grocery'), 0);
+      // Set up enhanced drag and drop for categorized grocery lists
+      setTimeout(() => setupGroceryDragAndDrop(list), 0);
     }
 
     function saveGroceryItems() {
@@ -6320,10 +6478,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
             
             html += `
-              <li class="task-item" draggable="true" 
-                  ondragstart="event.dataTransfer.setData('text/plain', ${item.id}); event.target.style.opacity='0.5';"
-                  ondragend="event.target.style.opacity='1';">
-          <span class="drag-handle">☰</span>
+              <li class="task-item" data-item-id="${item.id}">
+          <span class="drag-handle" draggable="true">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id}); renderGroceryListFullscreen();">
@@ -6343,8 +6499,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       list.innerHTML = html;
       
-      // Set up drag and drop (note: this will be limited within categories)
-      setTimeout(() => setupDragAndDrop(list, groceryItems, 'grocery'), 0);
+      // Set up enhanced drag and drop for categorized grocery lists
+      setTimeout(() => setupGroceryDragAndDrop(list), 0);
     }
 
     // Optional: Auto-save feature and data export/import for sharing between devices
