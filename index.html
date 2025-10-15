@@ -3978,9 +3978,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     async function extractIngredientsFromUrl(url) {
       if (!url || !url.trim()) return [];
 
+      console.log('Attempting to extract ingredients from:', url);
+
       try {
         // Use a CORS proxy to fetch the recipe page
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        console.log('Using proxy URL:', proxyUrl);
+        
         const response = await fetch(proxyUrl);
         
         if (!response.ok) {
@@ -3988,7 +3992,19 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
         
         const data = await response.json();
+        
+        // Check if the proxy returned an error
+        if (data.status && data.status.http_code && data.status.http_code !== 200) {
+          throw new Error(`Website returned error: ${data.status.http_code}`);
+        }
+        
         const html = data.contents;
+        
+        if (!html || html.trim().length === 0) {
+          throw new Error('No content received from the website');
+        }
+        
+        console.log('Received HTML content, length:', html.length);
         
         // Create a temporary DOM parser
         const parser = new DOMParser();
@@ -3996,21 +4012,28 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         // Try to extract from JSON-LD structured data (most common for recipes)
         const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+        console.log('Found JSON-LD scripts:', jsonLdScripts.length);
+        
         for (const script of jsonLdScripts) {
           try {
             const jsonData = JSON.parse(script.textContent);
+            console.log('Parsing JSON-LD data:', jsonData);
             const ingredients = extractIngredientsFromJsonLd(jsonData);
+            console.log('Extracted ingredients from JSON-LD:', ingredients);
             if (ingredients.length > 0) {
               return ingredients;
             }
           } catch (e) {
-            // Continue to next script if parsing fails
+            console.log('Failed to parse JSON-LD script:', e);
             continue;
           }
         }
         
         // Fallback: Try to extract from common HTML patterns
-        return extractIngredientsFromHtml(doc);
+        console.log('Falling back to HTML pattern matching');
+        const htmlIngredients = extractIngredientsFromHtml(doc);
+        console.log('Extracted ingredients from HTML:', htmlIngredients);
+        return htmlIngredients;
         
       } catch (error) {
         console.error('Error fetching recipe:', error);
@@ -4238,7 +4261,19 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             }
           } catch (error) {
             console.error('Error extracting ingredients:', error);
-            alert('Failed to extract ingredients. Please check the URL and try again.');
+            let errorMessage = 'Failed to extract ingredients. ';
+            
+            if (error.message.includes('HTTP error')) {
+              errorMessage += 'The website could not be accessed. Please check if the URL is correct and publicly accessible.';
+            } else if (error.message.includes('No content received')) {
+              errorMessage += 'The website returned empty content. It might be blocking automated access.';
+            } else if (error.message.includes('Website returned error')) {
+              errorMessage += 'The website returned an error. Please try a different recipe URL.';
+            } else {
+              errorMessage += 'Please check the URL and try again. Check the browser console for more details.';
+            }
+            
+            alert(errorMessage);
           } finally {
             autoFillBtn.disabled = false;
             autoFillBtn.innerHTML = '🔗 Auto-fill from URL';
