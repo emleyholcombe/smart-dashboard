@@ -3462,6 +3462,89 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       });
     }
 
+    // Grocery categorization system
+    const groceryCategories = {
+      'Produce': {
+        keywords: ['apple', 'banana', 'orange', 'lemon', 'lime', 'grape', 'berry', 'strawberry', 'blueberry', 'raspberry', 'blackberry', 'cherry', 'peach', 'pear', 'plum', 'mango', 'pineapple', 'kiwi', 'avocado', 'tomato', 'cucumber', 'lettuce', 'spinach', 'kale', 'arugula', 'cabbage', 'broccoli', 'cauliflower', 'carrot', 'celery', 'onion', 'garlic', 'ginger', 'potato', 'sweet potato', 'bell pepper', 'jalapeño', 'mushroom', 'zucchini', 'squash', 'eggplant', 'corn', 'peas', 'green beans', 'asparagus', 'herbs', 'basil', 'cilantro', 'parsley', 'thyme', 'rosemary', 'oregano', 'dill', 'mint', 'salad', 'greens', 'radish', 'turnip', 'beet', 'leek', 'scallion', 'green onion', 'chives']
+      },
+      'Bakery': {
+        keywords: ['bread', 'baguette', 'roll', 'bagel', 'croissant', 'muffin', 'donut', 'cake', 'cookie', 'pastry', 'pie', 'tart', 'danish', 'scone', 'biscuit', 'pretzel', 'loaf', 'sourdough', 'whole wheat', 'rye bread', 'pita', 'naan', 'tortilla', 'wrap']
+      },
+      'Deli': {
+        keywords: ['deli meat', 'ham', 'turkey', 'salami', 'prosciutto', 'pastrami', 'roast beef', 'bologna', 'pepperoni', 'deli cheese', 'sliced cheese', 'sandwich', 'prepared salad', 'potato salad', 'coleslaw', 'hummus', 'olives', 'pickles']
+      },
+      'Meat & Seafood': {
+        keywords: ['chicken', 'beef', 'pork', 'lamb', 'turkey', 'duck', 'steak', 'ground beef', 'ground turkey', 'chicken breast', 'chicken thigh', 'pork chop', 'bacon', 'sausage', 'fish', 'salmon', 'tuna', 'cod', 'tilapia', 'shrimp', 'crab', 'lobster', 'scallops', 'mussels', 'clams', 'oysters', 'meat', 'poultry', 'seafood']
+      },
+      'Dairy': {
+        keywords: ['milk', 'yogurt', 'cheese', 'butter', 'eggs', 'cream', 'sour cream', 'cottage cheese', 'cream cheese', 'mozzarella', 'cheddar', 'swiss', 'parmesan', 'feta', 'goat cheese', 'ricotta', 'half and half', 'heavy cream', 'whipping cream', 'buttermilk', 'kefir']
+      },
+      'Canned & Packaged Goods': {
+        keywords: ['canned', 'can of', 'soup', 'broth', 'stock', 'beans', 'chickpeas', 'lentils', 'tomatoes', 'tomato sauce', 'pasta sauce', 'marinara', 'salsa', 'diced tomatoes', 'tomato paste', 'coconut milk', 'canned fruit', 'canned vegetables', 'corn', 'green beans', 'peas', 'carrots', 'jar', 'bottle', 'packaged', 'boxed']
+      },
+      'Dry Goods & Baking': {
+        keywords: ['flour', 'sugar', 'brown sugar', 'powdered sugar', 'baking powder', 'baking soda', 'vanilla', 'extract', 'oil', 'olive oil', 'vegetable oil', 'coconut oil', 'vinegar', 'salt', 'pepper', 'spices', 'cinnamon', 'paprika', 'cumin', 'chili powder', 'garlic powder', 'onion powder', 'dried herbs', 'baking mix', 'pancake mix', 'cake mix', 'cornstarch', 'cocoa powder', 'chocolate chips', 'nuts', 'almonds', 'walnuts', 'pecans', 'peanuts']
+      },
+      'Snacks & Candy': {
+        keywords: ['chips', 'crackers', 'pretzels', 'popcorn', 'nuts', 'trail mix', 'granola bar', 'energy bar', 'protein bar', 'candy', 'chocolate', 'gum', 'mints', 'cookies', 'snacks', 'goldfish', 'cheez-its', 'oreos', 'graham crackers']
+      },
+      'Cereal & Breakfast': {
+        keywords: ['cereal', 'oatmeal', 'granola', 'muesli', 'pancake mix', 'waffle mix', 'syrup', 'maple syrup', 'honey', 'jam', 'jelly', 'peanut butter', 'almond butter', 'nutella', 'breakfast', 'oats', 'quinoa flakes']
+      },
+      'Pasta, Rice & International Foods': {
+        keywords: ['pasta', 'spaghetti', 'penne', 'fusilli', 'linguine', 'fettuccine', 'macaroni', 'lasagna', 'ravioli', 'rice', 'brown rice', 'white rice', 'jasmine rice', 'basmati rice', 'wild rice', 'quinoa', 'couscous', 'noodles', 'ramen', 'udon', 'soba', 'rice noodles', 'pad thai', 'curry', 'soy sauce', 'teriyaki', 'sriracha', 'hot sauce', 'salsa', 'tahini', 'miso', 'kimchi', 'international', 'ethnic']
+      },
+      'Frozen Foods': {
+        keywords: ['frozen', 'ice cream', 'frozen yogurt', 'sorbet', 'frozen fruit', 'frozen vegetables', 'frozen dinner', 'frozen pizza', 'frozen burrito', 'frozen meal', 'frozen chicken', 'frozen fish', 'frozen shrimp', 'frozen berries', 'frozen peas', 'frozen corn', 'frozen broccoli', 'frozen spinach', 'popsicle', 'ice', 'frozen bread', 'frozen pastry']
+      },
+      'Beverages': {
+        keywords: ['water', 'sparkling water', 'juice', 'orange juice', 'apple juice', 'cranberry juice', 'soda', 'cola', 'pepsi', 'coke', 'sprite', 'coffee', 'tea', 'green tea', 'black tea', 'herbal tea', 'energy drink', 'sports drink', 'beer', 'wine', 'alcohol', 'vodka', 'whiskey', 'rum', 'gin', 'champagne', 'kombucha', 'smoothie', 'protein shake', 'almond milk', 'oat milk', 'soy milk', 'coconut milk', 'rice milk']
+      },
+      'Health & Beauty': {
+        keywords: ['shampoo', 'conditioner', 'soap', 'body wash', 'lotion', 'moisturizer', 'sunscreen', 'toothpaste', 'toothbrush', 'mouthwash', 'deodorant', 'perfume', 'cologne', 'makeup', 'lipstick', 'mascara', 'foundation', 'vitamins', 'supplements', 'medicine', 'advil', 'tylenol', 'aspirin', 'bandaids', 'first aid', 'contact solution', 'razor', 'shaving cream']
+      },
+      'Cleaning & Household': {
+        keywords: ['laundry detergent', 'fabric softener', 'bleach', 'dish soap', 'dishwasher detergent', 'all-purpose cleaner', 'glass cleaner', 'bathroom cleaner', 'toilet paper', 'paper towels', 'napkins', 'tissues', 'trash bags', 'garbage bags', 'aluminum foil', 'plastic wrap', 'parchment paper', 'wax paper', 'sponges', 'scrubber', 'cleaning supplies', 'vacuum bags', 'air freshener', 'candles', 'light bulbs', 'batteries']
+      },
+      'Pet Supplies': {
+        keywords: ['dog food', 'cat food', 'pet food', 'dog treats', 'cat treats', 'pet treats', 'cat litter', 'dog toys', 'cat toys', 'pet toys', 'leash', 'collar', 'pet supplies', 'bird food', 'fish food', 'hamster food', 'guinea pig food']
+      },
+      'Floral Department': {
+        keywords: ['flowers', 'bouquet', 'roses', 'tulips', 'daisies', 'carnations', 'lilies', 'plants', 'potted plant', 'succulent', 'orchid', 'floral', 'gift card', 'balloon', 'greeting card']
+      },
+      'Pharmacy': {
+        keywords: ['prescription', 'medication', 'pharmacy', 'pills', 'capsules', 'tablets', 'insulin', 'inhaler', 'antibiotic', 'pain reliever', 'allergy medicine', 'cold medicine', 'cough syrup', 'eye drops', 'ear drops']
+      }
+    };
+
+    function categorizeGroceryItem(itemText) {
+      const text = itemText.toLowerCase();
+      
+      for (const [category, data] of Object.entries(groceryCategories)) {
+        for (const keyword of data.keywords) {
+          if (text.includes(keyword)) {
+            return category;
+          }
+        }
+      }
+      
+      return 'Other'; // Default category for items that don't match
+    }
+
+    function groupGroceriesByCategory(items) {
+      const grouped = {};
+      
+      items.forEach(item => {
+        const category = categorizeGroceryItem(item.text);
+        if (!grouped[category]) {
+          grouped[category] = [];
+        }
+        grouped[category].push(item);
+      });
+      
+      return grouped;
+    }
+
     // Grocery List Functions
     function addGroceryItem() {
       const input = document.getElementById('grocery-input');
@@ -3640,29 +3723,76 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       updateItemOrders(groceryItems);
       const sortedItems = sortItemsByOrder([...groceryItems]);
       
-      list.innerHTML = sortedItems.map(item => {
-        const recipeSource = item.recipeSource ? `<div class="recipe-source" style="font-size: 0.8em; color: #666; margin-top: 2px;">For: ${escapeHtml(item.recipeSource)}</div>` : '';
-        const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
-        
-        return `
+      // Group items by category
+      const groupedItems = groupGroceriesByCategory(sortedItems);
+      
+      // Define category order for logical shopping flow
+      const categoryOrder = [
+        'Produce',
+        'Bakery', 
+        'Deli',
+        'Meat & Seafood',
+        'Dairy',
+        'Canned & Packaged Goods',
+        'Dry Goods & Baking',
+        'Snacks & Candy',
+        'Cereal & Breakfast',
+        'Pasta, Rice & International Foods',
+        'Frozen Foods',
+        'Beverages',
+        'Health & Beauty',
+        'Cleaning & Household',
+        'Pet Supplies',
+        'Floral Department',
+        'Pharmacy',
+        'Other'
+      ];
+      
+      let html = '';
+      
+      categoryOrder.forEach(category => {
+        const items = groupedItems[category];
+        if (items && items.length > 0) {
+          // Add category header
+          html += `<li class="category-header" style="
+            font-weight: bold; 
+            color: var(--primary-color); 
+            background: #f8f9fa; 
+            padding: 8px 12px; 
+            margin: 8px 0 4px 0; 
+            border-radius: 4px;
+            list-style: none;
+            border-left: 4px solid var(--primary-color);
+          ">${category}</li>`;
+          
+          // Add items in this category
+          items.forEach(item => {
+            const recipeSource = item.recipeSource ? `<div class="recipe-source" style="font-size: 0.8em; color: #666; margin-top: 2px;">For: ${escapeHtml(item.recipeSource)}</div>` : '';
+            const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
+            
+            html += `
         <li class="task-item">
           <span class="drag-handle">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id})">
-            <div style="flex: 1;">
-              <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}${optionalIndicator}</span>
-              ${recipeSource}
-            </div>
+                <div style="flex: 1;">
+                  <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}${optionalIndicator}</span>
+                  ${recipeSource}
+                </div>
           <div class="task-actions">
             <button class="edit-btn" onclick="editGroceryItem(${item.id})" title="Edit">✏️</button>
             <button class="delete-btn" onclick="deleteGroceryItem(${item.id})" title="Delete">🗑️</button>
           </div>
         </li>
-        `;
-      }).join('');
+            `;
+          });
+        }
+      });
       
-      // Set up drag and drop
+      list.innerHTML = html;
+      
+      // Set up drag and drop (note: this will be limited within categories)
       setTimeout(() => setupDragAndDrop(list, groceryItems, 'grocery'), 0);
     }
 
@@ -6033,29 +6163,76 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       updateItemOrders(groceryItems);
       const sortedItems = sortItemsByOrder([...groceryItems]);
       
-      list.innerHTML = sortedItems.map(item => {
-        const recipeSource = item.recipeSource ? `<div class="recipe-source" style="font-size: 0.8em; color: #666; margin-top: 2px;">For: ${escapeHtml(item.recipeSource)}</div>` : '';
-        const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
-        
-        return `
+      // Group items by category
+      const groupedItems = groupGroceriesByCategory(sortedItems);
+      
+      // Define category order for logical shopping flow
+      const categoryOrder = [
+        'Produce',
+        'Bakery', 
+        'Deli',
+        'Meat & Seafood',
+        'Dairy',
+        'Canned & Packaged Goods',
+        'Dry Goods & Baking',
+        'Snacks & Candy',
+        'Cereal & Breakfast',
+        'Pasta, Rice & International Foods',
+        'Frozen Foods',
+        'Beverages',
+        'Health & Beauty',
+        'Cleaning & Household',
+        'Pet Supplies',
+        'Floral Department',
+        'Pharmacy',
+        'Other'
+      ];
+      
+      let html = '';
+      
+      categoryOrder.forEach(category => {
+        const items = groupedItems[category];
+        if (items && items.length > 0) {
+          // Add category header
+          html += `<li class="category-header" style="
+            font-weight: bold; 
+            color: var(--primary-color); 
+            background: #f8f9fa; 
+            padding: 8px 12px; 
+            margin: 8px 0 4px 0; 
+            border-radius: 4px;
+            list-style: none;
+            border-left: 4px solid var(--primary-color);
+          ">${category}</li>`;
+          
+          // Add items in this category
+          items.forEach(item => {
+            const recipeSource = item.recipeSource ? `<div class="recipe-source" style="font-size: 0.8em; color: #666; margin-top: 2px;">For: ${escapeHtml(item.recipeSource)}</div>` : '';
+            const optionalIndicator = item.isOptional ? ' <span style="color: #999; font-size: 0.8em;">(optional)</span>' : '';
+            
+            html += `
         <li class="task-item">
           <span class="drag-handle">☰</span>
           <input type="checkbox" class="task-checkbox" 
                  ${item.completed ? 'checked' : ''} 
                  onchange="toggleGroceryItem(${item.id}); renderGroceryListFullscreen();">
-            <div style="flex: 1;">
-              <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}${optionalIndicator}</span>
-              ${recipeSource}
-            </div>
+                <div style="flex: 1;">
+                  <span class="task-text ${item.completed ? 'completed' : ''}">${escapeHtml(item.text)}${optionalIndicator}</span>
+                  ${recipeSource}
+                </div>
           <div class="task-actions">
             <button class="edit-btn" onclick="editGroceryItem(${item.id}); renderGroceryListFullscreen();" title="Edit">✏️</button>
             <button class="delete-btn" onclick="deleteGroceryItem(${item.id}); renderGroceryListFullscreen();" title="Delete">🗑️</button>
           </div>
         </li>
-        `;
-      }).join('');
+            `;
+          });
+        }
+      });
       
-      // Set up drag and drop
+      list.innerHTML = html;
+      
+      // Set up drag and drop (note: this will be limited within categories)
       setTimeout(() => setupDragAndDrop(list, groceryItems, 'grocery'), 0);
     }
 
