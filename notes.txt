@@ -3298,14 +3298,65 @@ COMMITS:
 - "Move 'Add All Ingredients to Grocery List' button to top of ingredients section" (1b240ce)
 - "Add recipe source editing to grocery items" (f8a341c)
 
+## **TODO CALENDAR VIEW IMPLEMENTATION** 📅
+
+**USER REQUEST**: Add calendar view showing completed tasks on completion dates and uncompleted tasks with due dates.
+
+**IMPLEMENTATION COMPLETED**:
+
+### **CALENDAR BUTTON LOCATIONS**:
+1. **Widget View**: 📅 Calendar button flush left of To-Do List/History titles
+2. **Fullscreen View**: 📅 Calendar button left of Current/History buttons in header
+3. **Home Screen**: 📅 To-Do Calendar button added below To-Do button in navigation grid
+
+### **CALENDAR FUNCTIONALITY**:
+- **3-Month Display**: Previous, current, and next months in responsive grid
+- **Dual Mode Support**: Current todos vs History todos
+- **Smart Data Integration**:
+  - ✅ **Completed Tasks**: Green badges on `completedAt` dates
+  - ⚠️ **Due Tasks**: Orange badges on `dueDate` for uncompleted items
+  - **Filtering**: Only shows relevant todos (completed OR uncompleted with due dates)
+
+### **VISUAL FEATURES**:
+- **Modal Interface**: Large overlay calendar with click-outside-to-close
+- **Today Highlighting**: Current date highlighted in blue
+- **Task Badges**: Color-coded with hover tooltips showing full text
+- **Text Truncation**: Long task names truncated with "..." for compact display
+- **Professional Design**: Clean grid layout with proper month headers
+
+### **TECHNICAL IMPLEMENTATION**:
+- **Functions Added**:
+  - `openTodoCalendar(isHistoryMode)`: Creates modal calendar view
+  - `renderTodoCalendar(isHistoryMode)`: Renders 3-month calendar grid
+  - `renderCalendarMonth()`: Generates individual month with todo data
+- **Data Processing**: Groups todos by ISO date strings for efficient lookup
+- **Dynamic Button Behavior**: Calendar buttons adapt to current/history mode
+- **Integration**: Works with existing todo system (due dates, completion tracking)
+
+### **USER EXPERIENCE**:
+- **Easy Access**: Calendar buttons in all relevant locations
+- **Context Aware**: Shows appropriate data based on current mode
+- **Visual Clarity**: Clear distinction between completed and due tasks
+- **Responsive**: Adapts to different screen sizes
+- **Intuitive**: Hover for details, click outside to close
+
+**FILES MODIFIED**:
+- `index.html`: Added calendar functions and UI integration
+- `notes.txt`: Documented implementation (this entry)
+
+**COMMITS**:
+- "Add comprehensive todo calendar view functionality" (c7f7850)
+- "Add To-Do Calendar button to home screen and update documentation" (pending)
+
 CURRENT PROJECT STATE:
 ======================
-- Total commits today: 10
-- Lines of code: 6257 (index.html)
-- All functionality working and tested (including enhanced grocery integration)
+- Total commits today: 11+
+- Lines of code: 7000+ (index.html)
+- All functionality working and tested (including calendar view)
 - Clean git history with descriptive commit messages
-- Comprehensive recipe management system complete
-- Robust auto-fill with multiple fallback mechanisms
+- Comprehensive todo calendar system complete
+- Enhanced grocery categorization with drag-and-drop
+- Robust recipe management with auto-fill capabilities
 - Seamless meal planning to grocery shopping workflow
-- Complete grocery list management with recipe attribution
+- Complete todo calendar integration with dual-mode support
 
