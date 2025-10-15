@@ -7377,15 +7377,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
     }
 
-    // PWA-specific features (temporarily disabled for debugging)
+    // PWA-specific features (layout customizations disabled, but keep essential features)
     function enablePWAFeatures() {
-      // Temporarily disable all PWA customizations to debug layout issue
-      console.log('PWA features temporarily disabled for debugging');
-      // Only keep essential features
+      console.log('PWA features: keeping essential features, layout customizations disabled');
+      // Keep essential features that don't break layout
       addHapticFeedback();
-      // addMobileOptimizations(); // DISABLED
-      // addAppSpecificUI(); // DISABLED  
-      addSwipeGestures();
+      addSwipeGestures(); // This includes pull-to-refresh with visual feedback
+      // addMobileOptimizations(); // DISABLED - this was breaking layout
+      // addAppSpecificUI(); // DISABLED - this was adding unwanted UI elements
     }
 
     // Browser-specific features  
@@ -7782,10 +7781,10 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       });
     }
 
-    // Initialize PWA customizations when page loads (TEMPORARILY DISABLED FOR DEBUGGING)
+    // Initialize PWA customizations when page loads (essential features only)
     document.addEventListener('DOMContentLoaded', () => {
-      // setTimeout(applyPWACustomizations, 100); // DISABLED
-      console.log('PWA customizations completely disabled for debugging');
+      setTimeout(applyPWACustomizations, 100); // Re-enabled for pull-to-refresh feedback
+      console.log('PWA customizations: essential features only (no layout changes)');
     });
 
     // PWA-specific data loading debug
