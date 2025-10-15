@@ -3390,15 +3390,32 @@ COMMITS:
 - **Navigation**: Calendar accessible from widget buttons, fullscreen headers, and home screen
 - **User Flow**: Current tasks → Historical tasks → Calendar visualization
 
+### **CLICKABLE CALENDAR TODOS**:
+- **Feature**: Todo items in calendar view are now clickable for direct editing
+- **Current Tasks**: Orange (!) badges open edit modal directly
+- **Completed Tasks**: Green (✓) badges re-add to current list then open edit modal
+- **Visual Feedback**: Cursor pointer on hover, updated tooltips with "Click to edit"
+- **Integration**: Changes reflect immediately in current todo list and future calendar views
+
+**TECHNICAL IMPLEMENTATION**:
+- Added `editTodoFromCalendar(todoId, isHistoryItem)` function
+- Clickable todo badges with onclick handlers in `renderCalendarMonth()`
+- Automatic re-adding of completed tasks to current list for editing
+- Smart item finding by text and originalHistoryId after re-adding
+- Timeout ensures edit modal opens after re-adding process completes
+
+**COMMITS**:
+- "Add clickable todo items in calendar view for direct editing" (1fb9612)
+
 CURRENT PROJECT STATE:
 ======================
-- Total commits today: 20+
-- Lines of code: 7059 (index.html)
-- All functionality working and tested (including enhanced calendar)
+- Total commits today: 21+
+- Lines of code: 7097 (index.html)
+- All functionality working and tested (including clickable calendar todos)
 - Clean git history with descriptive commit messages
-- Comprehensive todo calendar system with navigation complete
+- Comprehensive todo calendar system with interactive editing complete
 - Enhanced grocery categorization with drag-and-drop
 - Robust recipe management with auto-fill capabilities
 - Seamless meal planning to grocery shopping workflow
-- Complete todo calendar integration with bug fixes and UX improvements
+- Complete todo calendar integration with full editing capabilities
 
