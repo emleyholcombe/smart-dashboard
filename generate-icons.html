@@ -95,12 +95,42 @@
       ctx.roundRect(0, 0, size, size, radius);
       ctx.fill();
       
-      // Draw "BH" text (Bennett Hub)
+      // Draw circular ring of evenly spaced radial bars
       ctx.fillStyle = 'white';
-      ctx.font = `bold ${size * 0.35}px Inter, Arial, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('BH', size / 2, size / 2);
+      ctx.strokeStyle = 'white';
+      ctx.lineCap = 'round';
+      
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const ringRadius = size * 0.22; // Distance from center to middle of bars (closer to center)
+      const barLength = size * 0.12; // Length of each bar
+      const barWidth = size * 0.045; // Width of each bar (thicker)
+      const barCount = 16; // Number of bars around the circle
+      
+      // Draw each radial bar
+      for (let i = 0; i < barCount; i++) {
+        const angle = (i * 2 * Math.PI) / barCount;
+        
+        // Alternate between full size and half size bars
+        const isFullSize = i % 2 === 0;
+        const currentBarLength = isFullSize ? barLength : barLength / 2;
+        
+        // All bars flush with outer edge of circle
+        const outerRadius = ringRadius + barLength / 2; // Fixed outer edge
+        const innerRadius = outerRadius - currentBarLength; // Variable inner edge
+        
+        const innerX = centerX + Math.cos(angle) * innerRadius;
+        const innerY = centerY + Math.sin(angle) * innerRadius;
+        const outerX = centerX + Math.cos(angle) * outerRadius;
+        const outerY = centerY + Math.sin(angle) * outerRadius;
+        
+        // Draw rectangular bar with rounded ends
+        ctx.lineWidth = barWidth;
+        ctx.beginPath();
+        ctx.moveTo(innerX, innerY);
+        ctx.lineTo(outerX, outerY);
+        ctx.stroke();
+      }
       
       return canvas;
     }
