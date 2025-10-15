@@ -3628,7 +3628,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     function setupGroceryDragAndDrop(listElement) {
       const listItems = listElement.querySelectorAll('.task-item');
+      const categoryHeaders = listElement.querySelectorAll('.category-header');
       
+      // Set up drag handles for grocery items
       listItems.forEach((item, globalIndex) => {
         const dragHandle = item.querySelector('.drag-handle');
         if (dragHandle) {
@@ -3641,9 +3643,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           const handle = newDragHandle;
           
           handle.addEventListener('dragstart', (e) => {
-            const itemId = parseInt(e.target.closest('.task-item').getAttribute('data-item-id') || 
-                                   e.target.closest('.task-item').querySelector('input[onchange*="toggleGroceryItem"]')
-                                   ?.getAttribute('onchange')?.match(/\d+/)?.[0]);
+            const itemId = parseInt(item.getAttribute('data-item-id'));
             
             if (itemId) {
               groceryDraggedItem = groceryItems.find(item => item.id === itemId);
@@ -3685,16 +3685,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         item.addEventListener('dragenter', (e) => {
           e.preventDefault();
-          if (groceryDraggedItem && groceryDraggedItem.id !== parseInt(e.target.closest('.task-item')?.getAttribute('data-item-id') || 
-                                                                      e.target.closest('.task-item')?.querySelector('input[onchange*="toggleGroceryItem"]')
-                                                                      ?.getAttribute('onchange')?.match(/\d+/)?.[0])) {
-            updateGroceryDropIndicator(e, item, listElement);
-          }
-        });
-        
-        item.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          if (groceryDraggedItem) {
+          if (groceryDraggedItem && groceryDraggedItem.id !== parseInt(item.getAttribute('data-item-id'))) {
             updateGroceryDropIndicator(e, item, listElement);
           }
         });
@@ -3710,9 +3701,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           clearGroceryDropIndicators(listElement);
           
           if (groceryDraggedItem) {
-            const targetItemId = parseInt(e.target.closest('.task-item')?.getAttribute('data-item-id') || 
-                                         e.target.closest('.task-item')?.querySelector('input[onchange*="toggleGroceryItem"]')
-                                         ?.getAttribute('onchange')?.match(/\d+/)?.[0]);
+            const targetItemId = parseInt(item.getAttribute('data-item-id'));
             const targetItem = groceryItems.find(item => item.id === targetItemId);
             
             if (targetItem && targetItem.id !== groceryDraggedItem.id) {
@@ -3728,11 +3717,44 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               }
               
               saveGroceryItems();
-              renderGroceryList();
               
-              // Also update fullscreen view if it's open
+              // Re-render appropriate view
               if (document.getElementById('fullscreen-grocery-list')) {
                 renderGroceryListFullscreen();
+              } else {
+                renderGroceryList();
+              }
+            }
+          }
+        });
+      });
+      
+      // Set up category headers as drop zones (remove inline events, use proper listeners)
+      categoryHeaders.forEach(header => {
+        header.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          header.style.background = '#e3f2fd';
+        });
+        
+        header.addEventListener('dragleave', (e) => {
+          header.style.background = '#f8f9fa';
+        });
+        
+        header.addEventListener('drop', (e) => {
+          e.preventDefault();
+          header.style.background = '#f8f9fa';
+          
+          if (groceryDraggedItem) {
+            const targetCategory = header.getAttribute('data-category');
+            if (targetCategory && targetCategory !== groceryDraggedCategory) {
+              groceryDraggedItem.manualCategory = targetCategory;
+              saveGroceryItems();
+              
+              // Re-render appropriate view
+              if (document.getElementById('fullscreen-grocery-list')) {
+                renderGroceryListFullscreen();
+              } else {
+                renderGroceryList();
               }
             }
           }
@@ -4028,9 +4050,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           // Add category header as drop zone
           html += `<li class="category-header" 
                       data-category="${category}"
-                      ondragover="event.preventDefault(); this.style.background='#e3f2fd';" 
-                      ondragleave="this.style.background='#f8f9fa';"
-                      ondrop="event.preventDefault(); this.style.background='#f8f9fa'; handleGroceryCategoryDrop(event.dataTransfer.getData('text/plain'), '${category}');"
                       style="
             font-weight: bold; 
             color: var(--primary-color); 
@@ -6475,9 +6494,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           // Add category header as drop zone
           html += `<li class="category-header" 
                       data-category="${category}"
-                      ondragover="event.preventDefault(); this.style.background='#e3f2fd';" 
-                      ondragleave="this.style.background='#f8f9fa';"
-                      ondrop="event.preventDefault(); this.style.background='#f8f9fa'; handleGroceryCategoryDrop(event.dataTransfer.getData('text/plain'), '${category}');"
                       style="
             font-weight: bold; 
             color: var(--primary-color); 
