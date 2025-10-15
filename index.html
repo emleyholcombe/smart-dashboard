@@ -3670,7 +3670,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           const handle = newDragHandle;
           
           handle.addEventListener('dragstart', (e) => {
-            const itemId = parseInt(item.getAttribute('data-item-id'));
+            const itemId = parseFloat(item.getAttribute('data-item-id'));
             
             if (itemId) {
               groceryDraggedItem = groceryItems.find(item => item.id === itemId);
@@ -3707,7 +3707,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Set up drop zones for reordering within categories
         item.addEventListener('dragenter', (e) => {
           e.preventDefault();
-          if (groceryDraggedItem && groceryDraggedItem.id !== parseInt(item.getAttribute('data-item-id'))) {
+          if (groceryDraggedItem && groceryDraggedItem.id !== parseFloat(item.getAttribute('data-item-id'))) {
             updateGroceryDropIndicator(e, item, listElement);
           }
         });
@@ -3715,7 +3715,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         item.addEventListener('dragover', (e) => {
           e.preventDefault();
           e.dataTransfer.dropEffect = 'move';
-          if (groceryDraggedItem && groceryDraggedItem.id !== parseInt(item.getAttribute('data-item-id'))) {
+          if (groceryDraggedItem && groceryDraggedItem.id !== parseFloat(item.getAttribute('data-item-id'))) {
             updateGroceryDropIndicator(e, item, listElement);
           }
         });
@@ -3731,7 +3731,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           clearGroceryDropIndicators(listElement);
           
           if (groceryDraggedItem) {
-            const targetItemId = parseInt(item.getAttribute('data-item-id'));
+            const targetItemId = parseFloat(item.getAttribute('data-item-id'));
             const targetItem = groceryItems.find(item => item.id === targetItemId);
             
             if (targetItem && targetItem.id !== groceryDraggedItem.id) {
