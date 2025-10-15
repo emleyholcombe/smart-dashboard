@@ -2528,6 +2528,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           const historyItem = {
             id: Date.now() + Math.random(),
             text: item.text,
+            completed: true, // Mark as completed in history
             completedAt: item.completedAt,
             originalId: item.id,
             order: Date.now(), // Add order property for sorting
@@ -6626,25 +6627,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Group todos by date - combine ALL data for comprehensive view
       const todosByDate = {};
       
-      console.log('todoHistory:', todoHistory.length, 'items');
-      console.log('todoItems:', todoItems.length, 'items');
-      
       // Add completed todos from history on their completion date
       todoHistory.forEach(todo => {
-        console.log('Checking history item:', {
-          text: todo.text,
-          completed: todo.completed,
-          completedAt: todo.completedAt,
-          hasCompletedAt: !!todo.completedAt
-        });
-        
         if (todo.completed && todo.completedAt) {
           const completedDate = new Date(todo.completedAt).toISOString().split('T')[0];
           if (!todosByDate[completedDate]) todosByDate[completedDate] = [];
           todosByDate[completedDate].push({...todo, type: 'completed'});
-          console.log('Added completed todo:', todo.text, 'on', completedDate);
-        } else {
-          console.log('Skipped history item - completed:', todo.completed, 'completedAt:', todo.completedAt);
         }
       });
       
@@ -6653,11 +6641,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         if (!todo.completed && todo.dueDate) {
           if (!todosByDate[todo.dueDate]) todosByDate[todo.dueDate] = [];
           todosByDate[todo.dueDate].push({...todo, type: 'due'});
-          console.log('Added due todo:', todo.text, 'on', todo.dueDate);
         }
       });
-      
-      console.log('Final todosByDate:', todosByDate);
       
       // Render calendar
       let calendarHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
