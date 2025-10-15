@@ -2630,15 +2630,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             item.text = newText;
             item.dueDate = newDueDate || null;
             item.assignedTo = newAssignedTo || null;
-            saveTodoItems();
+          saveTodoItems();
             
             // Render the appropriate view (widget or fullscreen)
             if (document.getElementById('fullscreen-container')) {
               renderTodoListFullscreen();
             } else {
-              renderTodoList();
-            }
-          }
+          renderTodoList();
+        }
+      }
           document.body.removeChild(modal);
         };
         
@@ -2681,7 +2681,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     function renderTodoList() {
       const list = document.getElementById('todo-list');
-
+      
       if (showingTodoHistory) {
         let filteredHistory = [...todoHistory];
         
@@ -2761,17 +2761,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
           return `
             <li class="task-item ${taskItemClass}">
-              <span class="drag-handle">☰</span>
+            <span class="drag-handle">☰</span>
             <input type="checkbox" class="task-checkbox" 
                    onchange="toggleTodoItem(${item.id})">
             ${avatarHtml}
             <span class="task-text">${escapeHtml(item.text)}</span>
             ${dueDateDisplay ? `<span class="task-due-date ${dueDateClass}" onclick="editTodoDueDate(${item.id})" title="Click to edit due date">${dueDateDisplay}</span>` : ''}
             <div class="task-actions">
-                <button class="edit-btn" onclick="editTodoItem(${item.id})" title="Edit">✏️</button>
-                <button class="delete-btn" onclick="deleteTodoItem(${item.id})" title="Delete">🗑️</button>
-              </div>
-            </li>
+              <button class="edit-btn" onclick="editTodoItem(${item.id})" title="Edit">✏️</button>
+              <button class="delete-btn" onclick="deleteTodoItem(${item.id})" title="Delete">🗑️</button>
+            </div>
+          </li>
           `;
         }).join('');
         
@@ -3350,7 +3350,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       if (document.getElementById('fullscreen-container')) {
         renderTodoListFullscreen();
       } else {
-        renderTodoList();
+      renderTodoList();
       }
     }
 
@@ -3382,7 +3382,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       if (document.getElementById('fullscreen-container')) {
         renderTodoListFullscreen();
       } else {
-        renderTodoList();
+      renderTodoList();
       }
       
       console.log(`Re-added "${historyItem.text}" to current todo list and removed from history`);
@@ -4136,6 +4136,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         </div>
 
         <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Recipe URL (optional):</label>
+          <input type="url" id="edit-meal-url" value="${escapeHtml(item.url || '')}" 
+                 placeholder="https://example.com/recipe" 
+                 style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; 
+                        font-size: 14px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
           <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Ingredients:</label>
           <div id="ingredients-container">
             ${ingredientsList}
@@ -4146,11 +4154,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                            border: 1px dashed #ccc; border-radius: 4px; cursor: pointer;">
               + Add Ingredient
             </button>
-            ${item.url ? `<button type="button" id="auto-fill-btn" 
+            <button type="button" id="auto-fill-btn" 
                     style="padding: 8px 12px; background: var(--primary-color); color: white;
                            border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">
               🔗 Auto-fill from URL
-            </button>` : ''}
+            </button>
           </div>
         </div>
 
@@ -4170,6 +4178,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const autoFillBtn = document.getElementById('auto-fill-btn');
       const container = document.getElementById('ingredients-container');
       const nameInput = document.getElementById('edit-meal-name');
+      const urlInput = document.getElementById('edit-meal-url');
 
       // Focus on name input
       nameInput.focus();
@@ -4194,11 +4203,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Auto-fill from URL functionality
       if (autoFillBtn) {
         autoFillBtn.addEventListener('click', async () => {
+          const currentUrl = urlInput.value.trim();
+          if (!currentUrl) {
+            alert('Please enter a recipe URL first.');
+            urlInput.focus();
+            return;
+          }
+
           autoFillBtn.disabled = true;
           autoFillBtn.textContent = '🔄 Loading...';
           
           try {
-            const ingredients = await extractIngredientsFromUrl(item.url);
+            const ingredients = await extractIngredientsFromUrl(currentUrl);
             if (ingredients && ingredients.length > 0) {
               // Clear existing ingredients
               container.innerHTML = '';
@@ -4242,23 +4258,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           return;
         }
 
+        const newUrl = urlInput.value.trim();
         const inputs = container.querySelectorAll('input[type="text"]');
         const ingredients = Array.from(inputs)
           .map(input => input.value.trim())
           .filter(value => value.length > 0);
 
-        // Update both name and ingredients
+        // Update name, URL, and ingredients
         item.text = newName;
+        item.url = newUrl;
         item.ingredients = ingredients;
 
         // Sync to the other list (meal <-> history)
-        if (isHistory) {
-          syncHistoryToMeal(id, { text: newName, ingredients: ingredients });
-        } else {
-          syncMealToHistory(id, { text: newName, ingredients: ingredients });
+          if (isHistory) {
+          syncHistoryToMeal(id, { text: newName, url: newUrl, ingredients: ingredients });
+          } else {
+          syncMealToHistory(id, { text: newName, url: newUrl, ingredients: ingredients });
         }
-
-        saveMealItems();
+          
+          saveMealItems();
         saveMealHistory();
 
         // Re-render the appropriate view
@@ -4302,31 +4320,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       });
     }
 
-    function editMealUrl(id, isHistory = false) {
-      const items = isHistory ? mealHistory : mealItems;
-      const item = items.find(item => item.id === id);
-      
-      if (item) {
-        const currentUrl = item.url || '';
-        const newUrl = prompt(`${currentUrl ? 'Edit' : 'Add'} recipe URL for "${item.text}":`, currentUrl);
-        
-        if (newUrl !== null) { // User didn't cancel
-          item.url = newUrl.trim();
-          
-          if (isHistory) {
-            // Sync URL change from history to current meals
-            syncHistoryToMeal(id, { url: newUrl.trim() });
-            saveMealHistory();
-          } else {
-            // Sync URL change from current meals to history
-            syncMealToHistory(id, { url: newUrl.trim() });
-            saveMealItems();
-          }
-          
-          renderMealsList();
-        }
-      }
-    }
 
     function renderMealsList() {
       const list = document.getElementById('meals-list');
@@ -4368,7 +4361,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             <div class="task-actions">
               ${historyButton}
               <button class="edit-btn" onclick="editMealRecipe(${item.id}, ${showingMealHistory})" title="Edit recipe">📝</button>
-              <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingMealHistory})" title="${item.url ? 'Edit URL' : 'Add URL'}">🔗</button>
               <button class="delete-btn" onclick="deleteMealItem(${item.id})" title="Delete">🗑️</button>
             </div>
           </li>
@@ -4665,7 +4657,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             <div class="task-actions">
               ${historyButton}
               <button class="edit-btn" onclick="editMealRecipe(${item.id}, ${showingMealHistory})" title="Edit recipe">📝</button>
-              <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingMealHistory}); renderMealsListFullscreen();" title="${item.url ? 'Edit URL' : 'Add URL'}">🔗</button>
               <button class="delete-btn" onclick="deleteMealItem(${item.id}); renderMealsListFullscreen();" title="Delete">🗑️</button>
             </div>
           </li>
@@ -5555,7 +5546,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function renderTodoListFullscreen() {
       const list = document.getElementById('fullscreen-todo-list');
       if (!list) return;
-
+      
       if (showingTodoHistory) {
         let filteredHistory = [...todoHistory];
         
@@ -5628,17 +5619,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
           return `
             <li class="task-item ${taskItemClass}">
-              <span class="drag-handle">☰</span>
-              <input type="checkbox" class="task-checkbox" 
-                     onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
+            <span class="drag-handle">☰</span>
+            <input type="checkbox" class="task-checkbox" 
+                   onchange="toggleTodoItem(${item.id}); renderTodoListFullscreen();">
               ${avatarHtml}
-              <span class="task-text">${escapeHtml(item.text)}</span>
+            <span class="task-text">${escapeHtml(item.text)}</span>
               ${dueDateDisplay ? `<span class="task-due-date ${dueDateClass}" onclick="editTodoDueDate(${item.id})" title="Click to edit due date">${dueDateDisplay}</span>` : ''}
-              <div class="task-actions">
-                <button class="edit-btn" onclick="editTodoItem(${item.id}); renderTodoListFullscreen();" title="Edit">✏️</button>
-                <button class="delete-btn" onclick="deleteTodoItem(${item.id}); renderTodoListFullscreen();" title="Delete">🗑️</button>
-              </div>
-            </li>
+            <div class="task-actions">
+              <button class="edit-btn" onclick="editTodoItem(${item.id}); renderTodoListFullscreen();" title="Edit">✏️</button>
+              <button class="delete-btn" onclick="deleteTodoItem(${item.id}); renderTodoListFullscreen();" title="Delete">🗑️</button>
+            </div>
+          </li>
           `;
         }).join('');
         
