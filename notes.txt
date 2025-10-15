@@ -3397,25 +3397,36 @@ COMMITS:
 - **Visual Feedback**: Cursor pointer on hover, updated tooltips with "Click to edit"
 - **Integration**: Changes reflect immediately in current todo list and future calendar views
 
+### **CALENDAR AVATAR FILTERING**:
+- **Feature**: Avatar filter buttons (E/N/F) in calendar navigation for assignment-based filtering
+- **Independent State**: Calendar filters separate from main todo list filters
+- **Visual Feedback**: Border highlight and scale transform when active
+- **Color Coding**: Emley (blue), Nate (purple), Family (green) matching existing patterns
+- **Real-time Updates**: Calendar re-renders immediately when filters change
+
 **TECHNICAL IMPLEMENTATION**:
 - Added `editTodoFromCalendar(todoId, isHistoryItem)` function
 - Clickable todo badges with onclick handlers in `renderCalendarMonth()`
 - Automatic re-adding of completed tasks to current list for editing
 - Smart item finding by text and originalHistoryId after re-adding
 - Timeout ensures edit modal opens after re-adding process completes
+- Added `selectedCalendarAvatarFilters` array for calendar-specific filtering state
+- Created `toggleCalendarAvatarFilter()`, `updateCalendarAvatarFilterButtons()`, `filterCalendarTodosByAvatar()` functions
+- Applied filtering to both todoHistory and todoItems before calendar rendering
 
 **COMMITS**:
 - "Add clickable todo items in calendar view for direct editing" (1fb9612)
+- "Add avatar filtering to todo calendar view" (53a4b3b)
 
 CURRENT PROJECT STATE:
 ======================
-- Total commits today: 21+
-- Lines of code: 7097 (index.html)
-- All functionality working and tested (including clickable calendar todos)
+- Total commits today: 22+
+- Lines of code: 7165 (index.html)
+- All functionality working and tested (including calendar avatar filtering)
 - Clean git history with descriptive commit messages
-- Comprehensive todo calendar system with interactive editing complete
+- Comprehensive todo calendar system with interactive editing and filtering complete
 - Enhanced grocery categorization with drag-and-drop
 - Robust recipe management with auto-fill capabilities
 - Seamless meal planning to grocery shopping workflow
-- Complete todo calendar integration with full editing capabilities
+- Complete todo calendar integration with full editing and avatar filtering capabilities
 
