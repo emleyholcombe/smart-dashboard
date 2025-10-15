@@ -7776,9 +7776,10 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       });
     }
 
-    // Initialize PWA customizations when page loads
+    // Initialize PWA customizations when page loads (TEMPORARILY DISABLED FOR DEBUGGING)
     document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(applyPWACustomizations, 100);
+      // setTimeout(applyPWACustomizations, 100); // DISABLED
+      console.log('PWA customizations completely disabled for debugging');
     });
 
     // PWA-specific data loading debug
