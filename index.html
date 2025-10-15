@@ -4270,6 +4270,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
         <div style="margin-bottom: 20px;">
           <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Ingredients:</label>
+          <div style="margin-bottom: 12px;">
+            <button type="button" id="add-all-to-grocery-btn" 
+                    style="width: 100%; padding: 8px; background: #28a745; color: white;
+                           border: none; border-radius: 4px; cursor: pointer;">
+              🛒 Add All Ingredients to Grocery List
+            </button>
+          </div>
           <div id="ingredients-container">
             ${ingredientsList}
           </div>
@@ -4283,13 +4290,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                     style="padding: 8px 12px; background: var(--primary-color); color: white;
                            border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">
               🔗 Auto-fill from URL
-            </button>
-          </div>
-          <div style="margin-top: 8px;">
-            <button type="button" id="add-all-to-grocery-btn" 
-                    style="width: 100%; padding: 8px; background: #28a745; color: white;
-                           border: none; border-radius: 4px; cursor: pointer;">
-              🛒 Add All Ingredients to Grocery List
             </button>
           </div>
         </div>
