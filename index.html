@@ -3536,13 +3536,26 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return 'Canned & Packaged Goods';
       }
       
-      // 2. Fresh herbs and spices go to Produce (fresh parsley, fresh ginger, etc.)
+      // 2. Fresh garlic cloves go to Produce (garlic cloves, fresh garlic, minced garlic cloves, etc.)
+      const garlicCloveIndicators = [
+        'garlic clove', 'garlic cloves', 'fresh garlic', 'minced garlic cloves', 
+        'chopped garlic', 'crushed garlic', 'smashed garlic', 'whole clove garlic', 
+        'whole cloves garlic', 'peeled garlic', 'clove garlic', 'cloves garlic'
+      ];
+      const clovePattern = /\b\d+\s+clove[s]?\b/; // Matches "1 clove", "2 cloves", "3 cloves", etc.
+      
+      if (garlicCloveIndicators.some(indicator => text.includes(indicator)) || 
+          (text.includes('garlic') && clovePattern.test(text))) {
+        return 'Produce';
+      }
+      
+      // 3. Fresh herbs and spices go to Produce (fresh parsley, fresh ginger, etc.)
       const freshHerbKeywords = ['parsley', 'cilantro', 'basil', 'thyme', 'rosemary', 'oregano', 'dill', 'mint', 'sage', 'chives', 'ginger', 'garlic', 'onion'];
       if (text.includes('fresh') && freshHerbKeywords.some(herb => text.includes(herb))) {
         return 'Produce';
       }
       
-      // 3. Spice measurements indicate Spices (but not fresh ones)
+      // 4. Spice measurements indicate Spices (but not fresh ones)
       const spiceMeasurements = ['teaspoon', 'tsp', 'tablespoon', 'tbsp', 'pinch of', 'dash of', 'ground ', 'dried '];
       const spiceKeywords = ['turmeric', 'garam masala', 'cumin', 'coriander', 'cardamom', 'cinnamon', 'paprika', 'chili powder', 'curry powder', 'oregano', 'basil', 'thyme', 'rosemary', 'sage', 'parsley', 'cilantro', 'dill', 'mint', 'garlic powder', 'onion powder', 'black pepper', 'white pepper', 'cayenne', 'nutmeg', 'cloves', 'allspice', 'bay leaves'];
       
@@ -3553,12 +3566,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return 'Spices';
       }
       
-      // 4. Frozen indicators
+      // 5. Frozen indicators
       if (text.includes('frozen')) {
         return 'Frozen Foods';
       }
       
-      // 5. Fresh meat indicators
+      // 6. Fresh meat indicators
       const meatPreparations = ['boneless', 'skinless', 'ground', 'chopped', 'diced', 'sliced', 'whole', 'fresh'];
       const meatTypes = ['chicken', 'beef', 'pork', 'lamb', 'turkey', 'duck', 'fish', 'salmon', 'tuna'];
       if (meatTypes.some(meat => text.includes(meat)) && 
@@ -3566,13 +3579,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return 'Meat & Seafood';
       }
       
-      // 6. Dairy with measurements
+      // 7. Dairy with measurements
       if ((text.includes('cup') || text.includes('oz') || text.includes('pint') || text.includes('quart') || text.includes('gallon')) &&
           (text.includes('milk') || text.includes('cream') || text.includes('yogurt') || text.includes('butter'))) {
         return 'Dairy';
       }
       
-      // 7. Baking measurements
+      // 8. Baking measurements
       const bakingMeasurements = ['cup', 'cups', 'lb', 'pound', 'ounce', 'oz'];
       const bakingIngredients = ['flour', 'sugar', 'brown sugar', 'powdered sugar', 'baking powder', 'baking soda', 'vanilla extract', 'oil', 'butter'];
       if (bakingMeasurements.some(measurement => text.includes(measurement)) &&
