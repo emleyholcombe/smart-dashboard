@@ -3534,7 +3534,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         </div>
 
         <div style="margin-bottom: 16px;">
-          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Recipe Source (optional):</label>
+          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Recipe Source:</label>
           <input type="text" id="edit-grocery-source" value="${escapeHtml(item.recipeSource || '')}" 
                  placeholder="e.g., Butter Chicken, Pasta Recipe..." 
                  style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; 
@@ -3586,8 +3586,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         item.recipeSource = newSource || null;
         item.isOptional = isOptional;
         
-        saveGroceryItems();
-        renderGroceryList();
+          saveGroceryItems();
+          renderGroceryList();
         
         // Also update fullscreen view if it's open
         if (document.getElementById('fullscreen-grocery-list')) {
