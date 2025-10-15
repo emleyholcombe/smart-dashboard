@@ -6618,25 +6618,23 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       return monthHTML;
     }
 
+    // Calendar navigation state
+    let calendarViewDate = new Date();
+
     function renderTodoCalendarFullscreen() {
       const container = document.getElementById('fullscreen-todo-calendar-container');
       if (!container) return;
       
-      // Get current date and calculate calendar bounds
-      const today = new Date();
-      const currentMonth = today.getMonth();
-      const currentYear = today.getFullYear();
+      // Use the calendar view date (defaults to current date)
+      const viewYear = calendarViewDate.getFullYear();
+      const viewMonth = calendarViewDate.getMonth();
       
-      // Show 3 months: previous, current, next
-      const months = [];
-      for (let i = -1; i <= 1; i++) {
-        const date = new Date(currentYear, currentMonth + i, 1);
-        months.push({
-          year: date.getFullYear(),
-          month: date.getMonth(),
-          name: date.toLocaleString('default', { month: 'long', year: 'numeric' })
-        });
-      }
+      // Show only the selected month
+      const months = [{
+        year: viewYear,
+        month: viewMonth,
+        name: calendarViewDate.toLocaleString('default', { month: 'long', year: 'numeric' })
+      }];
       
       // Group todos by date - combine ALL data for comprehensive view
       const todosByDate = {};
@@ -6660,15 +6658,75 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
       });
       
-      // Render calendar
-      let calendarHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+        // Add navigation controls
+        let calendarHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px;">
+            <button onclick="navigateCalendar(-1)" style="
+              background: var(--primary-color); 
+              color: white; 
+              border: none; 
+              border-radius: 6px; 
+              padding: 8px 16px; 
+              cursor: pointer; 
+              font-size: 14px;
+              display: flex;
+              align-items: center;
+              gap: 5px;
+            ">
+              ← Previous Month
+            </button>
+            
+            <button onclick="navigateCalendar(0)" style="
+              background: #6c757d; 
+              color: white; 
+              border: none; 
+              border-radius: 6px; 
+              padding: 8px 16px; 
+              cursor: pointer; 
+              font-size: 14px;
+            ">
+              Today
+            </button>
+            
+            <button onclick="navigateCalendar(1)" style="
+              background: var(--primary-color); 
+              color: white; 
+              border: none; 
+              border-radius: 6px; 
+              padding: 8px 16px; 
+              cursor: pointer; 
+              font-size: 14px;
+              display: flex;
+              align-items: center;
+              gap: 5px;
+            ">
+              Next Month →
+            </button>
+          </div>
+        `;
+        
+        // Render calendar month
+        calendarHTML += '<div style="display: grid; grid-template-columns: 1fr; gap: 20px;">';
+        
+        months.forEach(monthInfo => {
+          calendarHTML += renderCalendarMonth(monthInfo.year, monthInfo.month, monthInfo.name, todosByDate);
+        });
+        
+        calendarHTML += '</div>';
+        container.innerHTML = calendarHTML;
+    }
+
+    function navigateCalendar(direction) {
+      if (direction === 0) {
+        // Reset to current month
+        calendarViewDate = new Date();
+      } else {
+        // Navigate to previous (-1) or next (1) month
+        calendarViewDate.setMonth(calendarViewDate.getMonth() + direction);
+      }
       
-      months.forEach(monthInfo => {
-        calendarHTML += renderCalendarMonth(monthInfo.year, monthInfo.month, monthInfo.name, todosByDate);
-      });
-      
-      calendarHTML += '</div>';
-      container.innerHTML = calendarHTML;
+      // Re-render the calendar with the new date
+      renderTodoCalendarFullscreen();
     }
 
     // Fullscreen grocery functions
@@ -6871,6 +6929,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function showFullscreenTodoCalendar() {
+      // Reset calendar to current month when opening
+      calendarViewDate = new Date();
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       openFullscreen('todo-calendar');
