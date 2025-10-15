@@ -3404,6 +3404,13 @@ COMMITS:
 - **Color Coding**: Emley (blue), Nate (purple), Family (green) matching existing patterns
 - **Real-time Updates**: Calendar re-renders immediately when filters change
 
+### **CALENDAR COLOR CODING**:
+- **Completed Tasks**: Green background (#4caf50) with ✓ icon - clearly shows accomplishments
+- **Overdue Tasks**: Red background (#f44336) with ! icon - urgent attention needed
+- **Current/Future Due Tasks**: Neutral gray background (#757575) with • icon - no false urgency
+- **Visual Hierarchy**: Red draws immediate attention to overdue items, gray reduces noise for future tasks
+- **Updated Tooltips**: (Completed), (Overdue), (Due) for clear status indication
+
 **TECHNICAL IMPLEMENTATION**:
 - Added `editTodoFromCalendar(todoId, isHistoryItem)` function
 - Clickable todo badges with onclick handlers in `renderCalendarMonth()`
@@ -3417,16 +3424,17 @@ COMMITS:
 **COMMITS**:
 - "Add clickable todo items in calendar view for direct editing" (1fb9612)
 - "Add avatar filtering to todo calendar view" (53a4b3b)
+- "Update calendar color coding: green for completed, red for overdue, gray for current/future" (77607fb)
 
 CURRENT PROJECT STATE:
 ======================
-- Total commits today: 22+
-- Lines of code: 7165 (index.html)
-- All functionality working and tested (including calendar avatar filtering)
+- Total commits today: 23+
+- Lines of code: 7185 (index.html)
+- All functionality working and tested (including enhanced calendar color coding)
 - Clean git history with descriptive commit messages
-- Comprehensive todo calendar system with interactive editing and filtering complete
+- Comprehensive todo calendar system with interactive editing, filtering, and intuitive color coding complete
 - Enhanced grocery categorization with drag-and-drop
 - Robust recipe management with auto-fill capabilities
 - Seamless meal planning to grocery shopping workflow
-- Complete todo calendar integration with full editing and avatar filtering capabilities
+- Complete todo calendar integration with full editing, avatar filtering, and priority-based color coding
 
