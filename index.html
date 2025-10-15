@@ -6598,9 +6598,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               : 'background: #ff9800; color: white;';
             const todoIcon = todo.type === 'completed' ? '✓' : '!';
             
+            // Determine the appropriate edit function based on todo type
+            const editFunction = todo.type === 'completed' 
+              ? `editTodoFromCalendar(${todo.id}, true)` // true for history item
+              : `editTodoFromCalendar(${todo.id}, false)`; // false for current item
+            
             monthHTML += `
-              <div style="${todoStyle} padding: 2px 4px; margin: 1px 0; border-radius: 3px; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" 
-                   title="${escapeHtml(todo.text)} ${todo.type === 'completed' ? '(Completed)' : '(Due)'}">
+              <div style="${todoStyle} padding: 2px 4px; margin: 1px 0; border-radius: 3px; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" 
+                   title="Click to edit: ${escapeHtml(todo.text)} ${todo.type === 'completed' ? '(Completed)' : '(Due)'}"
+                   onclick="${editFunction}">
                 ${todoIcon} ${escapeHtml(todo.text.substring(0, 15))}${todo.text.length > 15 ? '...' : ''}
               </div>
             `;
@@ -6727,6 +6733,36 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // Re-render the calendar with the new date
       renderTodoCalendarFullscreen();
+    }
+
+    function editTodoFromCalendar(todoId, isHistoryItem) {
+      if (isHistoryItem) {
+        // For completed tasks, we need to re-add them to current list first
+        // Find the history item
+        const historyItem = todoHistory.find(item => item.id === todoId);
+        if (!historyItem) {
+          console.error('History item not found:', todoId);
+          return;
+        }
+        
+        // Re-add to current list (this will remove from history)
+        reAddTodoFromHistory(todoId);
+        
+        // Find the newly created item in current list (it will have a new ID)
+        // We need to find it by text since the ID changes
+        const newItem = todoItems.find(item => 
+          item.text === historyItem.text && 
+          item.originalHistoryId === todoId
+        );
+        
+        if (newItem) {
+          // Open edit modal for the new current item
+          setTimeout(() => editTodoItem(newItem.id), 100);
+        }
+      } else {
+        // For current tasks, directly open the edit modal
+        editTodoItem(todoId);
+      }
     }
 
     // Fullscreen grocery functions
