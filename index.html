@@ -1535,6 +1535,7 @@
     <!-- To-Do List -->
     <div class="widget todo-widget" id="todo-widget">
       <div style="position: relative; text-align: center; margin-bottom: 1.5rem;">
+        <button onclick="openTodoCalendar()" class="calendar-button" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); padding: 4px 8px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">📅 Calendar</button>
         <h2 onclick="openFullscreen('todo')" style="margin: 0; cursor: pointer;">To-Do List</h2>
         <button onclick="showTodoHistory()" class="history-button">History</button>
       </div>
@@ -3191,10 +3192,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       showingTodoHistory = !showingTodoHistory;
       const historyButton = document.querySelector('.todo-widget .history-button');
       const headerTitle = document.querySelector('.todo-widget h2');
+      const calendarButton = document.querySelector('.todo-widget .calendar-button');
       
       if (showingTodoHistory) {
         historyButton.textContent = 'Current';
         headerTitle.textContent = 'To-Do History';
+        if (calendarButton) {
+          calendarButton.onclick = () => openTodoCalendar(true); // true for history mode
+        }
         
         // Update header onclick to open fullscreen history
         headerTitle.onclick = () => {
@@ -3247,6 +3252,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       } else {
         historyButton.textContent = 'History';
         headerTitle.textContent = 'To-Do List';
+        if (calendarButton) {
+          calendarButton.onclick = () => openTodoCalendar(false); // false for current mode
+        }
         
         // Restore original header onclick behavior
         headerTitle.onclick = () => openFullscreen('todo');
@@ -6025,6 +6033,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         title.onclick = closeFullscreen;
         title.style.cursor = 'pointer';
         
+        // Add Calendar button to the left of History/Current button
+        const calendarBtn = document.createElement('button');
+        calendarBtn.className = 'back-button'; // Use same styling as other header buttons
+        calendarBtn.textContent = '📅 Calendar';
+        calendarBtn.onclick = () => openTodoCalendar(showingTodoHistory);
+        
         // Add History/Current button to the left of Home button in header
         const historyBtn = document.createElement('button');
         historyBtn.className = 'back-button'; // Use same styling as other header buttons
@@ -6042,7 +6056,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           renderTodoListFullscreen();
         };
         
-        // Insert the history button at the beginning of the button container
+        // Insert the buttons at the beginning of the button container
+        buttonContainer.insertBefore(calendarBtn, homeButton);
         buttonContainer.insertBefore(historyBtn, homeButton);
         
         // Add appropriate input container based on mode
@@ -6483,6 +6498,192 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       updateAvatarFilterButtons();
       
       renderTodoListFullscreen();
+    }
+
+    // Todo Calendar Functions
+    function openTodoCalendar(isHistoryMode = false) {
+      // Create modal for calendar view
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      `;
+      
+      const dialog = document.createElement('div');
+      dialog.className = 'modal-dialog';
+      dialog.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        width: 90%;
+        max-width: 1000px;
+        max-height: 90%;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      `;
+      
+      const title = isHistoryMode ? 'To-Do History Calendar' : 'To-Do Calendar';
+      dialog.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="margin: 0; color: var(--primary-color);">${title}</h2>
+          <button onclick="this.closest('.modal-overlay').remove()" 
+                  style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">×</button>
+        </div>
+        <div id="todo-calendar-container">
+          <!-- Calendar will be rendered here -->
+        </div>
+      `;
+      
+      modal.appendChild(dialog);
+      document.body.appendChild(modal);
+      
+      // Render the calendar
+      renderTodoCalendar(isHistoryMode);
+      
+      // Close modal when clicking outside
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+    }
+
+    function renderTodoCalendar(isHistoryMode = false) {
+      const container = document.getElementById('todo-calendar-container');
+      if (!container) return;
+      
+      // Get current date and calculate calendar bounds
+      const today = new Date();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+      
+      // Show 3 months: previous, current, next
+      const months = [];
+      for (let i = -1; i <= 1; i++) {
+        const date = new Date(currentYear, currentMonth + i, 1);
+        months.push({
+          year: date.getFullYear(),
+          month: date.getMonth(),
+          name: date.toLocaleString('default', { month: 'long', year: 'numeric' })
+        });
+      }
+      
+      // Get todo data based on mode
+      const todoData = isHistoryMode ? todoHistory : todoItems;
+      
+      // Group todos by date
+      const todosByDate = {};
+      
+      todoData.forEach(todo => {
+        // Add completed todos on their completion date
+        if (todo.completed && todo.completedAt) {
+          const completedDate = new Date(todo.completedAt).toISOString().split('T')[0];
+          if (!todosByDate[completedDate]) todosByDate[completedDate] = [];
+          todosByDate[completedDate].push({...todo, type: 'completed'});
+        }
+        
+        // Add uncompleted todos with due dates on their due date
+        if (!todo.completed && todo.dueDate) {
+          if (!todosByDate[todo.dueDate]) todosByDate[todo.dueDate] = [];
+          todosByDate[todo.dueDate].push({...todo, type: 'due'});
+        }
+      });
+      
+      // Render calendar
+      let calendarHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+      
+      months.forEach(monthInfo => {
+        calendarHTML += renderCalendarMonth(monthInfo.year, monthInfo.month, monthInfo.name, todosByDate);
+      });
+      
+      calendarHTML += '</div>';
+      container.innerHTML = calendarHTML;
+    }
+
+    function renderCalendarMonth(year, month, monthName, todosByDate) {
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startDate = new Date(firstDay);
+      startDate.setDate(startDate.getDate() - firstDay.getDay()); // Start from Sunday
+      
+      const today = new Date().toISOString().split('T')[0];
+      
+      let monthHTML = `
+        <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+          <div style="background: var(--primary-color); color: white; padding: 12px; text-align: center; font-weight: bold;">
+            ${monthName}
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(7, 1fr);">
+      `;
+      
+      // Day headers
+      const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      dayHeaders.forEach(day => {
+        monthHTML += `<div style="padding: 8px; text-align: center; font-weight: bold; background: #f8f9fa; border-bottom: 1px solid #ddd;">${day}</div>`;
+      });
+      
+      // Calendar days
+      const currentDate = new Date(startDate);
+      for (let week = 0; week < 6; week++) {
+        for (let day = 0; day < 7; day++) {
+          const dateStr = currentDate.toISOString().split('T')[0];
+          const isCurrentMonth = currentDate.getMonth() === month;
+          const isToday = dateStr === today;
+          const todosForDate = todosByDate[dateStr] || [];
+          
+          let dayClass = 'calendar-day';
+          let dayStyle = `
+            padding: 8px 4px;
+            min-height: 60px;
+            border-bottom: 1px solid #eee;
+            border-right: 1px solid #eee;
+            position: relative;
+            font-size: 12px;
+          `;
+          
+          if (!isCurrentMonth) {
+            dayStyle += 'color: #ccc; background: #f9f9f9;';
+          } else if (isToday) {
+            dayStyle += 'background: #e3f2fd; font-weight: bold;';
+          }
+          
+          monthHTML += `<div class="${dayClass}" style="${dayStyle}">`;
+          monthHTML += `<div style="font-weight: ${isToday ? 'bold' : 'normal'};">${currentDate.getDate()}</div>`;
+          
+          // Add todos for this date
+          todosForDate.forEach(todo => {
+            const todoStyle = todo.type === 'completed' 
+              ? 'background: #4caf50; color: white;' 
+              : 'background: #ff9800; color: white;';
+            const todoIcon = todo.type === 'completed' ? '✓' : '!';
+            
+            monthHTML += `
+              <div style="${todoStyle} padding: 2px 4px; margin: 1px 0; border-radius: 3px; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" 
+                   title="${escapeHtml(todo.text)} ${todo.type === 'completed' ? '(Completed)' : '(Due)'}">
+                ${todoIcon} ${escapeHtml(todo.text.substring(0, 15))}${todo.text.length > 15 ? '...' : ''}
+              </div>
+            `;
+          });
+          
+          monthHTML += '</div>';
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+        
+        // Break if we've gone past the current month
+        if (currentDate.getMonth() !== month && week >= 4) break;
+      }
+      
+      monthHTML += '</div></div>';
+      return monthHTML;
     }
 
     // Fullscreen grocery functions
