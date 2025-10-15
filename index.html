@@ -3482,8 +3482,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       'Canned & Packaged Goods': {
         keywords: ['canned', 'can of', 'soup', 'broth', 'stock', 'beans', 'chickpeas', 'lentils', 'tomatoes', 'tomato sauce', 'pasta sauce', 'marinara', 'salsa', 'diced tomatoes', 'tomato paste', 'coconut milk', 'canned fruit', 'canned vegetables', 'corn', 'green beans', 'peas', 'carrots', 'jar', 'bottle', 'packaged', 'boxed']
       },
+      'Spices': {
+        keywords: ['spices', 'seasoning', 'herbs', 'dried herbs', 'cinnamon', 'paprika', 'cumin', 'chili powder', 'garlic powder', 'onion powder', 'turmeric', 'garam masala', 'coriander', 'cardamom', 'oregano', 'basil', 'thyme', 'rosemary', 'sage', 'parsley', 'cilantro', 'dill', 'mint', 'black pepper', 'white pepper', 'cayenne', 'nutmeg', 'cloves', 'allspice', 'bay leaves', 'curry powder', 'italian seasoning', 'mustard seed', 'celery seed', 'fennel', 'star anise', 'saffron', 'vanilla bean', 'ground', 'dried', 'fresh herbs']
+      },
       'Dry Goods & Baking': {
-        keywords: ['flour', 'sugar', 'brown sugar', 'powdered sugar', 'baking powder', 'baking soda', 'vanilla', 'extract', 'oil', 'olive oil', 'vegetable oil', 'coconut oil', 'vinegar', 'salt', 'pepper', 'spices', 'cinnamon', 'paprika', 'cumin', 'chili powder', 'garlic powder', 'onion powder', 'dried herbs', 'baking mix', 'pancake mix', 'cake mix', 'cornstarch', 'cocoa powder', 'chocolate chips', 'nuts', 'almonds', 'walnuts', 'pecans', 'peanuts']
+        keywords: ['flour', 'sugar', 'brown sugar', 'powdered sugar', 'baking powder', 'baking soda', 'vanilla', 'extract', 'oil', 'olive oil', 'vegetable oil', 'coconut oil', 'vinegar', 'salt', 'baking mix', 'pancake mix', 'cake mix', 'cornstarch', 'cocoa powder', 'chocolate chips', 'nuts', 'almonds', 'walnuts', 'pecans', 'peanuts']
       },
       'Snacks & Candy': {
         keywords: ['chips', 'crackers', 'pretzels', 'popcorn', 'nuts', 'trail mix', 'granola bar', 'energy bar', 'protein bar', 'candy', 'chocolate', 'gum', 'mints', 'cookies', 'snacks', 'goldfish', 'cheez-its', 'oreos', 'graham crackers']
@@ -3533,14 +3536,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return 'Canned & Packaged Goods';
       }
       
-      // 2. Spice measurements indicate Dry Goods & Baking
+      // 2. Spice measurements indicate Spices
       const spiceMeasurements = ['teaspoon', 'tsp', 'tablespoon', 'tbsp', 'pinch of', 'dash of', 'ground ', 'dried ', 'fresh '];
       const spiceKeywords = ['turmeric', 'garam masala', 'cumin', 'coriander', 'cardamom', 'cinnamon', 'paprika', 'chili powder', 'curry powder', 'oregano', 'basil', 'thyme', 'rosemary', 'sage', 'parsley', 'cilantro', 'dill', 'mint', 'garlic powder', 'onion powder', 'black pepper', 'white pepper', 'cayenne', 'nutmeg', 'cloves', 'allspice', 'bay leaves'];
       
       if (spiceMeasurements.some(measurement => text.includes(measurement)) || 
           (spiceKeywords.some(spice => text.includes(spice)) && 
            (text.includes('ground') || text.includes('dried') || text.includes('powder') || text.includes('teaspoon') || text.includes('tablespoon')))) {
-        return 'Dry Goods & Baking';
+        return 'Spices';
       }
       
       // 3. Frozen indicators
@@ -3866,6 +3869,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             <option value="Meat & Seafood" ${item.manualCategory === 'Meat & Seafood' ? 'selected' : ''}>Meat & Seafood</option>
             <option value="Dairy" ${item.manualCategory === 'Dairy' ? 'selected' : ''}>Dairy</option>
             <option value="Canned & Packaged Goods" ${item.manualCategory === 'Canned & Packaged Goods' ? 'selected' : ''}>Canned & Packaged Goods</option>
+            <option value="Spices" ${item.manualCategory === 'Spices' ? 'selected' : ''}>Spices</option>
             <option value="Dry Goods & Baking" ${item.manualCategory === 'Dry Goods & Baking' ? 'selected' : ''}>Dry Goods & Baking</option>
             <option value="Snacks & Candy" ${item.manualCategory === 'Snacks & Candy' ? 'selected' : ''}>Snacks & Candy</option>
             <option value="Cereal & Breakfast" ${item.manualCategory === 'Cereal & Breakfast' ? 'selected' : ''}>Cereal & Breakfast</option>
@@ -3994,6 +3998,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         'Meat & Seafood',
         'Dairy',
         'Canned & Packaged Goods',
+        'Spices',
         'Dry Goods & Baking',
         'Snacks & Candy',
         'Cereal & Breakfast',
@@ -6440,6 +6445,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         'Meat & Seafood',
         'Dairy',
         'Canned & Packaged Goods',
+        'Spices',
         'Dry Goods & Baking',
         'Snacks & Candy',
         'Cereal & Breakfast',
