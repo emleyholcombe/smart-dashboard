@@ -3973,21 +3973,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       renderMealsList();
     }
 
-    function editMealItem(id) {
-      const item = mealItems.find(item => item.id === id);
-      if (item) {
-        const newText = prompt('Edit meal:', item.text);
-        if (newText !== null && newText.trim()) {
-          item.text = newText.trim();
-          
-          // Sync text change to history item with same ID
-          syncMealToHistory(id, { text: item.text });
-          
-          saveMealItems();
-          renderMealsList();
-        }
-      }
-    }
 
     // Recipe ingredient extraction function
     async function extractIngredientsFromUrl(url) {
@@ -4109,7 +4094,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       return ingredients;
     }
 
-    function editMealIngredients(id, isHistory = false) {
+    function editMealRecipe(id, isHistory = false) {
       const items = isHistory ? mealHistory : mealItems;
       const item = items.find(item => item.id === id);
       if (!item) return;
@@ -4141,27 +4126,39 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       ).join('');
 
       dialog.innerHTML = `
-        <h3 style="margin: 0 0 16px 0; color: #333;">Recipe Ingredients for "${escapeHtml(item.text)}"</h3>
-        <div id="ingredients-container">
-          ${ingredientsList}
+        <h3 style="margin: 0 0 20px 0; color: #333;">Edit Recipe</h3>
+        
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Meal Name:</label>
+          <input type="text" id="edit-meal-name" value="${escapeHtml(item.text)}" 
+                 style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; 
+                        font-size: 14px; box-sizing: border-box;">
         </div>
-        <div style="display: flex; gap: 8px; margin: 16px 0;">
-          <button type="button" id="add-ingredient-btn" 
-                  style="flex: 1; padding: 8px; background: #f0f0f0; 
-                         border: 1px dashed #ccc; border-radius: 4px; cursor: pointer;">
-            + Add Ingredient
-          </button>
-          ${item.url ? `<button type="button" id="auto-fill-btn" 
-                  style="padding: 8px 12px; background: var(--primary-color); color: white;
-                         border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">
-            🔗 Auto-fill from URL
-          </button>` : ''}
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Ingredients:</label>
+          <div id="ingredients-container">
+            ${ingredientsList}
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <button type="button" id="add-ingredient-btn" 
+                    style="flex: 1; padding: 8px; background: #f0f0f0; 
+                           border: 1px dashed #ccc; border-radius: 4px; cursor: pointer;">
+              + Add Ingredient
+            </button>
+            ${item.url ? `<button type="button" id="auto-fill-btn" 
+                    style="padding: 8px 12px; background: var(--primary-color); color: white;
+                           border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">
+              🔗 Auto-fill from URL
+            </button>` : ''}
+          </div>
         </div>
-        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
-          <button id="ingredients-cancel-btn" style="padding: 8px 16px; border: 1px solid #ddd; 
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+          <button id="recipe-cancel-btn" style="padding: 10px 20px; border: 1px solid #ddd; 
                   border-radius: 6px; background: white; cursor: pointer;">Cancel</button>
-          <button id="ingredients-save-btn" style="padding: 8px 16px; border: none; border-radius: 6px; 
-                  background: var(--primary-color); color: white; cursor: pointer;">Save</button>
+          <button id="recipe-save-btn" style="padding: 10px 20px; border: none; border-radius: 6px; 
+                  background: var(--primary-color); color: white; cursor: pointer;">Save Recipe</button>
         </div>
       `;
 
@@ -4172,6 +4169,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const addBtn = document.getElementById('add-ingredient-btn');
       const autoFillBtn = document.getElementById('auto-fill-btn');
       const container = document.getElementById('ingredients-container');
+      const nameInput = document.getElementById('edit-meal-name');
+
+      // Focus on name input
+      nameInput.focus();
+      nameInput.select();
       
       addBtn.addEventListener('click', () => {
         const newIndex = container.children.length;
@@ -4229,22 +4231,31 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
 
       // Handle save
-      const saveBtn = document.getElementById('ingredients-save-btn');
-      const cancelBtn = document.getElementById('ingredients-cancel-btn');
+      const saveBtn = document.getElementById('recipe-save-btn');
+      const cancelBtn = document.getElementById('recipe-cancel-btn');
 
       const handleSave = () => {
+        const newName = nameInput.value.trim();
+        if (!newName) {
+          alert('Please enter a meal name.');
+          nameInput.focus();
+          return;
+        }
+
         const inputs = container.querySelectorAll('input[type="text"]');
         const ingredients = Array.from(inputs)
           .map(input => input.value.trim())
           .filter(value => value.length > 0);
 
+        // Update both name and ingredients
+        item.text = newName;
         item.ingredients = ingredients;
 
         // Sync to the other list (meal <-> history)
         if (isHistory) {
-          syncHistoryToMeal(id, { ingredients: ingredients });
+          syncHistoryToMeal(id, { text: newName, ingredients: ingredients });
         } else {
-          syncMealToHistory(id, { ingredients: ingredients });
+          syncMealToHistory(id, { text: newName, ingredients: ingredients });
         }
 
         saveMealItems();
@@ -4274,9 +4285,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
       });
 
-      // Handle Enter key to add new ingredient
+      // Handle keyboard shortcuts
+      nameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSave();
+        }
+      });
+
+      // Handle Enter key to add new ingredient (only for ingredient inputs)
       dialog.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.id !== 'edit-meal-name') {
           e.preventDefault();
           addBtn.click();
         }
@@ -4348,8 +4367,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             <span class="task-text ${item.completed ? 'completed' : ''}">${mealText}</span>
             <div class="task-actions">
               ${historyButton}
-              <button class="edit-btn" onclick="editMealIngredients(${item.id}, ${showingMealHistory})" title="Recipe ingredients">📝</button>
-              <button class="edit-btn" onclick="editMealItem(${item.id})" title="Edit name">✏️</button>
+              <button class="edit-btn" onclick="editMealRecipe(${item.id}, ${showingMealHistory})" title="Edit recipe">📝</button>
               <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingMealHistory})" title="${item.url ? 'Edit URL' : 'Add URL'}">🔗</button>
               <button class="delete-btn" onclick="deleteMealItem(${item.id})" title="Delete">🗑️</button>
             </div>
@@ -4646,8 +4664,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             <span class="task-text ${item.completed ? 'completed' : ''}">${mealText}</span>
             <div class="task-actions">
               ${historyButton}
-              <button class="edit-btn" onclick="editMealIngredients(${item.id}, ${showingMealHistory})" title="Recipe ingredients">📝</button>
-              <button class="edit-btn" onclick="editMealItem(${item.id}); renderMealsListFullscreen();" title="Edit name">✏️</button>
+              <button class="edit-btn" onclick="editMealRecipe(${item.id}, ${showingMealHistory})" title="Edit recipe">📝</button>
               <button class="edit-btn" onclick="editMealUrl(${item.id}, ${showingMealHistory}); renderMealsListFullscreen();" title="${item.url ? 'Edit URL' : 'Add URL'}">🔗</button>
               <button class="delete-btn" onclick="deleteMealItem(${item.id}); renderMealsListFullscreen();" title="Delete">🗑️</button>
             </div>
