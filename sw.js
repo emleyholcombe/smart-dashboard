@@ -116,30 +116,6 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// Handle messages from the main thread
-self.addEventListener('message', (event) => {
-  console.log('Service Worker: Message received', event.data);
-  
-  if (event.data && event.data.command === 'SKIP_WAITING') {
-    console.log('Service Worker: Skipping waiting and taking control');
-    self.skipWaiting();
-  }
-  
-  if (event.data && event.data.command === 'FORCE_REFRESH') {
-    console.log('Service Worker: Force refreshing cache');
-    // Clear cache and force reload
-    caches.delete(CACHE_NAME).then(() => {
-      console.log('Service Worker: Cache cleared');
-      // Notify all clients to reload
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({ command: 'RELOAD' });
-        });
-      });
-    });
-  }
-});
-
 // Push notification handling (for future use)
 self.addEventListener('push', (event) => {
   console.log('Service Worker: Push event received');

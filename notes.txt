@@ -3590,69 +3590,58 @@ PWA REFRESH FUNCTIONALITY - October 15, 2025
 ==========================================
 
 REFRESH METHODS IMPLEMENTED:
-1. **Pull-to-Refresh (PWA Mobile)**:
+1. **Manual Refresh Button (PWA)**:
+   - Fixed position refresh button (top-right corner)
+   - 44px touch target for accessibility
+   - Spinning animation during refresh
+   - Haptic feedback on mobile devices
+   - Only visible in PWA mode
+
+2. **Pull-to-Refresh (Mobile PWA)**:
    - Native mobile app experience
    - Pull down from top when at scroll position 0
-   - Visual indicator with gradient background
-   - Haptic feedback on refresh action
-   - Animated progress and status messages
-
-2. **Manual Refresh Button (PWA)**:
-   - Fixed position refresh button (top-right)
-   - 44px touch target for accessibility
-   - Animated rotation and status feedback
-   - Haptic feedback on tap
-   - Visual success/error indicators
+   - 80px threshold for activation
+   - Haptic feedback on trigger
+   - Automatic data refresh
 
 3. **Keyboard Shortcut (Desktop)**:
    - Ctrl/Cmd + R for data refresh
    - Prevents default browser refresh
-   - Shows loading indicator
+   - Works in both PWA and browser modes
    - Desktop-optimized experience
 
-4. **Automatic Service Worker Updates**:
-   - Periodic update checks (every minute)
-   - Automatic cache refresh
-   - Background update detection
-   - Seamless app updates
+REFRESH FUNCTIONALITY:
+- **Data Reload**: Calls loadAllData() to refresh from localStorage
+- **UI Updates**: Refreshes all widget displays (todo, grocery, meals)
+- **Fullscreen Support**: Updates active fullscreen views
+- **Visual Feedback**: Spinning animation and console logging
+- **Error Handling**: Graceful failure with button reset
 
 TECHNICAL IMPLEMENTATION:
-- **Pull-to-Refresh**: Touch event handling with threshold detection
-- **Service Worker Communication**: Message passing for cache updates
-- **Data Refresh**: Calls loadAllData() to reload from localStorage
-- **Visual Feedback**: Dynamic indicators with color-coded status
-- **Platform Detection**: Different refresh methods for PWA vs desktop
+- **Button Creation**: Dynamic DOM element with fixed positioning
+- **Animation**: CSS keyframes for spinning effect
+- **Touch Events**: touchstart, touchmove, touchend for pull-to-refresh
+- **Keyboard Events**: keydown listener for Ctrl/Cmd + R
+- **Promise Handling**: Async data loading with proper error handling
 
 REFRESH BEHAVIORS:
-- **PWA Mode**: Pull-to-refresh + manual button + auto-updates
-- **Desktop Mode**: Keyboard shortcut + auto-updates
+- **PWA Mode**: Manual button + pull-to-refresh + keyboard shortcut
+- **Desktop Mode**: Keyboard shortcut only
 - **Data Refresh**: Reloads todos, grocery items, meals, and recipes
-- **Cache Refresh**: Updates service worker cache
-- **Visual Feedback**: Loading states, success/error messages
-
-REFRESH INDICATORS:
-- **Pull-to-Refresh**: "↓ Pull to refresh" → "↑ Release to refresh" → "🔄 Refreshing..." → "✓ Refreshed!"
-- **Manual Button**: "🔄" → "⏳" → "✓" → "🔄"
-- **Desktop**: "🔄 Refreshing..." → "✓ Refreshed!"
-- **Error States**: "✗ Refresh failed" with red background
+- **Visual Feedback**: Button animation and haptic feedback
+- **Fullscreen Aware**: Updates currently open fullscreen views
 
 HAPTIC FEEDBACK:
-- Single vibration (10ms) on manual refresh button
-- Triple vibration (50ms x3) on pull-to-refresh activation
+- 50ms vibration on refresh button tap (PWA only)
+- 50ms vibration on pull-to-refresh activation (PWA only)
 - iOS and Android compatible vibration API
-
-SERVICE WORKER INTEGRATION:
-- SKIP_WAITING command for immediate updates
-- FORCE_REFRESH command for cache clearing
-- Automatic reload on controller change
-- Background sync capabilities
 
 NEXT STEPS FOR FULL PWA:
 1. Generate and add all required icon files using generate-icons.html
 2. Test installation on iOS Safari and Android Chrome
 3. Verify offline functionality works as expected
 4. Test PWA vs desktop customizations
-5. Test all refresh methods (pull-to-refresh, manual button, keyboard)
+5. Test refresh functionality (button, pull-to-refresh, keyboard)
 6. Optional: Add push notification server integration
 7. Optional: Implement background sync for data updates
 
