@@ -6593,10 +6593,30 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
           // Add todos for this date
           todosForDate.forEach(todo => {
-            const todoStyle = todo.type === 'completed' 
-              ? 'background: #4caf50; color: white;' 
-              : 'background: #ff9800; color: white;';
-            const todoIcon = todo.type === 'completed' ? '✓' : '!';
+            let todoStyle, todoIcon, tooltipSuffix;
+            
+            if (todo.type === 'completed') {
+              // Completed tasks: Green
+              todoStyle = 'background: #4caf50; color: white;';
+              todoIcon = '✓';
+              tooltipSuffix = '(Completed)';
+            } else {
+              // Due tasks: Check if overdue
+              const taskDate = dateStr;
+              const isOverdue = taskDate < today;
+              
+              if (isOverdue) {
+                // Overdue tasks: Red
+                todoStyle = 'background: #f44336; color: white;';
+                todoIcon = '!';
+                tooltipSuffix = '(Overdue)';
+              } else {
+                // Current/future due tasks: No special color (neutral gray)
+                todoStyle = 'background: #757575; color: white;';
+                todoIcon = '•';
+                tooltipSuffix = '(Due)';
+              }
+            }
             
             // Determine the appropriate edit function based on todo type
             const editFunction = todo.type === 'completed' 
@@ -6605,7 +6625,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             
             monthHTML += `
               <div style="${todoStyle} padding: 2px 4px; margin: 1px 0; border-radius: 3px; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" 
-                   title="Click to edit: ${escapeHtml(todo.text)} ${todo.type === 'completed' ? '(Completed)' : '(Due)'}"
+                   title="Click to edit: ${escapeHtml(todo.text)} ${tooltipSuffix}"
                    onclick="${editFunction}">
                 ${todoIcon} ${escapeHtml(todo.text.substring(0, 15))}${todo.text.length > 15 ? '...' : ''}
               </div>
