@@ -2445,6 +2445,21 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     document.addEventListener('DOMContentLoaded', async function() {
       console.log('DOMContentLoaded fired, initializing dashboard...');
       
+      // PWA-specific initialization
+      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('🚀 PWA Mode detected - ensuring proper data sync');
+        
+        // Add a small delay to ensure PWA context is fully loaded
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Debug PWA data loading
+        console.log('🔍 PWA Debug Info Before Loading:');
+        console.log('- GIST_ID from localStorage:', localStorage.getItem('dashboardGistId'));
+        console.log('- GITHUB_TOKEN exists:', !!localStorage.getItem('githubToken'));
+        console.log('- JSONBIN_ID from localStorage:', localStorage.getItem('dashboardJsonBinId'));
+        console.log('- Navigator online:', navigator.onLine);
+      }
+      
       // Load data from cloud or localStorage
       await loadAllData();
       
@@ -7529,8 +7544,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       document.body.appendChild(refreshButton);
       
-      // Add app version indicator
+      // Add app version indicator with sync status
       const versionIndicator = document.createElement('div');
+      versionIndicator.id = 'pwa-version-indicator';
       versionIndicator.textContent = 'PWA v1.0';
       versionIndicator.style.cssText = `
         position: fixed;
@@ -7539,9 +7555,56 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         font-size: 10px;
         color: #999;
         z-index: 1000;
-        pointer-events: none;
+        cursor: pointer;
+        padding: 4px 8px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 4px;
+        border: 1px solid #ddd;
       `;
+      
+      // Add click handler for debug info
+      versionIndicator.addEventListener('click', () => {
+        const debugInfo = debugPWADataLoading();
+        const totalItems = debugInfo.currentData.todoItems.length + 
+                          debugInfo.currentData.groceryItems.length + 
+                          debugInfo.currentData.mealItems.length;
+        
+        const message = `🔍 PWA Debug Info:
+        
+📱 Mode: ${debugInfo.pwaMode ? 'PWA' : 'Browser'}
+🌐 Online: ${debugInfo.isOnline ? 'Yes' : 'No'}
+🔑 GitHub Token: ${debugInfo.hasGithubToken ? 'Yes' : 'No'}
+📝 Gist ID: ${debugInfo.hasGistId ? 'Yes' : 'No'}
+
+📊 Current Data: ${totalItems} items
+📝 Todos: ${debugInfo.currentData.todoItems.length}
+🛒 Grocery: ${debugInfo.currentData.groceryItems.length}  
+🍽️ Meals: ${debugInfo.currentData.mealItems.length}
+
+${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '✅ Data loaded successfully'}`;
+        
+        alert(message);
+      });
+      
       document.body.appendChild(versionIndicator);
+      
+      // Update version indicator with sync status
+      const updateVersionIndicator = () => {
+        const totalItems = todoItems.length + groceryItems.length + mealItems.length;
+        const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
+        versionIndicator.textContent = `PWA v1.0 ${syncStatus} (${totalItems})`;
+        versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
+          GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
+          JSONBIN_ID ? 'JSONBin sync active' : 
+          'Local storage only'
+        }`;
+      };
+      
+      // Update indicator initially and when data changes
+      updateVersionIndicator();
+      
+      // Store update function globally so other parts can call it
+      window.updatePWAVersionIndicator = updateVersionIndicator;
     }
 
     // Refresh app data function
@@ -7609,6 +7672,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
         
         console.log('✅ App data refreshed successfully');
+        
+        // Update PWA version indicator if it exists
+        if (window.updatePWAVersionIndicator) {
+          window.updatePWAVersionIndicator();
+        }
         
       }).catch((error) => {
         console.error('❌ Error refreshing app data:', error);
@@ -7711,6 +7779,53 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(applyPWACustomizations, 100);
     });
+
+    // PWA-specific data loading debug
+    function debugPWADataLoading() {
+      console.log('🔍 PWA Data Loading Debug:');
+      console.log('- PWA Mode:', window.pwaInfo?.isPWA);
+      console.log('- GIST_ID:', GIST_ID);
+      console.log('- GITHUB_TOKEN:', GITHUB_TOKEN ? '✅ Present' : '❌ Missing');
+      console.log('- JSONBIN_ID:', JSONBIN_ID);
+      console.log('- Online Status:', isOnline);
+      console.log('- Current Data:', {
+        todoItems: todoItems.length,
+        groceryItems: groceryItems.length,
+        mealItems: mealItems.length,
+        todoHistory: todoHistory.length,
+        mealHistory: mealHistory.length
+      });
+      
+      // Check localStorage
+      const localData = {
+        todoItems: JSON.parse(localStorage.getItem('todoItems') || '[]').length,
+        groceryItems: JSON.parse(localStorage.getItem('groceryItems') || '[]').length,
+        mealItems: JSON.parse(localStorage.getItem('mealItems') || '[]').length,
+        todoHistory: JSON.parse(localStorage.getItem('todoHistory') || '[]').length,
+        mealHistory: JSON.parse(localStorage.getItem('mealHistory') || '[]').length,
+        gistId: localStorage.getItem('dashboardGistId'),
+        githubToken: localStorage.getItem('githubToken') ? '✅ Present' : '❌ Missing'
+      };
+      console.log('- Local Storage:', localData);
+      
+      return {
+        pwaMode: window.pwaInfo?.isPWA,
+        hasGistId: !!GIST_ID,
+        hasGithubToken: !!GITHUB_TOKEN,
+        isOnline,
+        currentData: getCurrentData(),
+        localData
+      };
+    }
+
+    // Enhanced refresh function for PWA debugging
+    function refreshAppDataWithDebug() {
+      console.log('🔄 PWA Refresh with Debug Info');
+      debugPWADataLoading();
+      
+      // Force reload data
+      return refreshAppData();
+    }
   </script>
 
   </div> <!-- Close dashboard div -->
