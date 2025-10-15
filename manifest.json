@@ -5,7 +5,7 @@
   "start_url": "/smart-dashboard/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#667eea",
+  "theme_color": "#8c5ec4",
   "orientation": "portrait-primary",
   "scope": "/smart-dashboard/",
   "lang": "en",

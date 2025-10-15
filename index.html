@@ -19,7 +19,7 @@
   <meta name="msapplication-config" content="browserconfig.xml">
   <meta name="msapplication-TileColor" content="#1976d2">
   <meta name="msapplication-tap-highlight" content="no">
-  <meta name="theme-color" content="#667eea">
+  <meta name="theme-color" content="#8c5ec4">
   
   <!-- Apple Touch Icons -->
   <link rel="apple-touch-icon" href="/smart-dashboard/icon-152.png">
@@ -158,6 +158,11 @@
       flex-direction: column;
       height: 100vh;
       overflow-x: hidden;
+      /* Ensure background extends to safe areas on iOS */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      margin-top: calc(-1 * env(safe-area-inset-top));
+      margin-bottom: calc(-1 * env(safe-area-inset-bottom));
     }
 
     header {
@@ -7409,6 +7414,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Keep essential features that don't break layout
       addHapticFeedback();
       addSwipeGestures(); // This includes pull-to-refresh with visual feedback
+      addPWAStatusBarFix(); // Fix for iOS status bar white banner
       // addMobileOptimizations(); // DISABLED - this was breaking layout
       // addAppSpecificUI(); // DISABLED - this was adding unwanted UI elements
     }
@@ -7485,6 +7491,42 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         /* Show install button in browser mode */
         .browser-mode .install-prompt {
           display: block !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Fix iOS status bar white banner in PWA mode
+    function addPWAStatusBarFix() {
+      if (!window.pwaInfo?.isPWA) return;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        /* PWA Status Bar Fix - Ensure purple gradient extends to top */
+        .pwa-mode body {
+          background: var(--background) !important;
+          background-attachment: fixed !important;
+          min-height: 100vh !important;
+          min-height: calc(100vh + env(safe-area-inset-top)) !important;
+        }
+        
+        .pwa-mode html {
+          background: var(--background) !important;
+          background-attachment: fixed !important;
+          min-height: 100vh !important;
+          min-height: calc(100vh + env(safe-area-inset-top)) !important;
+        }
+        
+        /* Ensure no white space at top */
+        .pwa-mode body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: env(safe-area-inset-top, 0);
+          background: #8c5ec4;
+          z-index: -1;
         }
       `;
       document.head.appendChild(style);
