@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 Unicode Grocery Icon Workshop</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .icon-option {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .icon-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            position: relative;
+            font-size: 3rem;
+        }
+
+        .option-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .option-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        /* Shopping Cart Options */
+        .cart1 { color: #2c3e50; }
+        .cart2 { color: #e74c3c; }
+        .cart3 { color: #27ae60; }
+        .cart4 { color: #f39c12; }
+
+        /* Basket Options */
+        .basket1 { color: #8b4513; }
+        .basket2 { color: #d2691e; }
+        .basket3 { color: #cd853f; }
+        .basket4 { color: #daa520; }
+
+        /* Bag Options */
+        .bag1 { color: #7f4f24; }
+        .bag2 { color: #a0522d; }
+        .bag3 { color: #8b4513; }
+        .bag4 { color: #654321; }
+
+        /* Food Symbol Options */
+        .food1 { color: #e74c3c; }
+        .food2 { color: #27ae60; }
+        .food3 { color: #f39c12; }
+        .food4 { color: #9b59b6; }
+
+        /* Custom Combinations */
+        .combo1 .symbol1 { color: #8b4513; font-size: 2.5rem; }
+        .combo1 .symbol2 { color: #e74c3c; font-size: 1.5rem; position: absolute; top: 15px; right: 15px; }
+
+        .combo2 .symbol1 { color: #2c3e50; font-size: 2.5rem; }
+        .combo2 .symbol2 { color: #27ae60; font-size: 1.5rem; position: absolute; top: 15px; right: 15px; }
+
+        .combo3 .symbol1 { color: #7f4f24; font-size: 2.5rem; }
+        .combo3 .symbol2 { color: #f39c12; font-size: 1.5rem; position: absolute; bottom: 15px; right: 15px; }
+
+        .combo4 .symbol1 { color: #8b4513; font-size: 2.8rem; }
+        .combo4 .symbol2 { color: #e74c3c; font-size: 1.2rem; position: absolute; top: 20px; left: 20px; }
+        .combo4 .symbol3 { color: #27ae60; font-size: 1.2rem; position: absolute; bottom: 20px; right: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🛒 Unicode Grocery Icon Workshop</h1>
+    
+    <div class="icon-grid">
+        <!-- Shopping Cart Symbols -->
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="cart1">🛒</span>
+            </div>
+            <div class="option-title">Cart Option 1</div>
+            <div class="option-description">Standard shopping cart (dark blue)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="cart2">🛍️</span>
+            </div>
+            <div class="option-title">Cart Option 2</div>
+            <div class="option-description">Shopping bags (red)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="cart3">♦</span>
+            </div>
+            <div class="option-title">Cart Option 3</div>
+            <div class="option-description">Diamond symbol (green)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="cart4">◆</span>
+            </div>
+            <div class="option-title">Cart Option 4</div>
+            <div class="option-description">Filled diamond (orange)</div>
+        </div>
+
+        <!-- Basket Symbols -->
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="basket1">⚏</span>
+            </div>
+            <div class="option-title">Basket Option 1</div>
+            <div class="option-description">Basket weave symbol (brown)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="basket2">⬢</span>
+            </div>
+            <div class="option-title">Basket Option 2</div>
+            <div class="option-description">Hexagon outline (tan)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="basket3">⬣</span>
+            </div>
+            <div class="option-title">Basket Option 3</div>
+            <div class="option-description">Filled hexagon (sandy brown)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="basket4">◉</span>
+            </div>
+            <div class="option-title">Basket Option 4</div>
+            <div class="option-description">Circle with dot (gold)</div>
+        </div>
+
+        <!-- Bag Symbols -->
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="bag1">◐</span>
+            </div>
+            <div class="option-title">Bag Option 1</div>
+            <div class="option-description">Half circle (dark brown)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="bag2">◑</span>
+            </div>
+            <div class="option-title">Bag Option 2</div>
+            <div class="option-description">Half circle alt (saddle brown)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="bag3">●</span>
+            </div>
+            <div class="option-title">Bag Option 3</div>
+            <div class="option-description">Filled circle (brown)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="bag4">■</span>
+            </div>
+            <div class="option-title">Bag Option 4</div>
+            <div class="option-description">Filled square (dark khaki)</div>
+        </div>
+
+        <!-- Food Symbols -->
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="food1">★</span>
+            </div>
+            <div class="option-title">Food Option 1</div>
+            <div class="option-description">Star symbol (red)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="food2">♥</span>
+            </div>
+            <div class="option-title">Food Option 2</div>
+            <div class="option-description">Heart symbol (green)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="food3">▲</span>
+            </div>
+            <div class="option-title">Food Option 3</div>
+            <div class="option-description">Triangle up (orange)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container">
+                <span class="food4">◆</span>
+            </div>
+            <div class="option-title">Food Option 4</div>
+            <div class="option-description">Diamond (purple)</div>
+        </div>
+
+        <!-- Combination Symbols -->
+        <div class="icon-option">
+            <div class="icon-container combo1">
+                <span class="symbol1">⬢</span>
+                <span class="symbol2">●</span>
+            </div>
+            <div class="option-title">Combo Option 1</div>
+            <div class="option-description">Hexagon + dot (basket + food)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container combo2">
+                <span class="symbol1">■</span>
+                <span class="symbol2">★</span>
+            </div>
+            <div class="option-title">Combo Option 2</div>
+            <div class="option-description">Square + star (bag + food)</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container combo3">
+                <span class="symbol1">◐</span>
+                <span class="symbol2">♦</span>
+            </div>
+            <div class="option-title">Combo Option 3</div>
+            <div class="option-description">Half circle + diamond</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container combo4">
+                <span class="symbol1">◉</span>
+                <span class="symbol2">▲</span>
+                <span class="symbol3">●</span>
+            </div>
+            <div class="option-title">Combo Option 4</div>
+            <div class="option-description">Circle + triangle + dot (multi-food)</div>
+        </div>
+    </div>
+</body>
+</html>
