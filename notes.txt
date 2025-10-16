@@ -3740,3 +3740,57 @@ function addPWAGroceryIconFix() {
 - Apply changes in enablePWAFeatures() with appropriate delays
 - Test in console first, then implement via JavaScript functions
 
+## CALENDAR ICON SIZING AND POSITIONING (v7.2 - FINAL SOLUTION)
+
+**PROBLEM SOLVED:**
+- Calendar icon was not displaying with correct size/positioning on desktop
+- User console-tested perfect values but they weren't applying in production
+- Issue was CSS specificity conflict, not browser caching
+
+**CONSOLE-TESTED PERFECT VALUES:**
+- Size: 3.5rem × 3.5rem
+- Margin: -0.5rem 0 (prevents "Calendar" text from moving)
+- Transform: translateY(0.4rem) (perfect downward positioning)
+- Maintains "Calendar" text aligned with "Dashboard" text
+
+**FINAL TECHNICAL SOLUTION:**
+```css
+/* Calendar icon: Ensure inline styles take precedence */
+.nav-button:nth-child(2) .nav-icon img {
+  width: 3.5rem !important;
+  height: 3.5rem !important;
+  margin: -0.5rem 0 !important;
+  transform: translateY(0.4rem) !important;
+  object-fit: contain !important;
+}
+```
+
+**DEBUGGING PROCESS:**
+1. Initially thought it was browser caching issue
+2. Tried multiple cache-busting strategies (?v=67, ?v=70, ?v=71, ?v=72-force)
+3. User questioned cache theory - was correct to do so
+4. Discovered CSS specificity conflict with .nav-icon general styles
+5. Added specific CSS targeting calendar button (nth-child(2)) with !important
+
+**CURRENT STATUS (v7.2):**
+- Desktop version indicator: "Desktop v7.2" (bottom left of home page)
+- PWA version indicator: "PWA v7.2 - Tap to Update" (with manual update functionality)
+- Calendar icon: Perfect console-tested sizing with CSS !important override
+- Icon file: google_icon_with_white_outline.png (user's cropped and edited version)
+
+**NAVIGATION BUTTON POSITIONS:**
+1. Dashboard (🏠) - nth-child(1)
+2. Calendar (img) - nth-child(2) ← Target for calendar icon CSS
+3. To-Do (✅) - nth-child(3)
+4. To-Do History (📋) - nth-child(4)
+5. To-Do Calendar (📅) - nth-child(5)
+6. Grocery (🧺🥖🍎) - nth-child(6) ← Has special CSS for overlapping emojis
+7. Meals (🍽️) - nth-child(7)
+8. Meal History (📚) - nth-child(8)
+
+**KEY LEARNINGS:**
+- Always question assumptions (cache vs. CSS specificity)
+- Console testing is invaluable for real-time UI adjustments
+- CSS !important with specific selectors can override stubborn conflicts
+- Version indicators help track deployment status across platforms
+
