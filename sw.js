@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v60-remove-pwa-auto-return';
+const CACHE_NAME = 'bennett-hub-v61-pwa-calendar-optimizations';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

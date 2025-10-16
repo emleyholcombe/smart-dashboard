@@ -7773,6 +7773,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       addPWAStatusBarFix(); // Fix for iOS status bar white banner
       addPWAVersionIndicator(); // Add version indicator for debugging and manual updates
       addPWAGroceryIconFix(); // Force correct grocery icon positioning via JavaScript
+      addPWACalendarOptimizations(); // Optimize calendar for mobile touch interface
       // addMobileOptimizations(); // DISABLED - this was breaking layout
       // addAppSpecificUI(); // DISABLED - this was adding unwanted UI elements
     }
@@ -7798,6 +7799,61 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           console.log('✅ PWA: Applied correct baguette positioning via JavaScript');
         }
       }, 500); // Wait 500ms for elements to be ready
+    }
+
+    // PWA Calendar Optimizations for Mobile Touch Interface
+    function addPWACalendarOptimizations() {
+      const style = document.createElement('style');
+      style.id = 'pwa-calendar-optimizations';
+      style.textContent = `
+        /* PWA Calendar Mobile Optimizations */
+        body.pwa-mode .calendar-day {
+          min-height: 80px !important; /* Increased from 60px */
+          padding: 12px 8px !important; /* Increased from 8px 4px */
+          font-size: 14px !important; /* Increased from 12px */
+        }
+        
+        /* Calendar todo items - larger touch targets */
+        body.pwa-mode .calendar-day > div[onclick] {
+          font-size: 12px !important; /* Increased from 10px */
+          padding: 6px 8px !important; /* Increased from 2px 4px */
+          margin: 3px 0 !important; /* Increased from 1px 0 */
+          min-height: 32px !important; /* Minimum touch target */
+          display: flex !important;
+          align-items: center !important;
+          line-height: 1.2 !important;
+        }
+        
+        /* Calendar navigation buttons - larger for touch */
+        body.pwa-mode button[onclick*="navigateCalendar"] {
+          padding: 12px 20px !important; /* Increased from 8px 16px */
+          font-size: 16px !important; /* Increased from 14px */
+          min-height: 48px !important; /* Standard touch target */
+        }
+        
+        /* Calendar avatar filter buttons - larger for touch */
+        body.pwa-mode .calendar-avatar-filter {
+          width: 36px !important; /* Increased from 28px */
+          height: 36px !important; /* Increased from 28px */
+          font-size: 14px !important; /* Increased from 12px */
+          margin: 0 4px !important; /* Add spacing */
+        }
+        
+        /* Calendar header - better mobile spacing */
+        body.pwa-mode .calendar-day:first-child {
+          font-size: 16px !important; /* Day headers larger */
+          padding: 12px !important;
+          font-weight: bold !important;
+        }
+        
+        /* Calendar month title - larger for mobile */
+        body.pwa-mode div[style*="font-size: 18px"] {
+          font-size: 22px !important;
+          padding: 16px !important;
+        }
+      `;
+      document.head.appendChild(style);
+      console.log('✅ PWA: Calendar optimizations applied for mobile touch interface');
     }
 
     // Browser-specific features  
@@ -7927,7 +7983,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v6.0 - Tap to Update';
+      versionIndicator.textContent = 'PWA v6.1 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7997,7 +8053,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v6.0 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v6.1 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8084,7 +8140,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v6.0';
+      versionIndicator.textContent = 'PWA v6.1';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8143,7 +8199,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v6.0 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v6.1 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
