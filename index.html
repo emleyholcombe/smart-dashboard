@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v8.1
+        Desktop v8.2
       </div>
     </div>
   </div>
@@ -7843,6 +7843,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       addPWAVersionIndicator(); // Add version indicator for debugging and manual updates
       addPWAGroceryIconFix(); // Force correct grocery icon positioning via JavaScript
       addPWACalendarOptimizations(); // Optimize calendar for mobile touch interface
+      addPWANavigationAlignment(); // Align Calendar title with Dashboard title
       // addMobileOptimizations(); // DISABLED - this was breaking layout
       // addAppSpecificUI(); // DISABLED - this was adding unwanted UI elements
     }
@@ -8071,6 +8072,31 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       console.log('✅ PWA: Calendar optimizations applied for mobile touch interface');
     }
 
+    // PWA Navigation Icon Alignment
+    function addPWANavigationAlignment() {
+      const style = document.createElement('style');
+      style.id = 'pwa-navigation-alignment';
+      style.textContent = `
+        /* PWA: Align Calendar title with Dashboard title */
+        body.pwa-mode .nav-button:nth-child(2) .nav-label {
+          transform: translateY(0%) !important;
+        }
+        
+        /* PWA: Make calendar icon smaller and adjust position */
+        body.pwa-mode .nav-button:nth-child(2) .nav-icon img {
+          width: 2.2rem !important;
+          height: 2.2rem !important;
+        }
+        
+        /* PWA: Adjust calendar icon position to center with smaller size */
+        body.pwa-mode .nav-button:nth-child(2) .nav-icon {
+          transform: translateY(0%) !important;
+        }
+      `;
+      document.head.appendChild(style);
+      console.log('✅ PWA: Navigation alignment applied - Calendar title aligned with Dashboard');
+    }
+
     // Browser-specific features  
     function enableBrowserFeatures() {
       // Add browser-specific features
@@ -8198,7 +8224,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v8.1 - Tap to Update';
+      versionIndicator.textContent = 'PWA v8.2 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8268,7 +8294,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v8.1 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v8.2 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8355,7 +8381,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v8.1';
+      versionIndicator.textContent = 'PWA v8.2';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8414,7 +8440,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v8.1 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v8.2 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
