@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v12-force-activation';
+const CACHE_NAME = 'bennett-hub-v13-cache-busting';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
