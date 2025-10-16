@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v65-google-icon-white-outline';
+const CACHE_NAME = 'bennett-hub-v66-updated-google-icon-white-outline';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
