@@ -7320,6 +7320,63 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
     }
 
+    // Show debug panel for PWA troubleshooting
+    function showDebugPanel() {
+      const panel = document.createElement('div');
+      panel.id = 'debug-panel';
+      panel.style.cssText = `
+        position: fixed;
+        top: 50px;
+        left: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        z-index: 10004;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 70vh;
+        overflow-y: auto;
+      `;
+      
+      const logs = [];
+      const originalLog = console.log;
+      
+      // Capture console logs
+      console.log = function(...args) {
+        logs.push(args.join(' '));
+        if (logs.length > 50) logs.shift(); // Keep last 50 logs
+        updateDebugPanel();
+        originalLog.apply(console, args);
+      };
+      
+      function updateDebugPanel() {
+        if (document.getElementById('debug-panel')) {
+          panel.innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <strong>🔍 PWA Debug Console</strong>
+              <button onclick="document.body.removeChild(document.getElementById('debug-panel')); console.log = originalLog;" 
+                      style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 5px;">Close</button>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px; max-height: 300px; overflow-y: auto;">
+              ${logs.map(log => `<div>${log}</div>`).join('')}
+            </div>
+            <div style="margin-top: 10px;">
+              <button onclick="forceAppUpdate()" style="background: #4caf50; color: white; border: none; padding: 10px; border-radius: 5px; margin-right: 10px;">Force Update</button>
+              <button onclick="window.location.reload()" style="background: #2196f3; color: white; border: none; padding: 10px; border-radius: 5px;">Reload</button>
+            </div>
+          `;
+        }
+      }
+      
+      document.body.appendChild(panel);
+      updateDebugPanel();
+      
+      // Store original log function globally
+      window.originalLog = originalLog;
+    }
+
     // Show update notification for PWA
     function showUpdateNotification() {
       const notification = document.createElement('div');
@@ -7709,10 +7766,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
 ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '✅ Data loaded successfully'}
 
-🔄 Tap OK to force app update`;
+🔄 Tap OK to force app update
+📊 Tap CANCEL to show debug panel`;
         
         if (confirm(message)) {
           forceAppUpdate();
+        } else {
+          showDebugPanel();
         }
       });
       
