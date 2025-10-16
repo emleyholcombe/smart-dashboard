@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v11-final-test';
+const CACHE_NAME = 'bennett-hub-v12-force-activation';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -21,7 +21,7 @@ const urlsToCache = [
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Install event');
+  console.log('Service Worker: Install event - FORCING IMMEDIATE ACTIVATION');
   // Skip waiting to activate immediately
   self.skipWaiting();
   event.waitUntil(
