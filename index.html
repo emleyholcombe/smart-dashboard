@@ -1559,7 +1559,7 @@
         
         <button class="nav-button" onclick="showFullscreenCalendar()">
           <span class="nav-icon">
-            <img src="google_icon.png" alt="Calendar" style="width: 2.5rem; height: 2.5rem; object-fit: contain;">
+            <img src="google_icon_with_white_outline.png" alt="Calendar" style="width: 2.5rem; height: 2.5rem; object-fit: contain;">
           </span>
           <span class="nav-label">Calendar</span>
         </button>
@@ -7904,6 +7904,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         headerInfo.style.display = 'none';
       }
       
+      // Hide home button in header for PWA
+      const homeButton = document.querySelector('.home-button');
+      if (homeButton) {
+        homeButton.style.display = 'none';
+      }
+      
       console.log('✅ PWA: Applied simplified dashboard layout');
     }
     
@@ -8141,7 +8147,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v6.3 - Tap to Update';
+      versionIndicator.textContent = 'PWA v6.5 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8298,7 +8304,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v6.3';
+      versionIndicator.textContent = 'PWA v6.5';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
