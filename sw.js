@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v21-white-circle';
+const CACHE_NAME = 'bennett-hub-v22-overlapping-emojis';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
