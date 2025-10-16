@@ -5734,6 +5734,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       };
       const timeString = now.toLocaleTimeString('en-US', timeOptions);
       document.getElementById('current-time').textContent = timeString;
+      
+      // Update PWA dashboard if it exists
+      if (window.pwaInfo?.isPWA && document.getElementById('pwa-dashboard')) {
+        updatePWADashboardData();
+      }
     }
 
     function getWeatherEmoji(condition, isNight = false) {
@@ -5891,6 +5896,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             precipInfoElement.style.display = 'flex';
           } else {
             precipInfoElement.style.display = 'none';
+          }
+          
+          // Update PWA dashboard if it exists
+          if (window.pwaInfo?.isPWA && document.getElementById('pwa-dashboard')) {
+            updatePWADashboardData();
           }
           
           return;
@@ -7168,6 +7178,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function showDashboard() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
+      
+      // Apply PWA-specific dashboard layout if in PWA mode
+      if (window.pwaInfo?.isPWA) {
+        applyPWADashboardLayout();
+      }
+      
       updateURL('dashboard');
     }
 
@@ -7803,6 +7819,146 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }, 500); // Wait 500ms for elements to be ready
     }
 
+    // PWA Simplified Dashboard Layout
+    function applyPWADashboardLayout() {
+      const main = document.querySelector('main');
+      const header = document.querySelector('header');
+      
+      if (!main || !header) return;
+      
+      // Hide the main widget area and modify header for PWA
+      main.style.display = 'none';
+      
+      // Create simplified PWA dashboard content
+      let pwaDashboard = document.getElementById('pwa-dashboard');
+      if (!pwaDashboard) {
+        pwaDashboard = document.createElement('div');
+        pwaDashboard.id = 'pwa-dashboard';
+        pwaDashboard.style.cssText = `
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          flex: 1;
+          padding: 2rem;
+          text-align: center;
+          gap: 2rem;
+        `;
+        
+        // Create large info display
+        pwaDashboard.innerHTML = `
+          <div style="
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 300px;
+          ">
+            <div style="font-size: 1.5rem; font-weight: 600; color: white;">
+              <span id="pwa-current-date">Loading...</span>
+            </div>
+            <div style="font-size: 3rem; font-weight: 300; color: white;">
+              <span id="pwa-current-time">Loading...</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; font-size: 1.25rem;">
+              <span id="pwa-weather-icon" style="font-size: 2rem;">🌡️</span>
+              <span id="pwa-current-temp" style="color: white; font-weight: 500;">Loading...</span>
+            </div>
+            <div id="pwa-precipitation-info" style="display: none; font-size: 1rem; color: rgba(255,255,255,0.9);">
+              <span id="pwa-precip-icon" style="margin-right: 0.5rem;">💧</span>
+              <span id="pwa-precip-details">--</span>
+            </div>
+          </div>
+          
+          <button onclick="showLandingPage()" style="
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 48px;
+          ">
+            🏠 Home
+          </button>
+        `;
+        
+        document.getElementById('dashboard').appendChild(pwaDashboard);
+      }
+      
+      pwaDashboard.style.display = 'flex';
+      
+      // Update PWA dashboard with current data
+      updatePWADashboardData();
+      
+      // Hide header info items (keep just title)
+      const headerInfo = document.querySelector('.header-info');
+      if (headerInfo) {
+        headerInfo.style.display = 'none';
+      }
+      
+      console.log('✅ PWA: Applied simplified dashboard layout');
+    }
+    
+    // Update PWA dashboard with current header data
+    function updatePWADashboardData() {
+      // Copy date
+      const sourceDate = document.getElementById('current-date');
+      const targetDate = document.getElementById('pwa-current-date');
+      if (sourceDate && targetDate) {
+        targetDate.textContent = sourceDate.textContent;
+      }
+      
+      // Copy time
+      const sourceTime = document.getElementById('current-time');
+      const targetTime = document.getElementById('pwa-current-time');
+      if (sourceTime && targetTime) {
+        targetTime.textContent = sourceTime.textContent;
+      }
+      
+      // Copy weather
+      const sourceTemp = document.getElementById('current-temp');
+      const targetTemp = document.getElementById('pwa-current-temp');
+      const sourceWeatherIcon = document.getElementById('weather-icon');
+      const targetWeatherIcon = document.getElementById('pwa-weather-icon');
+      
+      if (sourceTemp && targetTemp) {
+        targetTemp.textContent = sourceTemp.textContent;
+      }
+      if (sourceWeatherIcon && targetWeatherIcon) {
+        targetWeatherIcon.textContent = sourceWeatherIcon.textContent;
+      }
+      
+      // Copy precipitation
+      const sourcePrecipInfo = document.getElementById('precipitation-info');
+      const targetPrecipInfo = document.getElementById('pwa-precipitation-info');
+      const sourcePrecipIcon = document.getElementById('precip-icon');
+      const targetPrecipIcon = document.getElementById('pwa-precip-icon');
+      const sourcePrecipDetails = document.getElementById('precip-details');
+      const targetPrecipDetails = document.getElementById('pwa-precip-details');
+      
+      if (sourcePrecipInfo && targetPrecipInfo) {
+        if (sourcePrecipInfo.style.display !== 'none') {
+          targetPrecipInfo.style.display = 'block';
+          if (sourcePrecipIcon && targetPrecipIcon) {
+            targetPrecipIcon.textContent = sourcePrecipIcon.textContent;
+          }
+          if (sourcePrecipDetails && targetPrecipDetails) {
+            targetPrecipDetails.textContent = sourcePrecipDetails.textContent;
+          }
+        } else {
+          targetPrecipInfo.style.display = 'none';
+        }
+      }
+    }
+
     // PWA Calendar Optimizations for Mobile Touch Interface
     function addPWACalendarOptimizations() {
       const style = document.createElement('style');
@@ -7985,7 +8141,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v6.2 - Tap to Update';
+      versionIndicator.textContent = 'PWA v6.3 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8055,7 +8211,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v6.2 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v6.3 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8142,7 +8298,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v6.2';
+      versionIndicator.textContent = 'PWA v6.3';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8201,7 +8357,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v6.2 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v6.3 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
