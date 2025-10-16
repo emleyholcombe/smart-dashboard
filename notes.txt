@@ -3676,10 +3676,67 @@ Applied USER-TESTED PERFECT positioning through live console testing (`index.htm
 - Perfect "grocery basket" aesthetic achieved through user feedback
 - COMPLETED: User-approved perfect positioning for PWA grocery icon
 
-## PWA Manual Update System (v5.6)
+## PWA Manual Update System (v5.8)
 - Reliable manual update function using complete cache clearing
-- Version indicator shows "PWA v5.6 - Tap to Update" 
+- Version indicator shows "PWA v5.8 - Tap to Update" 
 - Update process: unregister service workers → clear caches → reload with cache-busting
 - No more automatic refresh loops - fully manual control
 - Console testing workflow for live UI adjustments established
+
+## JavaScript-Based PWA Grocery Icon Fix (v5.8) - SUCCESSFUL SOLUTION
+
+**PROBLEM SOLVED:**
+- CSS specificity wasn't working for PWA grocery icon positioning
+- Multiple CSS approaches failed (maximum specificity, html body selector)
+- PWA was reverting to wrong positioning despite correct CSS values in code
+
+**SUCCESSFUL JAVASCRIPT SOLUTION:**
+- Added `addPWAGroceryIconFix()` function to `enablePWAFeatures()`
+- Uses JavaScript to directly apply styles after PWA initialization
+- Function location: lines 7770-7791 in index.html
+
+**TECHNICAL IMPLEMENTATION:**
+```javascript
+function addPWAGroceryIconFix() {
+  setTimeout(() => {
+    const apple = document.querySelector('.nav-button:nth-child(6) .nav-icon .emoji-overlay');
+    const baguette = document.querySelector('.nav-button:nth-child(6) .nav-icon .emoji-base');
+    
+    if (apple) {
+      apple.style.setProperty('left', '9px', 'important');
+      apple.style.setProperty('top', '31%', 'important');
+      apple.style.setProperty('font-size', '1.0rem', 'important');
+    }
+    
+    if (baguette) {
+      baguette.style.setProperty('right', '4px', 'important');
+      baguette.style.setProperty('top', '27%', 'important');
+      baguette.style.setProperty('font-size', '1.4rem', 'important');
+    }
+  }, 500);
+}
+```
+
+**USER-TESTED PERFECT VALUES (CONFIRMED WORKING):**
+- Apple: left: 9px, top: 31%, font-size: 1.0rem
+- Baguette: right: 4px, top: 27%, font-size: 1.4rem
+- Basket: unchanged (2.5rem, centered, bottom: -3px)
+
+**LIVE TESTING WORKFLOW ESTABLISHED:**
+1. Create adjustment function in console for real-time testing
+2. User provides feedback on positioning changes
+3. Iterate until perfect positioning achieved
+4. Apply final values via JavaScript in PWA initialization
+5. CSS approach failed, JavaScript approach succeeded
+
+**WHY THIS WORKS:**
+- Runs after PWA detection and DOM ready (500ms delay)
+- Uses element.style.setProperty() with !important (same as console commands)
+- Applied during PWA initialization, overrides any conflicting CSS
+- Console logs confirm when positioning is applied successfully
+
+**FUTURE REFERENCE:**
+- For PWA-specific UI fixes that CSS can't handle, use JavaScript injection
+- Apply changes in enablePWAFeatures() with appropriate delays
+- Test in console first, then implement via JavaScript functions
 

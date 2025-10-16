@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v58-javascript-grocery-icon-fix';
+const CACHE_NAME = 'bennett-hub-v59-pwa-navigation-customization';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
