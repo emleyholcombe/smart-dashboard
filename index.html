@@ -7855,6 +7855,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       setTimeout(() => {
         const apple = document.querySelector('.nav-button:nth-child(6) .nav-icon .emoji-overlay');
         const baguette = document.querySelector('.nav-button:nth-child(6) .nav-icon .emoji-base');
+        const basket = document.querySelector('.nav-button:nth-child(6) .nav-icon .emoji-basket');
         const groceryIcon = document.querySelector('.nav-button:nth-child(6) .nav-icon');
         const groceryLabel = document.querySelector('.nav-button:nth-child(6) .nav-label');
         
@@ -7872,11 +7873,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           console.log('✅ PWA: Applied correct baguette positioning via JavaScript (0.6x scale)');
         }
         
-        // Scale grocery icon container and move up 9px
+        // Scale basket specifically
+        if (basket) {
+          basket.style.setProperty('font-size', '1.5rem', 'important'); // 2.5rem * 0.6
+          console.log('✅ PWA: Scaled basket to 0.6x via JavaScript');
+        }
+        
+        // Move grocery icon up 9px (container positioning)
         if (groceryIcon) {
           groceryIcon.style.setProperty('transform', 'translateY(-9px)', 'important');
-          groceryIcon.style.setProperty('font-size', '1.5rem', 'important'); // 2.5rem * 0.6 for basket
-          console.log('✅ PWA: Scaled grocery icon to 0.6x and moved up 9px via JavaScript');
+          console.log('✅ PWA: Moved grocery icon up 9px via JavaScript');
         }
         
         // Move grocery title up 11px
@@ -8293,7 +8299,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v9.6 - Tap to Update';
+      versionIndicator.textContent = 'PWA v9.7 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8363,7 +8369,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v9.6 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v9.7 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8450,7 +8456,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v9.6';
+      versionIndicator.textContent = 'PWA v9.7';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8509,7 +8515,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v9.6 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v9.7 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
