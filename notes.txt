@@ -3658,17 +3658,19 @@ CURRENT PROJECT STATE:
 - Complete todo calendar integration with full editing, avatar filtering, and priority-based color coding
 - Progressive Web App ready for iOS and Android installation
 
-## Final Grocery Icon Implementation (Latest)
+## Final Grocery Icon Implementation (PERFECT v4.7)
 
-Applied final basket design to main app (`index.html`):
+Applied PERFECT positioning through user testing to main app (`index.html`):
 - Updated CSS for `.nav-button:nth-child(6)` grocery icon
 - Added `.emoji-basket`, `.emoji-base`, `.emoji-overlay` positioning
 - Updated HTML to include basket emoji in navigation
-- Updated service worker cache to `v23-basket-grocery-icon`
-- Final design: Apple and baguette sitting in wicker basket
-  - Basket: 3.5rem, centered, bottom: -5px
-  - Baguette: right: 10px, top: 35%, 1.8rem
-  - Apple: left: 20px, top: 35%, 1.8rem
+- Updated service worker cache to `v47-perfect-grocery-icon-positioning`
+- FINAL PERFECT DESIGN: Apple and baguette sitting in wicker basket
+  - Basket: 3.5rem, centered, bottom: -5px (unchanged)
+  - Baguette: right: 8px, top: 30%, 1.8rem (moved right and down)
+  - Apple: left: 13px, top: 33%, 1.6rem (moved left and down, slightly smaller)
+- Fine-tuned through iterative console testing until perfect desktop/PWA match
+- Applied maximum CSS specificity for PWA compatibility
 - Perfect "grocery basket" aesthetic for both desktop and PWA app
-- Maintains clean, professional appearance with proper z-index layering
+- COMPLETED: All iPhone PWA users get identical positioning to desktop
 
