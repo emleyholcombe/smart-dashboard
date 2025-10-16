@@ -131,12 +131,16 @@
             right: 8px;
         }
 
-        /* Option 7: Custom - Apple left, baguette right, overlap middle */
+        /* Option 7: Custom - Apple left, baguette right, more overlap, no background */
+        .option7 {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
         .option7 .emoji-base {
             font-size: 2rem;
             transform: rotate(0deg);
             position: absolute;
-            right: 8px;
+            right: 20px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 1;
@@ -144,7 +148,7 @@
         .option7 .emoji-overlay {
             font-size: 2rem;
             position: absolute;
-            left: 8px;
+            left: 20px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 2;
@@ -227,7 +231,7 @@
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 7 - CUSTOM</div>
-            <div class="option-description">Apple left, baguette right horizontal, overlap in middle</div>
+            <div class="option-description">More overlap, no white background, transparent</div>
         </div>
     </div>
 </body>
