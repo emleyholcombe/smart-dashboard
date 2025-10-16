@@ -68,87 +68,97 @@
             filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
         }
 
-        /* Option 1: Apple front, baguette diagonal behind */
-        .option1 .emoji-base {
-            transform: rotate(45deg);
-        }
-        .option1 .emoji-overlay {
-            top: 10px;
-            left: 10px;
-        }
-
-        /* Option 2: Apple center, baguette horizontal behind */
-        .option2 .emoji-base {
-            transform: rotate(0deg);
-            opacity: 0.8;
-        }
-        .option2 .emoji-overlay {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        /* Option 3: Apple bottom-left, baguette angled top-right */
-        .option3 .emoji-base {
-            transform: rotate(-30deg);
-            position: absolute;
-            top: 5px;
-            right: 5px;
-        }
-        .option3 .emoji-overlay {
-            bottom: 8px;
-            left: 8px;
-        }
-
-        /* Option 4: Different sizes */
-        .option4 .emoji-base {
-            font-size: 1.8rem;
-            transform: rotate(45deg);
-        }
-        .option4 .emoji-overlay {
-            font-size: 1.8rem;
-            top: 8px;
-            left: 8px;
-        }
-
-        /* Option 5: Apple larger, baguette smaller */
-        .option5 .emoji-base {
-            font-size: 1.5rem;
-            transform: rotate(45deg);
-        }
-        .option5 .emoji-overlay {
-            font-size: 2rem;
-            top: 12px;
-            left: 12px;
-        }
-
-        /* Option 6: Different positioning */
-        .option6 .emoji-base {
-            transform: rotate(135deg);
-        }
-        .option6 .emoji-overlay {
-            top: 8px;
-            right: 8px;
-        }
-
-        /* Option 7: Custom - Apple left, baguette right, more overlap, no background */
-        .option7 {
+        /* All options: transparent background, no white circle */
+        .option1, .option2, .option3, .option4, .option5 {
             background: transparent !important;
             box-shadow: none !important;
         }
-        .option7 .emoji-base {
+
+        /* Option 1: No overlap - far apart */
+        .option1 .emoji-base {
             font-size: 2rem;
-            transform: rotate(0deg);
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        .option1 .emoji-overlay {
+            font-size: 2rem;
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+
+        /* Option 2: Slight overlap */
+        .option2 .emoji-base {
+            font-size: 2rem;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        .option2 .emoji-overlay {
+            font-size: 2rem;
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+
+        /* Option 3: Medium overlap */
+        .option3 .emoji-base {
+            font-size: 2rem;
             position: absolute;
             right: 20px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 1;
         }
-        .option7 .emoji-overlay {
+        .option3 .emoji-overlay {
             font-size: 2rem;
             position: absolute;
             left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+
+        /* Option 4: Heavy overlap */
+        .option4 .emoji-base {
+            font-size: 2rem;
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        .option4 .emoji-overlay {
+            font-size: 2rem;
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+
+        /* Option 5: Maximum overlap - almost stacked */
+        .option5 .emoji-base {
+            font-size: 2rem;
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        .option5 .emoji-overlay {
+            font-size: 2rem;
+            position: absolute;
+            left: 30px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 2;
@@ -177,7 +187,7 @@
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 1</div>
-            <div class="option-description">Apple front-left, baguette diagonal 45°</div>
+            <div class="option-description">No overlap - far apart</div>
         </div>
 
         <div class="icon-option">
@@ -186,7 +196,7 @@
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 2</div>
-            <div class="option-description">Apple center, baguette horizontal behind</div>
+            <div class="option-description">Slight overlap</div>
         </div>
 
         <div class="icon-option">
@@ -195,7 +205,7 @@
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 3</div>
-            <div class="option-description">Apple bottom-left, baguette angled top-right</div>
+            <div class="option-description">Medium overlap</div>
         </div>
 
         <div class="icon-option">
@@ -204,7 +214,7 @@
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 4</div>
-            <div class="option-description">Equal sizes, diagonal layout</div>
+            <div class="option-description">Heavy overlap</div>
         </div>
 
         <div class="icon-option">
@@ -213,25 +223,7 @@
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 5</div>
-            <div class="option-description">Apple larger (main focus), baguette smaller</div>
-        </div>
-
-        <div class="icon-option">
-            <div class="icon-container option6">
-                <span class="emoji-base">🥖</span>
-                <span class="emoji-overlay">🍎</span>
-            </div>
-            <div class="option-title">Option 6</div>
-            <div class="option-description">Apple top-right, baguette diagonal opposite</div>
-        </div>
-
-        <div class="icon-option">
-            <div class="icon-container option7">
-                <span class="emoji-base">🥖</span>
-                <span class="emoji-overlay">🍎</span>
-            </div>
-            <div class="option-title">Option 7 - CUSTOM</div>
-            <div class="option-description">More overlap, no white background, transparent</div>
+            <div class="option-description">Maximum overlap - almost stacked</div>
         </div>
     </div>
 </body>
