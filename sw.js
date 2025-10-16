@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v24-fix-basket-positioning';
+const CACHE_NAME = 'bennett-hub-v25-fix-overlap-positioning';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
