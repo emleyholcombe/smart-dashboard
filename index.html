@@ -98,28 +98,28 @@
     .nav-icon {
       font-size: 2.5rem;
       text-shadow: 
-        0 0 6px rgba(255, 255, 255, 0.9),
-        0 2px 8px rgba(0, 0, 0, 0.7),
-        1px 1px 3px rgba(0, 0, 0, 0.8);
-      filter: 
-        drop-shadow(0 0 4px rgba(255, 255, 255, 0.8))
-        brightness(1.1)
-        contrast(1.1);
+        1px 1px 2px rgba(0, 0, 0, 0.8),
+        -1px -1px 2px rgba(0, 0, 0, 0.8),
+        1px -1px 2px rgba(0, 0, 0, 0.8),
+        -1px 1px 2px rgba(0, 0, 0, 0.8);
     }
     
     /* Enhanced contrast for grocery cart specifically */
     .nav-button:nth-child(6) .nav-icon {
-      color: #ffffff !important;
+      background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       text-shadow: 
-        0 0 10px rgba(255, 255, 255, 1),
-        0 0 20px rgba(255, 255, 255, 0.8),
-        0 2px 8px rgba(0, 0, 0, 0.9),
-        2px 2px 4px rgba(0, 0, 0, 0.8);
+        2px 2px 4px rgba(0, 0, 0, 0.9),
+        -2px -2px 4px rgba(0, 0, 0, 0.9),
+        2px -2px 4px rgba(0, 0, 0, 0.9),
+        -2px 2px 4px rgba(0, 0, 0, 0.9);
       filter: 
-        drop-shadow(0 0 8px rgba(255, 255, 255, 1)) 
-        drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9))
-        brightness(1.2)
-        contrast(1.3);
+        drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8))
+        brightness(1.3)
+        contrast(1.2);
+      font-weight: bold;
     }
 
     .nav-label {
@@ -7735,7 +7735,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v1.6';
+      versionIndicator.textContent = 'PWA v1.7';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7804,7 +7804,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v1.6 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v1.7 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -7891,7 +7891,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v1.6';
+      versionIndicator.textContent = 'PWA v1.7';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7950,7 +7950,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v1.6 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v1.7 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 

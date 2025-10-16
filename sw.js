@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v14-aggressive-updates';
+const CACHE_NAME = 'bennett-hub-v15-golden-cart';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
