@@ -7878,10 +7878,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           console.log('✅ PWA: Moved grocery icon up 9px via JavaScript');
         }
         
-        // Move grocery title up 9px
+        // Move grocery title up 11px
         if (groceryLabel) {
-          groceryLabel.style.setProperty('transform', 'translateY(-9px)', 'important');
-          console.log('✅ PWA: Moved grocery title up 9px via JavaScript');
+          groceryLabel.style.setProperty('transform', 'translateY(-11px)', 'important');
+          console.log('✅ PWA: Moved grocery title up 11px via JavaScript');
         }
       }, 500); // Wait 500ms for elements to be ready
     }
@@ -8292,7 +8292,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v9.3 - Tap to Update';
+      versionIndicator.textContent = 'PWA v9.4 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
