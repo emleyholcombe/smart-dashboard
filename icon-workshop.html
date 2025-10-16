@@ -69,7 +69,7 @@
         }
 
         /* All options: transparent background, no white circle */
-        .option1, .option2, .option3, .option4, .option5 {
+        .option1, .option2, .option3, .option4 {
             background: transparent !important;
             box-shadow: none !important;
         }
@@ -110,11 +110,11 @@
             z-index: 2;
         }
 
-        /* Option 3: Medium overlap */
+        /* Option 3: Minimal gap - almost touching */
         .option3 .emoji-base {
             font-size: 2rem;
             position: absolute;
-            right: 20px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 1;
@@ -122,17 +122,17 @@
         .option3 .emoji-overlay {
             font-size: 2rem;
             position: absolute;
-            left: 20px;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 2;
         }
 
-        /* Option 4: Heavy overlap */
+        /* Option 4: Tiny gap - very close */
         .option4 .emoji-base {
             font-size: 2rem;
             position: absolute;
-            right: 25px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 1;
@@ -140,25 +140,7 @@
         .option4 .emoji-overlay {
             font-size: 2rem;
             position: absolute;
-            left: 25px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 2;
-        }
-
-        /* Option 5: Maximum overlap - almost stacked */
-        .option5 .emoji-base {
-            font-size: 2rem;
-            position: absolute;
-            right: 30px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-        .option5 .emoji-overlay {
-            font-size: 2rem;
-            position: absolute;
-            left: 30px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 2;
@@ -205,7 +187,7 @@
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 3</div>
-            <div class="option-description">Medium overlap</div>
+            <div class="option-description">Minimal gap - almost touching</div>
         </div>
 
         <div class="icon-option">
@@ -214,16 +196,7 @@
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 4</div>
-            <div class="option-description">Heavy overlap</div>
-        </div>
-
-        <div class="icon-option">
-            <div class="icon-container option5">
-                <span class="emoji-base">🥖</span>
-                <span class="emoji-overlay">🍎</span>
-            </div>
-            <div class="option-title">Option 5</div>
-            <div class="option-description">Maximum overlap - almost stacked</div>
+            <div class="option-description">Tiny gap - very close</div>
         </div>
     </div>
 </body>
