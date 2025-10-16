@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v39-desktop-no-pwa-customizations';
+const CACHE_NAME = 'bennett-hub-v40-disable-force-update-reload';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

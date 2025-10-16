@@ -7327,19 +7327,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             registration.update().then(() => {
               console.log('✅ Service worker update triggered for registration', index + 1);
               showUpdateNotification();
-              setTimeout(() => {
-                console.log('🔄 Reloading page...');
-                window.location.reload();
-              }, 1000);
+              // DISABLED: setTimeout reload - CAUSING DESKTOP LOOP
+              // setTimeout(() => {
+              //   console.log('🔄 Reloading page...');
+              //   window.location.reload();
+              // }, 1000);
             }).catch(error => {
               console.log('❌ Failed to update registration', index + 1, error);
             });
           });
         });
       } else {
-        // Fallback: just reload
-        console.log('🔄 Service worker not available, forcing reload...');
-        window.location.reload();
+        // DISABLED: Fallback reload - CAUSING DESKTOP LOOP
+        console.log('🔄 Service worker not available - RELOAD DISABLED');
+        // window.location.reload(); // DISABLED TO PREVENT LOOP
       }
     }
 
