@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v85-force-aggressive-cache-refresh';
+const CACHE_NAME = 'bennett-hub-v86-javascript-calendar-position-fix';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

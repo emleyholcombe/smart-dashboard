@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v8.5
+        Desktop v8.6
       </div>
     </div>
   </div>
@@ -7844,6 +7844,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       addPWAGroceryIconFix(); // Force correct grocery icon positioning via JavaScript
       addPWACalendarOptimizations(); // Optimize calendar for mobile touch interface
       addPWANavigationAlignment(); // Align Calendar title with Dashboard title
+      addPWACalendarPositionFix(); // Force Calendar positioning via JavaScript
       // addMobileOptimizations(); // DISABLED - this was breaking layout
       // addAppSpecificUI(); // DISABLED - this was adding unwanted UI elements
     }
@@ -8113,6 +8114,43 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       console.log('✅ PWA: Navigation alignment applied - Calendar title aligned with Dashboard');
     }
 
+    // PWA Calendar Position Fix via JavaScript (similar to grocery icon fix)
+    function addPWACalendarPositionFix() {
+      // Wait for DOM to be ready, then force correct positioning
+      setTimeout(() => {
+        const calendarIcon = document.querySelector('.nav-button:nth-child(2) .nav-icon');
+        const calendarLabel = document.querySelector('.nav-button:nth-child(2) .nav-label');
+        
+        if (calendarIcon) {
+          calendarIcon.style.setProperty('transform', 'none', 'important');
+          calendarIcon.style.setProperty('margin', '0', 'important');
+          calendarIcon.style.setProperty('position', 'relative', 'important');
+          calendarIcon.style.setProperty('top', '0', 'important');
+          calendarIcon.style.setProperty('bottom', '0', 'important');
+          console.log('✅ PWA: Applied correct calendar icon positioning via JavaScript');
+        }
+        
+        if (calendarLabel) {
+          calendarLabel.style.setProperty('transform', 'none', 'important');
+          calendarLabel.style.setProperty('margin', '0', 'important');
+          calendarLabel.style.setProperty('position', 'relative', 'important');
+          calendarLabel.style.setProperty('top', '0', 'important');
+          calendarLabel.style.setProperty('bottom', '0', 'important');
+          console.log('✅ PWA: Applied correct calendar label positioning via JavaScript');
+        }
+        
+        // Also force the button to use flex centering
+        const calendarButton = document.querySelector('.nav-button:nth-child(2)');
+        if (calendarButton) {
+          calendarButton.style.setProperty('display', 'flex', 'important');
+          calendarButton.style.setProperty('flex-direction', 'column', 'important');
+          calendarButton.style.setProperty('align-items', 'center', 'important');
+          calendarButton.style.setProperty('justify-content', 'center', 'important');
+          console.log('✅ PWA: Applied correct calendar button layout via JavaScript');
+        }
+      }, 500); // Wait 500ms for elements to be ready
+    }
+
     // Browser-specific features  
     function enableBrowserFeatures() {
       // Add browser-specific features
@@ -8240,7 +8278,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v8.5 - Tap to Update';
+      versionIndicator.textContent = 'PWA v8.6 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8310,7 +8348,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v8.5 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v8.6 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8397,7 +8435,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v8.5';
+      versionIndicator.textContent = 'PWA v8.6';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8456,7 +8494,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v8.5 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v8.6 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
