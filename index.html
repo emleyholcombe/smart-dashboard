@@ -99,11 +99,11 @@
       font-size: 2.5rem;
     }
     
-    /* Enhanced contrast for grocery cart - background circle */
+    /* Enhanced contrast for grocery cart - white background circle */
     .nav-button:nth-child(6) .nav-icon {
-      /* White icon with green background circle */
-      color: white !important;
-      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      /* Dark icon with white background circle */
+      color: #333 !important;
+      background: linear-gradient(135deg, #ffffff, #f5f5f5);
       border-radius: 50%;
       padding: 10px;
       width: 60px;
@@ -111,7 +111,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       font-weight: bold;
       margin: 0 auto;
     }
@@ -7748,7 +7748,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v2.2';
+      versionIndicator.textContent = 'PWA v2.3';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7817,7 +7817,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v2.2 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v2.3 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -7904,7 +7904,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v2.2';
+      versionIndicator.textContent = 'PWA v2.3';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7963,7 +7963,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v2.2 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v2.3 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
