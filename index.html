@@ -7458,6 +7458,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             // Check for updates immediately and every 10 seconds for PWA
             window.checkForUpdates = () => {
               console.log('🔄 PWA: Checking for updates...', new Date().toLocaleTimeString());
+              console.log('🔍 PWA: Update check triggered by interval ID:', window.updateIntervalId);
               
               // Force update by re-registering with cache-busting timestamp
               const swUrl = `/smart-dashboard/sw.js?v=${Date.now()}`;
@@ -7519,8 +7520,24 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             
             // Add safeguard: only start auto-updates after initial load
             setTimeout(() => {
-              window.updateIntervalId = setInterval(window.checkForUpdates, updateInterval);
-              console.log('✅ PWA: Auto-update enabled with', updateInterval/1000, 'second interval');
+              console.log('🚀 PWA: Starting auto-update system...');
+              console.log('📊 PWA Detection:', {
+                isPWA: isPWA,
+                updateInterval: updateInterval,
+                checkForUpdatesExists: typeof window.checkForUpdates
+              });
+              
+              if (typeof window.checkForUpdates === 'function') {
+                window.updateIntervalId = setInterval(window.checkForUpdates, updateInterval);
+                console.log('✅ PWA: Auto-update enabled with', updateInterval/1000, 'second interval');
+                console.log('🔍 PWA: Interval ID:', window.updateIntervalId);
+                
+                // Test the function immediately
+                console.log('🧪 PWA: Testing checkForUpdates function...');
+                window.checkForUpdates();
+              } else {
+                console.error('❌ PWA: checkForUpdates function not found!');
+              }
             }, 5000); // Wait 5 seconds before starting auto-updates
             
             // Handle updates
@@ -7852,7 +7869,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v4.9';
+      versionIndicator.textContent = 'PWA v5.0';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7921,7 +7938,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v4.9 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v5.0 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8008,7 +8025,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v4.9';
+      versionIndicator.textContent = 'PWA v5.0';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8067,7 +8084,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v4.9 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v5.0 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 

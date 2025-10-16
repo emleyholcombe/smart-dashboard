@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v49-auto-update-re-enabled';
+const CACHE_NAME = 'bennett-hub-v50-debug-auto-update';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
