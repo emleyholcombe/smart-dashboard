@@ -3665,10 +3665,12 @@ Applied PERFECT positioning through user testing to main app (`index.html`):
 - Added `.emoji-basket`, `.emoji-base`, `.emoji-overlay` positioning
 - Updated HTML to include basket emoji in navigation
 - Updated service worker cache to `v47-perfect-grocery-icon-positioning`
-- FINAL PERFECT DESIGN: Apple and baguette sitting in wicker basket
-  - Basket: 3.5rem, centered, bottom: -5px (unchanged)
-  - Baguette: right: 8px, top: 30%, 1.8rem (moved right and down)
-  - Apple: left: 13px, top: 33%, 1.6rem (moved left and down, slightly smaller)
+- FINAL SCALED DESIGN: Apple and baguette sitting in wicker basket (v4.8)
+  - Container: 50px × 50px (scaled from 70px for text alignment)
+  - Basket: 2.5rem, centered, bottom: -3px (scaled from 3.5rem)
+  - Baguette: right: 7px/6px, top: 25%/30%, 1.3rem (scaled from 1.8rem)
+  - Apple: left: 11px/9px, top: 28%/33%, 1.15rem (scaled from 1.6rem)
+  - ALIGNMENT: Top of baguette = top of calendar emoji, bottom of basket = bottom of calendar emoji
 - Fine-tuned through iterative console testing until perfect desktop/PWA match
 - Applied maximum CSS specificity for PWA compatibility
 - Perfect "grocery basket" aesthetic for both desktop and PWA app

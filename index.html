@@ -7512,12 +7512,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             // window.checkForUpdates();
             
             // DISABLED: Auto-update interval to prevent refresh loop
-            // const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
-            //              window.navigator.standalone === true;
-            // const updateInterval = isPWA ? 10000 : 30000;
-            // window.updateIntervalId = setInterval(window.checkForUpdates, updateInterval);
+            // Set up automatic update checking with safeguards
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                         window.navigator.standalone === true;
+            const updateInterval = isPWA ? 30000 : 60000; // 30s for PWA, 60s for browser
             
-            console.log('⚠️ Auto-update disabled to prevent refresh loop');
+            // Add safeguard: only start auto-updates after initial load
+            setTimeout(() => {
+              window.updateIntervalId = setInterval(window.checkForUpdates, updateInterval);
+              console.log('✅ PWA: Auto-update enabled with', updateInterval/1000, 'second interval');
+            }, 5000); // Wait 5 seconds before starting auto-updates
             
             // Handle updates
             registration.addEventListener('updatefound', () => {
@@ -7534,10 +7538,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                                           window.navigator.standalone === true;
                     if (isPWAForUpdate) {
                       showUpdateNotification();
-                      // DISABLED: Delay reload - CAUSING LOOP
-                      // setTimeout(() => {
-                      //   window.location.reload();
-                      // }, 1000);
+                      
+                      // Clear the update interval to prevent multiple reloads
+                      if (window.updateIntervalId) {
+                        clearInterval(window.updateIntervalId);
+                        console.log('🛑 PWA: Cleared update interval before reload');
+                      }
+                      
+                      // Delay reload to allow notification to show
+                      setTimeout(() => {
+                        console.log('🔄 PWA: Reloading for update...');
+                        window.location.reload();
+                      }, 2000);
                     } else {
                       // DISABLED: Immediate reload - CAUSING LOOP
                       // window.location.reload();
@@ -7551,12 +7563,21 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             
             // Handle controller change (new service worker activated)
             navigator.serviceWorker.addEventListener('controllerchange', () => {
-              console.log('PWA: New service worker activated - RELOAD DISABLED');
-              // Update version indicator before reloading
+              console.log('PWA: New service worker activated');
+              
+              // Clear any existing update intervals to prevent loops
+              if (window.updateIntervalId) {
+                clearInterval(window.updateIntervalId);
+                console.log('🛑 PWA: Cleared update interval on controller change');
+              }
+              
+              // Update version indicator
               if (window.updatePWAVersionIndicator) {
                 window.updatePWAVersionIndicator();
               }
-              // window.location.reload(); // DISABLED TO PREVENT LOOP
+              
+              console.log('🔄 PWA: Reloading for new controller...');
+              window.location.reload();
             });
           })
           .catch((error) => {
@@ -7831,7 +7852,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v4.8';
+      versionIndicator.textContent = 'PWA v4.9';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7900,7 +7921,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v4.8 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v4.9 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -7987,7 +8008,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v4.8';
+      versionIndicator.textContent = 'PWA v4.9';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8046,7 +8067,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v4.8 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v4.9 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
