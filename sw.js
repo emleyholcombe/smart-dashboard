@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v100-apple-baguette-repositioning';
+const CACHE_NAME = 'bennett-hub-v101-fine-tune-apple-baguette';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
