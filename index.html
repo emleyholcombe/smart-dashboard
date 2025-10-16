@@ -8080,8 +8080,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       style.textContent = `
         /* PWA: Make calendar icon smaller */
         body.pwa-mode .nav-button:nth-child(2) .nav-icon img {
-          width: 2.2rem !important;
-          height: 2.2rem !important;
+          width: 1.8125rem !important;
+          height: 1.8125rem !important;
         }
         
         /* PWA: Reset calendar icon container position with maximum specificity */
@@ -8278,7 +8278,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v8.7 - Tap to Update';
+      versionIndicator.textContent = 'PWA v8.8 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
