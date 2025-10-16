@@ -7729,8 +7729,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           margin: 8px !important;
         }
         
-        /* Ensure grocery icon looks identical in PWA mode */
-        .pwa-mode .nav-button:nth-child(6) .nav-icon {
+        /* Ensure grocery icon looks identical in PWA mode - MAXIMUM SPECIFICITY */
+        body.pwa-mode.mobile-device.display-standalone .nav-button:nth-child(6) .nav-icon {
           position: relative !important;
           display: inline-block !important;
           width: 70px !important;
@@ -7743,7 +7743,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           background: transparent !important;
         }
         
-        .pwa-mode .nav-button:nth-child(6) .nav-icon .emoji-basket {
+        body.pwa-mode.mobile-device.display-standalone .nav-button:nth-child(6) .nav-icon .emoji-basket {
           position: absolute !important;
           font-size: 3.5rem !important;
           bottom: -5px !important;
@@ -7752,7 +7752,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           z-index: 0 !important;
         }
         
-        .pwa-mode .nav-button:nth-child(6) .nav-icon .emoji-base {
+        body.pwa-mode.mobile-device.display-standalone .nav-button:nth-child(6) .nav-icon .emoji-base {
           position: absolute !important;
           right: 10px !important;
           top: 25% !important;
@@ -7761,7 +7761,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           font-size: 1.8rem !important;
         }
         
-        .pwa-mode .nav-button:nth-child(6) .nav-icon .emoji-overlay {
+        body.pwa-mode.mobile-device.display-standalone .nav-button:nth-child(6) .nav-icon .emoji-overlay {
           position: absolute !important;
           left: 15px !important;
           top: 28% !important;
