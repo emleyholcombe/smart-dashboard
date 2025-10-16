@@ -74,83 +74,117 @@
             box-shadow: none !important;
         }
 
-        /* Option 1: No overlap - far apart */
-        .option1 .emoji-base {
-            font-size: 2rem;
+        /* All options use Option 2 spacing (15px) with different basket sizes */
+
+        /* Option 1: Small basket */
+        .option1 .emoji-basket {
+            font-size: 2.5rem;
             position: absolute;
-            right: 5px;
-            top: 50%;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+        .option1 .emoji-base {
+            font-size: 1.8rem;
+            position: absolute;
+            right: 15px;
+            top: 30%;
             transform: translateY(-50%);
             z-index: 1;
         }
         .option1 .emoji-overlay {
-            font-size: 2rem;
+            font-size: 1.8rem;
             position: absolute;
-            left: 5px;
-            top: 50%;
+            left: 15px;
+            top: 30%;
             transform: translateY(-50%);
             z-index: 2;
         }
 
-        /* Option 2: Slight overlap */
+        /* Option 2: Medium basket */
+        .option2 .emoji-basket {
+            font-size: 3rem;
+            position: absolute;
+            bottom: 0px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
         .option2 .emoji-base {
-            font-size: 2rem;
+            font-size: 1.8rem;
             position: absolute;
             right: 15px;
-            top: 50%;
+            top: 25%;
             transform: translateY(-50%);
             z-index: 1;
         }
         .option2 .emoji-overlay {
-            font-size: 2rem;
+            font-size: 1.8rem;
             position: absolute;
             left: 15px;
-            top: 50%;
+            top: 25%;
             transform: translateY(-50%);
             z-index: 2;
         }
 
-        /* Option 3: Minimal gap - almost touching */
-        .option3 .emoji-base {
-            font-size: 2rem;
+        /* Option 3: Large basket */
+        .option3 .emoji-basket {
+            font-size: 3.5rem;
             position: absolute;
-            right: 10px;
-            top: 50%;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+        .option3 .emoji-base {
+            font-size: 1.8rem;
+            position: absolute;
+            right: 15px;
+            top: 20%;
             transform: translateY(-50%);
             z-index: 1;
         }
         .option3 .emoji-overlay {
-            font-size: 2rem;
+            font-size: 1.8rem;
             position: absolute;
-            left: 10px;
-            top: 50%;
+            left: 15px;
+            top: 20%;
             transform: translateY(-50%);
             z-index: 2;
         }
 
-        /* Option 4: Tiny gap - very close */
-        .option4 .emoji-base {
-            font-size: 2rem;
+        /* Option 4: Extra large basket */
+        .option4 .emoji-basket {
+            font-size: 4rem;
             position: absolute;
-            right: 12px;
-            top: 50%;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+        .option4 .emoji-base {
+            font-size: 1.8rem;
+            position: absolute;
+            right: 15px;
+            top: 15%;
             transform: translateY(-50%);
             z-index: 1;
         }
         .option4 .emoji-overlay {
-            font-size: 2rem;
+            font-size: 1.8rem;
             position: absolute;
-            left: 12px;
-            top: 50%;
+            left: 15px;
+            top: 15%;
             transform: translateY(-50%);
             z-index: 2;
         }
 
-        /* Option 5: With basket - Option 2 spacing + basket underneath */
+        /* Option 5: Maximum basket */
         .option5 .emoji-basket {
-            font-size: 2.2rem;
+            font-size: 4.5rem;
             position: absolute;
-            bottom: 8px;
+            bottom: -15px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 0;
@@ -159,7 +193,7 @@
             font-size: 1.8rem;
             position: absolute;
             right: 15px;
-            top: 35%;
+            top: 10%;
             transform: translateY(-50%);
             z-index: 1;
         }
@@ -167,7 +201,7 @@
             font-size: 1.8rem;
             position: absolute;
             left: 15px;
-            top: 35%;
+            top: 10%;
             transform: translateY(-50%);
             z-index: 2;
         }
@@ -191,38 +225,42 @@
     <div class="icon-grid">
         <div class="icon-option">
             <div class="icon-container option1">
+                <span class="emoji-basket">🧺</span>
                 <span class="emoji-base">🥖</span>
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 1</div>
-            <div class="option-description">No overlap - far apart</div>
+            <div class="option-description">Small basket (2.5rem)</div>
         </div>
 
         <div class="icon-option">
             <div class="icon-container option2">
+                <span class="emoji-basket">🧺</span>
                 <span class="emoji-base">🥖</span>
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 2</div>
-            <div class="option-description">Slight overlap</div>
+            <div class="option-description">Medium basket (3rem)</div>
         </div>
 
         <div class="icon-option">
             <div class="icon-container option3">
+                <span class="emoji-basket">🧺</span>
                 <span class="emoji-base">🥖</span>
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 3</div>
-            <div class="option-description">Minimal gap - almost touching</div>
+            <div class="option-description">Large basket (3.5rem)</div>
         </div>
 
         <div class="icon-option">
             <div class="icon-container option4">
+                <span class="emoji-basket">🧺</span>
                 <span class="emoji-base">🥖</span>
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 4</div>
-            <div class="option-description">Tiny gap - very close</div>
+            <div class="option-description">Extra large basket (4rem)</div>
         </div>
 
         <div class="icon-option">
@@ -231,8 +269,8 @@
                 <span class="emoji-base">🥖</span>
                 <span class="emoji-overlay">🍎</span>
             </div>
-            <div class="option-title">Option 5 - WITH BASKET</div>
-            <div class="option-description">Option 2 spacing + basket underneath</div>
+            <div class="option-title">Option 5</div>
+            <div class="option-description">Maximum basket (4.5rem)</div>
         </div>
     </div>
 </body>
