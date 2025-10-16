@@ -7859,23 +7859,24 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const groceryLabel = document.querySelector('.nav-button:nth-child(6) .nav-label');
         
         if (apple) {
-          apple.style.setProperty('left', '9px', 'important');
+          apple.style.setProperty('left', '7.2px', 'important'); // 9px * 0.8
           apple.style.setProperty('top', '31%', 'important');
-          apple.style.setProperty('font-size', '1.0rem', 'important');
-          console.log('✅ PWA: Applied correct apple positioning via JavaScript');
+          apple.style.setProperty('font-size', '0.8rem', 'important'); // 1.0rem * 0.8
+          console.log('✅ PWA: Applied correct apple positioning via JavaScript (0.8x scale)');
         }
         
         if (baguette) {
-          baguette.style.setProperty('right', '4px', 'important');
+          baguette.style.setProperty('right', '3.2px', 'important'); // 4px * 0.8
           baguette.style.setProperty('top', '27%', 'important');
-          baguette.style.setProperty('font-size', '1.4rem', 'important');
-          console.log('✅ PWA: Applied correct baguette positioning via JavaScript');
+          baguette.style.setProperty('font-size', '1.12rem', 'important'); // 1.4rem * 0.8
+          console.log('✅ PWA: Applied correct baguette positioning via JavaScript (0.8x scale)');
         }
         
-        // Move grocery icon up 9px
+        // Scale grocery icon container and move up 9px
         if (groceryIcon) {
           groceryIcon.style.setProperty('transform', 'translateY(-9px)', 'important');
-          console.log('✅ PWA: Moved grocery icon up 9px via JavaScript');
+          groceryIcon.style.setProperty('font-size', '2.0rem', 'important'); // 2.5rem * 0.8 for basket
+          console.log('✅ PWA: Scaled grocery icon to 0.8x and moved up 9px via JavaScript');
         }
         
         // Move grocery title up 11px
@@ -8292,7 +8293,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v9.4 - Tap to Update';
+      versionIndicator.textContent = 'PWA v9.5 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
