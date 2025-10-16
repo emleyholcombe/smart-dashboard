@@ -7530,7 +7530,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                     console.log('PWA: New content available, reloading...');
                     
                     // Show update notification for PWA
-                    if (isPWA) {
+                    const isPWAForUpdate = window.matchMedia('(display-mode: standalone)').matches || 
+                                          window.navigator.standalone === true;
+                    if (isPWAForUpdate) {
                       showUpdateNotification();
                       // DISABLED: Delay reload - CAUSING LOOP
                       // setTimeout(() => {
