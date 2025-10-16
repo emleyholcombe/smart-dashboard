@@ -3794,3 +3794,59 @@ function addPWAGroceryIconFix() {
 - CSS !important with specific selectors can override stubborn conflicts
 - Version indicators help track deployment status across platforms
 
+## PWA CALENDAR TITLE ALIGNMENT (v8.7 - FINAL SOLUTION)
+
+**PROBLEM SOLVED:**
+- PWA Calendar title was not aligned with Dashboard title horizontally
+- CSS overrides weren't working due to PWA-specific rendering differences
+- JavaScript-based positioning fix successfully implemented
+
+**ROOT CAUSE ANALYSIS:**
+- Calendar button had `justify-content: center` vs Dashboard's `justify-content: normal`
+- Calendar title was positioned 4px lower than Dashboard title
+- CSS specificity issues prevented proper alignment in PWA mode
+
+**CONSOLE-TESTED PERFECT VALUES:**
+- Calendar button: `justify-content: normal` (matches Dashboard)
+- Calendar label: `transform: translateY(-4px)` (perfect alignment)
+- Result: 0px vertical difference between titles
+
+**FINAL TECHNICAL SOLUTION:**
+```javascript
+// In addPWACalendarPositionFix() function:
+if (calendarLabel) {
+  calendarLabel.style.setProperty('transform', 'translateY(-4px)', 'important');
+  // ... other positioning resets
+}
+
+if (calendarButton) {
+  calendarButton.style.setProperty('justify-content', 'normal', 'important');
+  // ... other flex properties
+}
+```
+
+**DEBUGGING PROCESS:**
+1. Identified different `justify-content` values between buttons
+2. Fixed justify-content but titles still misaligned
+3. Measured exact pixel difference using getBoundingClientRect()
+4. Applied precise translateY(-4px) adjustment
+5. Achieved perfect 0px difference alignment
+
+**CURRENT STATUS (v8.7):**
+- PWA version indicator: "PWA v8.7 - Tap to Update"
+- Calendar and Dashboard titles: Perfectly aligned horizontally
+- Solution: JavaScript-based positioning (similar to grocery icon fix)
+- Method: Direct DOM manipulation with setProperty() and !important
+
+**PROVEN JAVASCRIPT APPROACH:**
+- CSS overrides failed, JavaScript succeeded
+- Applied during PWA initialization with 500ms delay
+- Uses element.style.setProperty() with 'important' flag
+- Console logs confirm successful positioning application
+
+**KEY LEARNINGS:**
+- PWA rendering can differ from desktop despite identical CSS
+- JavaScript DOM manipulation more reliable than CSS for PWA fixes
+- Console testing with getBoundingClientRect() provides precise measurements
+- translateY() transforms work better than margin/padding adjustments for fine positioning
+

@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v86-javascript-calendar-position-fix';
+const CACHE_NAME = 'bennett-hub-v87-perfect-calendar-title-alignment';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
