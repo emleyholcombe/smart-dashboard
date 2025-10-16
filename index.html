@@ -7284,6 +7284,72 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
   </script>
 
+  <!-- PWA Update Notification Function -->
+  <script>
+    // Force app update manually
+    function forceAppUpdate() {
+      console.log('🔄 Forcing app update...');
+      
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(registration => {
+            console.log('🔄 Updating service worker registration...');
+            registration.update().then(() => {
+              console.log('🔄 Service worker update triggered');
+              showUpdateNotification();
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            });
+          });
+        });
+      } else {
+        // Fallback: just reload
+        console.log('🔄 Service worker not available, forcing reload...');
+        window.location.reload();
+      }
+    }
+
+    // Show update notification for PWA
+    function showUpdateNotification() {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #4caf50, #66bb6a);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 10003;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.3s ease;
+      `;
+      notification.textContent = '🔄 Updating app...';
+      
+      // Add animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideDown {
+          from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+          to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+      document.body.appendChild(notification);
+      
+      // Remove after animation
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          document.body.removeChild(notification);
+        }
+      }, 800);
+    }
+  </script>
+
   <!-- PWA Service Worker Registration -->
   <script>
     // Register service worker for PWA functionality
@@ -7293,18 +7359,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           .then((registration) => {
             console.log('PWA: Service Worker registered successfully:', registration.scope);
             
-            // Check for updates immediately and every 30 seconds
+            // Check for updates immediately and every 10 seconds for PWA
             const checkForUpdates = () => {
               registration.update().then(() => {
                 console.log('PWA: Checked for updates');
+              }).catch(error => {
+                console.log('PWA: Update check failed:', error);
               });
             };
             
             // Check immediately
             checkForUpdates();
             
-            // Check every 30 seconds
-            setInterval(checkForUpdates, 30000);
+            // More frequent checks for PWA mode (every 10 seconds)
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                         window.navigator.standalone === true;
+            const updateInterval = isPWA ? 10000 : 30000; // 10s for PWA, 30s for browser
+            
+            console.log(`PWA: Setting update interval to ${updateInterval/1000} seconds (PWA mode: ${isPWA})`);
+            setInterval(checkForUpdates, updateInterval);
             
             // Handle updates
             registration.addEventListener('updatefound', () => {
@@ -7315,8 +7388,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                 if (newWorker.state === 'installed') {
                   if (navigator.serviceWorker.controller) {
                     console.log('PWA: New content available, reloading...');
-                    // Auto-reload to get new content
-                    window.location.reload();
+                    
+                    // Show update notification for PWA
+                    if (isPWA) {
+                      showUpdateNotification();
+                      // Delay reload slightly for PWA to show notification
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 1000);
+                    } else {
+                      // Immediate reload for browser
+                      window.location.reload();
+                    }
                   } else {
                     console.log('PWA: Content cached for offline use');
                   }
