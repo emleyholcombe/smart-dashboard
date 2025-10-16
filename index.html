@@ -7502,17 +7502,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               });
             };
             
-            // Check immediately
-            window.checkForUpdates();
+            // DISABLED: Aggressive update checking causing refresh loop
+            // window.checkForUpdates();
             
-            // More frequent checks for PWA mode (every 10 seconds)
-            const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
-                         window.navigator.standalone === true;
-            const updateInterval = isPWA ? 10000 : 30000; // 10s for PWA, 30s for browser
+            // DISABLED: Auto-update interval to prevent refresh loop
+            // const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+            //              window.navigator.standalone === true;
+            // const updateInterval = isPWA ? 10000 : 30000;
+            // window.updateIntervalId = setInterval(window.checkForUpdates, updateInterval);
             
-            console.log(`PWA: Setting update interval to ${updateInterval/1000} seconds (PWA mode: ${isPWA})`);
-            window.updateIntervalId = setInterval(window.checkForUpdates, updateInterval);
-            console.log('✅ PWA: Update interval started with ID:', window.updateIntervalId);
+            console.log('⚠️ Auto-update disabled to prevent refresh loop');
             
             // Handle updates
             registration.addEventListener('updatefound', () => {
