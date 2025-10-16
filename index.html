@@ -7549,6 +7549,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       addHapticFeedback();
       addSwipeGestures(); // This includes pull-to-refresh with visual feedback
       addPWAStatusBarFix(); // Fix for iOS status bar white banner
+      addPWAVersionIndicator(); // Add version indicator for debugging and manual updates
       // addMobileOptimizations(); // DISABLED - this was breaking layout
       // addAppSpecificUI(); // DISABLED - this was adding unwanted UI elements
     }
@@ -7628,6 +7629,94 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
       `;
       document.head.appendChild(style);
+    }
+
+    // Add PWA version indicator for debugging and manual updates
+    function addPWAVersionIndicator() {
+      if (!window.pwaInfo?.isPWA) return;
+      
+      // Add version indicator (only visible when debugging needed)
+      const versionIndicator = document.createElement('div');
+      versionIndicator.id = 'pwa-version-indicator';
+      versionIndicator.textContent = 'PWA v1.0';
+      versionIndicator.style.cssText = `
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.6);
+        z-index: 1000;
+        cursor: pointer;
+        padding: 4px 8px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 6px;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      `;
+      
+      // Make it more visible on touch for mobile
+      versionIndicator.addEventListener('touchstart', () => {
+        versionIndicator.style.opacity = '1';
+        versionIndicator.style.background = 'rgba(255, 255, 255, 0.9)';
+        versionIndicator.style.color = '#333';
+      });
+      
+      versionIndicator.addEventListener('touchend', () => {
+        setTimeout(() => {
+          versionIndicator.style.opacity = '0.7';
+          versionIndicator.style.background = 'rgba(0, 0, 0, 0.3)';
+          versionIndicator.style.color = 'rgba(255, 255, 255, 0.6)';
+        }, 200);
+      });
+      
+      // Add click handler for debug info and manual update
+      versionIndicator.addEventListener('click', () => {
+        const debugInfo = debugPWADataLoading();
+        const totalItems = debugInfo.currentData.todoItems.length + 
+                          debugInfo.currentData.groceryItems.length + 
+                          debugInfo.currentData.mealItems.length;
+        
+        const message = `🔍 PWA Debug Info:
+        
+📱 Mode: ${debugInfo.pwaMode ? 'PWA' : 'Browser'}
+🌐 Online: ${debugInfo.isOnline ? 'Yes' : 'No'}
+🔑 GitHub Token: ${debugInfo.hasGithubToken ? 'Yes' : 'No'}
+📝 Gist ID: ${debugInfo.hasGistId ? 'Yes' : 'No'}
+
+📊 Current Data: ${totalItems} items
+📝 Todos: ${debugInfo.currentData.todoItems.length}
+🛒 Grocery: ${debugInfo.currentData.groceryItems.length}  
+🍽️ Meals: ${debugInfo.currentData.mealItems.length}
+
+${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '✅ Data loaded successfully'}
+
+🔄 Tap OK to force app update`;
+        
+        if (confirm(message)) {
+          forceAppUpdate();
+        }
+      });
+      
+      document.body.appendChild(versionIndicator);
+      
+      // Update version indicator with sync status
+      const updateVersionIndicator = () => {
+        const totalItems = todoItems.length + groceryItems.length + mealItems.length;
+        const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
+        versionIndicator.textContent = `PWA v1.0 ${syncStatus} (${totalItems})`;
+        versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
+          GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
+          JSONBIN_ID ? 'JSONBin sync active' : 
+          'Local storage only'
+        }`;
+      };
+      
+      // Update indicator initially and when data changes
+      updateVersionIndicator();
+      
+      // Store update function globally so other parts can call it
+      window.updatePWAVersionIndicator = updateVersionIndicator;
     }
 
     // Fix iOS status bar white banner in PWA mode
