@@ -69,7 +69,7 @@
         }
 
         /* All options: transparent background, no white circle */
-        .option1, .option2, .option3, .option4 {
+        .option1, .option2, .option3, .option4, .option5 {
             background: transparent !important;
             box-shadow: none !important;
         }
@@ -146,6 +146,32 @@
             z-index: 2;
         }
 
+        /* Option 5: With basket - Option 2 spacing + basket underneath */
+        .option5 .emoji-basket {
+            font-size: 2.2rem;
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+        .option5 .emoji-base {
+            font-size: 1.8rem;
+            position: absolute;
+            right: 15px;
+            top: 35%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        .option5 .emoji-overlay {
+            font-size: 1.8rem;
+            position: absolute;
+            left: 15px;
+            top: 35%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+
         .option-title {
             font-weight: bold;
             margin-top: 15px;
@@ -197,6 +223,16 @@
             </div>
             <div class="option-title">Option 4</div>
             <div class="option-description">Tiny gap - very close</div>
+        </div>
+
+        <div class="icon-option">
+            <div class="icon-container option5">
+                <span class="emoji-basket">🧺</span>
+                <span class="emoji-base">🥖</span>
+                <span class="emoji-overlay">🍎</span>
+            </div>
+            <div class="option-title">Option 5 - WITH BASKET</div>
+            <div class="option-description">Option 2 spacing + basket underneath</div>
         </div>
     </div>
 </body>
