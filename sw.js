@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v75-calendar-button-shift-down';
+const CACHE_NAME = 'bennett-hub-v76-calendar-content-shift-down';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
