@@ -74,35 +74,9 @@
             box-shadow: none !important;
         }
 
-        /* 3 options comparing baseline vs medium vs between position */
+        /* Single option: Option 2 with apple and baguette moved slightly right */
 
-        /* Option 1: Between baseline and medium (40%) */
-        .option1 .emoji-basket {
-            font-size: 3.5rem;
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 0;
-        }
-        .option1 .emoji-base {
-            font-size: 1.8rem;
-            position: absolute;
-            right: 15px;
-            top: 40%;
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-        .option1 .emoji-overlay {
-            font-size: 1.8rem;
-            position: absolute;
-            left: 15px;
-            top: 40%;
-            transform: translateY(-50%);
-            z-index: 2;
-        }
-
-        /* Option 2: Medium position (35%) */
+        /* Option 2: Medium position (35%) - moved right as a unit */
         .option2 .emoji-basket {
             font-size: 3.5rem;
             position: absolute;
@@ -114,7 +88,7 @@
         .option2 .emoji-base {
             font-size: 1.8rem;
             position: absolute;
-            right: 15px;
+            right: 10px;
             top: 35%;
             transform: translateY(-50%);
             z-index: 1;
@@ -122,34 +96,8 @@
         .option2 .emoji-overlay {
             font-size: 1.8rem;
             position: absolute;
-            left: 15px;
+            left: 20px;
             top: 35%;
-            transform: translateY(-50%);
-            z-index: 2;
-        }
-
-        /* Option 3: Baseline position (45%) */
-        .option3 .emoji-basket {
-            font-size: 3.5rem;
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 0;
-        }
-        .option3 .emoji-base {
-            font-size: 1.8rem;
-            position: absolute;
-            right: 15px;
-            top: 45%;
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-        .option3 .emoji-overlay {
-            font-size: 1.8rem;
-            position: absolute;
-            left: 15px;
-            top: 45%;
             transform: translateY(-50%);
             z-index: 2;
         }
@@ -172,33 +120,13 @@
     
     <div class="icon-grid">
         <div class="icon-option">
-            <div class="icon-container option1">
-                <span class="emoji-basket">🧺</span>
-                <span class="emoji-base">🥖</span>
-                <span class="emoji-overlay">🍎</span>
-            </div>
-            <div class="option-title">Option 1</div>
-            <div class="option-description">Between position (40%)</div>
-        </div>
-
-        <div class="icon-option">
             <div class="icon-container option2">
                 <span class="emoji-basket">🧺</span>
                 <span class="emoji-base">🥖</span>
                 <span class="emoji-overlay">🍎</span>
             </div>
-            <div class="option-title">Option 2</div>
-            <div class="option-description">Medium position (35%)</div>
-        </div>
-
-        <div class="icon-option">
-            <div class="icon-container option3">
-                <span class="emoji-basket">🧺</span>
-                <span class="emoji-base">🥖</span>
-                <span class="emoji-overlay">🍎</span>
-            </div>
-            <div class="option-title">Option 3 ⭐</div>
-            <div class="option-description">BASELINE - Current position (45%)</div>
+            <div class="option-title">Final Option</div>
+            <div class="option-description">Medium position (35%) - moved right</div>
         </div>
     </div>
 </body>
