@@ -7855,6 +7855,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       setTimeout(() => {
         const apple = document.querySelector('.nav-button:nth-child(6) .nav-icon .emoji-overlay');
         const baguette = document.querySelector('.nav-button:nth-child(6) .nav-icon .emoji-base');
+        const groceryIcon = document.querySelector('.nav-button:nth-child(6) .nav-icon');
+        const groceryLabel = document.querySelector('.nav-button:nth-child(6) .nav-label');
         
         if (apple) {
           apple.style.setProperty('left', '9px', 'important');
@@ -7868,6 +7870,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           baguette.style.setProperty('top', '27%', 'important');
           baguette.style.setProperty('font-size', '1.4rem', 'important');
           console.log('✅ PWA: Applied correct baguette positioning via JavaScript');
+        }
+        
+        // Move grocery icon up 7px
+        if (groceryIcon) {
+          groceryIcon.style.setProperty('transform', 'translateY(-7px)', 'important');
+          console.log('✅ PWA: Moved grocery icon up 7px via JavaScript');
+        }
+        
+        // Move grocery title up 7px
+        if (groceryLabel) {
+          groceryLabel.style.setProperty('transform', 'translateY(-7px)', 'important');
+          console.log('✅ PWA: Moved grocery title up 7px via JavaScript');
         }
       }, 500); // Wait 500ms for elements to be ready
     }
@@ -8278,7 +8292,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v9.0 - Tap to Update';
+      versionIndicator.textContent = 'PWA v9.1 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
