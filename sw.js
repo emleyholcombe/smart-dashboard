@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v43-fix-ispwa-error';
+const CACHE_NAME = 'bennett-hub-v44-update-version-display';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
