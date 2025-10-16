@@ -7476,21 +7476,21 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                   // Wait for it to install and then activate
                   newRegistration.installing.addEventListener('statechange', () => {
                     if (newRegistration.installing.state === 'installed') {
-                      console.log('🎯 PWA: New service worker installed, forcing reload');
-                      window.location.reload();
+                      console.log('🎯 PWA: New service worker installed - RELOAD DISABLED');
+                      // window.location.reload(); // DISABLED TO PREVENT LOOP
                     }
                   });
                 }
                 if (newRegistration.active && newRegistration !== registration) {
-                  console.log('🔄 PWA: New service worker activated, reloading...');
-                  window.location.reload();
+                  console.log('🔄 PWA: New service worker activated - RELOAD DISABLED');
+                  // window.location.reload(); // DISABLED TO PREVENT LOOP
                 }
                 
-                // Force reload after 2 seconds regardless
-                setTimeout(() => {
-                  console.log('⏰ PWA: Force reload after timeout');
-                  window.location.reload();
-                }, 2000);
+                // DISABLED: Force reload after 2 seconds - CAUSING LOOP
+                // setTimeout(() => {
+                //   console.log('⏰ PWA: Force reload after timeout');
+                //   window.location.reload();
+                // }, 2000);
               }).catch(error => {
                 console.log('❌ PWA: Cache-busted update failed:', error);
                 // Fallback to regular update
@@ -7526,13 +7526,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                     // Show update notification for PWA
                     if (isPWA) {
                       showUpdateNotification();
-                      // Delay reload slightly for PWA to show notification
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 1000);
+                      // DISABLED: Delay reload - CAUSING LOOP
+                      // setTimeout(() => {
+                      //   window.location.reload();
+                      // }, 1000);
                     } else {
-                      // Immediate reload for browser
-                      window.location.reload();
+                      // DISABLED: Immediate reload - CAUSING LOOP
+                      // window.location.reload();
                     }
                   } else {
                     console.log('PWA: Content cached for offline use');
@@ -7543,12 +7543,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             
             // Handle controller change (new service worker activated)
             navigator.serviceWorker.addEventListener('controllerchange', () => {
-              console.log('PWA: New service worker activated, reloading...');
+              console.log('PWA: New service worker activated - RELOAD DISABLED');
               // Update version indicator before reloading
               if (window.updatePWAVersionIndicator) {
                 window.updatePWAVersionIndicator();
               }
-              window.location.reload();
+              // window.location.reload(); // DISABLED TO PREVENT LOOP
             });
           })
           .catch((error) => {
