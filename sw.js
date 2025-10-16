@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v19-clean-icons';
+const CACHE_NAME = 'bennett-hub-v20-circle-cart';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
