@@ -6141,7 +6141,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       backButton.onclick = closeFullscreen;
       backButton.innerHTML = '← Dashboard';
       
-      // Add auto-return indicator
+      // Add auto-return indicator (desktop only)
       const autoReturnIndicator = document.createElement('div');
       autoReturnIndicator.className = 'auto-return-indicator';
       autoReturnIndicator.innerHTML = '<div class="auto-return-dot"></div>Auto-return in 10min';
@@ -6150,14 +6150,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // PWA-specific: Only show Dashboard button for desktop/browser users
       if (!window.pwaInfo?.isPWA) {
-        buttonContainer.appendChild(backButton);
+      buttonContainer.appendChild(backButton);
       }
       
       const headerRight = document.createElement('div');
       headerRight.style.display = 'flex';
       headerRight.style.alignItems = 'center';
       headerRight.appendChild(buttonContainer);
+      
+      // PWA-specific: Only show auto-return indicator for desktop/browser users
+      if (!window.pwaInfo?.isPWA) {
       headerRight.appendChild(autoReturnIndicator);
+      }
       
       fullscreenHeader.appendChild(title);
       fullscreenHeader.appendChild(headerRight);
@@ -6487,8 +6491,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         updateURL(widgetType); // grocery, calendar, etc.
       }
       
-      // Start inactivity detection
+      // Start inactivity detection (desktop only)
+      if (!window.pwaInfo?.isPWA) {
       setupInactivityDetection();
+      }
     }
 
     function closeFullscreen() {
@@ -7921,7 +7927,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v5.9 - Tap to Update';
+      versionIndicator.textContent = 'PWA v6.0 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7991,7 +7997,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v5.9 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v6.0 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8078,7 +8084,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v5.9';
+      versionIndicator.textContent = 'PWA v6.0';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8137,7 +8143,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v5.9 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v6.0 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
