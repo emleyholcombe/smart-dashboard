@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v8.3
+        Desktop v8.4
       </div>
     </div>
   </div>
@@ -8083,14 +8083,30 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           height: 2.2rem !important;
         }
         
-        /* PWA: Reset calendar icon container position completely */
-        body.pwa-mode .nav-button:nth-child(2) .nav-icon {
+        /* PWA: Reset calendar icon container position with maximum specificity */
+        html body.pwa-mode.mobile-device.display-standalone .nav-button:nth-child(2) .nav-icon {
           transform: none !important;
+          margin: 0 !important;
+          position: relative !important;
+          top: 0 !important;
+          bottom: 0 !important;
         }
         
-        /* PWA: Reset calendar text position completely */
-        body.pwa-mode .nav-button:nth-child(2) .nav-label {
+        /* PWA: Reset calendar text position with maximum specificity */
+        html body.pwa-mode.mobile-device.display-standalone .nav-button:nth-child(2) .nav-label {
           transform: none !important;
+          margin: 0 !important;
+          position: relative !important;
+          top: 0 !important;
+          bottom: 0 !important;
+        }
+        
+        /* PWA: Force calendar button content to center naturally */
+        html body.pwa-mode.mobile-device.display-standalone .nav-button:nth-child(2) {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
         }
       `;
       document.head.appendChild(style);
@@ -8224,7 +8240,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v8.3 - Tap to Update';
+      versionIndicator.textContent = 'PWA v8.4 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8294,7 +8310,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v8.3 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v8.4 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8381,7 +8397,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v8.3';
+      versionIndicator.textContent = 'PWA v8.4';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8440,7 +8456,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v8.3 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v8.4 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 

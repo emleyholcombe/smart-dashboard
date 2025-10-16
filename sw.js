@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v83-pwa-calendar-reset-transforms';
+const CACHE_NAME = 'bennett-hub-v84-pwa-calendar-maximum-specificity';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
