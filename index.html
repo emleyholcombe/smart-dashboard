@@ -8245,8 +8245,16 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
 
     // Initialize PWA customizations when page loads (essential features only)
     document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(applyPWACustomizations, 100); // Re-enabled for pull-to-refresh feedback
-      console.log('PWA customizations: essential features only (no layout changes)');
+      // Only apply PWA customizations if in PWA mode
+      const isPWAModeForCustomizations = window.matchMedia('(display-mode: standalone)').matches || 
+                                        window.navigator.standalone === true;
+      
+      if (isPWAModeForCustomizations) {
+        setTimeout(applyPWACustomizations, 100);
+        console.log('PWA customizations: essential features only (no layout changes)');
+      } else {
+        console.log('🌐 Desktop Browser: PWA customizations disabled');
+      }
     });
 
     // PWA-specific data loading debug
