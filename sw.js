@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v26-apple-left-adjustment';
+const CACHE_NAME = 'bennett-hub-v27-apple-size-adjustment';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
