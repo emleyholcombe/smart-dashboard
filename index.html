@@ -101,20 +101,20 @@
     
     /* Calendar icon: Ensure inline styles take precedence */
     .nav-button:nth-child(2) .nav-icon img {
-      width: 2.5rem !important;
-      height: 2.5rem !important;
+      width: 2.45rem !important;
+      height: 2.45rem !important;
       margin: 0 !important;
       transform: translateY(0.1rem) !important;
       object-fit: contain !important;
     }
     
-    /* Shift calendar icon and text down further within button */
+    /* Shift calendar icon and text down within button */
     .nav-button:nth-child(2) .nav-icon {
       transform: translateY(8%) !important;
     }
     
     .nav-button:nth-child(2) .nav-label {
-      transform: translateY(8%) !important;
+      transform: translateY(10%) !important;
     }
     
     /* Grocery icon: Apple and baguette in basket */
@@ -1577,7 +1577,7 @@
         
         <button class="nav-button" onclick="showFullscreenCalendar()">
           <span class="nav-icon">
-            <img src="google_icon_with_white_outline.png?v=72-force" alt="Calendar" style="width: 2.5rem; height: 2.5rem; margin: 0; transform: translateY(0.1rem); object-fit: contain;">
+            <img src="google_icon_with_white_outline.png?v=72-force" alt="Calendar" style="width: 2.45rem; height: 2.45rem; margin: 0; transform: translateY(0.1rem); object-fit: contain;">
           </span>
           <span class="nav-label">Calendar</span>
         </button>
@@ -1631,7 +1631,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v7.7
+        Desktop v7.8
       </div>
     </div>
   </div>
@@ -8189,7 +8189,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v7.7 - Tap to Update';
+      versionIndicator.textContent = 'PWA v7.8 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8259,7 +8259,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v7.7 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v7.8 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8346,7 +8346,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v7.7';
+      versionIndicator.textContent = 'PWA v7.8';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8405,7 +8405,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v7.7 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v7.8 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
