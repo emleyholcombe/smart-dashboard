@@ -74,9 +74,9 @@
             box-shadow: none !important;
         }
 
-        /* All options use Option 3 basket size with different apple/baguette heights */
+        /* 3 options comparing baseline vs medium vs between position */
 
-        /* Option 1: Higher position (25%) */
+        /* Option 1: Between baseline and medium (40%) */
         .option1 .emoji-basket {
             font-size: 3.5rem;
             position: absolute;
@@ -89,7 +89,7 @@
             font-size: 1.8rem;
             position: absolute;
             right: 15px;
-            top: 25%;
+            top: 40%;
             transform: translateY(-50%);
             z-index: 1;
         }
@@ -97,12 +97,12 @@
             font-size: 1.8rem;
             position: absolute;
             left: 15px;
-            top: 25%;
+            top: 40%;
             transform: translateY(-50%);
             z-index: 2;
         }
 
-        /* Option 2: Medium-high position (30%) */
+        /* Option 2: Medium position (35%) */
         .option2 .emoji-basket {
             font-size: 3.5rem;
             position: absolute;
@@ -115,7 +115,7 @@
             font-size: 1.8rem;
             position: absolute;
             right: 15px;
-            top: 30%;
+            top: 35%;
             transform: translateY(-50%);
             z-index: 1;
         }
@@ -123,12 +123,12 @@
             font-size: 1.8rem;
             position: absolute;
             left: 15px;
-            top: 30%;
+            top: 35%;
             transform: translateY(-50%);
             z-index: 2;
         }
 
-        /* Option 3: Current position (45%) - BASELINE */
+        /* Option 3: Baseline position (45%) */
         .option3 .emoji-basket {
             font-size: 3.5rem;
             position: absolute;
@@ -150,58 +150,6 @@
             position: absolute;
             left: 15px;
             top: 45%;
-            transform: translateY(-50%);
-            z-index: 2;
-        }
-
-        /* Option 4: Medium position (35%) */
-        .option4 .emoji-basket {
-            font-size: 3.5rem;
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 0;
-        }
-        .option4 .emoji-base {
-            font-size: 1.8rem;
-            position: absolute;
-            right: 15px;
-            top: 35%;
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-        .option4 .emoji-overlay {
-            font-size: 1.8rem;
-            position: absolute;
-            left: 15px;
-            top: 35%;
-            transform: translateY(-50%);
-            z-index: 2;
-        }
-
-        /* Option 5: Medium-low position (40%) */
-        .option5 .emoji-basket {
-            font-size: 3.5rem;
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 0;
-        }
-        .option5 .emoji-base {
-            font-size: 1.8rem;
-            position: absolute;
-            right: 15px;
-            top: 40%;
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-        .option5 .emoji-overlay {
-            font-size: 1.8rem;
-            position: absolute;
-            left: 15px;
-            top: 40%;
             transform: translateY(-50%);
             z-index: 2;
         }
@@ -230,7 +178,7 @@
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 1</div>
-            <div class="option-description">Higher position (25%)</div>
+            <div class="option-description">Between position (40%)</div>
         </div>
 
         <div class="icon-option">
@@ -240,7 +188,7 @@
                 <span class="emoji-overlay">🍎</span>
             </div>
             <div class="option-title">Option 2</div>
-            <div class="option-description">Medium-high position (30%)</div>
+            <div class="option-description">Medium position (35%)</div>
         </div>
 
         <div class="icon-option">
@@ -251,26 +199,6 @@
             </div>
             <div class="option-title">Option 3 ⭐</div>
             <div class="option-description">BASELINE - Current position (45%)</div>
-        </div>
-
-        <div class="icon-option">
-            <div class="icon-container option4">
-                <span class="emoji-basket">🧺</span>
-                <span class="emoji-base">🥖</span>
-                <span class="emoji-overlay">🍎</span>
-            </div>
-            <div class="option-title">Option 4</div>
-            <div class="option-description">Medium position (35%)</div>
-        </div>
-
-        <div class="icon-option">
-            <div class="icon-container option5">
-                <span class="emoji-basket">🧺</span>
-                <span class="emoji-base">🥖</span>
-                <span class="emoji-overlay">🍎</span>
-            </div>
-            <div class="option-title">Option 5</div>
-            <div class="option-description">Medium-low position (40%)</div>
         </div>
     </div>
 </body>
