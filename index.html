@@ -7311,36 +7311,46 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
   <script>
     // Force app update manually
     function forceAppUpdate() {
-      console.log('🔄 Forcing app update...');
+      console.log('🔄 Force updating PWA (same as console command)...');
       
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(registrations => {
-          console.log('📋 Found', registrations.length, 'service worker registrations');
-          registrations.forEach((registration, index) => {
-            console.log(`🔄 Updating registration ${index + 1}...`);
-            console.log('Registration state:', {
-              active: !!registration.active,
-              waiting: !!registration.waiting,
-              installing: !!registration.installing
-            });
-            
-            registration.update().then(() => {
-              console.log('✅ Service worker update triggered for registration', index + 1);
-              showUpdateNotification();
-              // DISABLED: setTimeout reload - CAUSING DESKTOP LOOP
-              // setTimeout(() => {
-              //   console.log('🔄 Reloading page...');
-              //   window.location.reload();
-              // }, 1000);
-            }).catch(error => {
-              console.log('❌ Failed to update registration', index + 1, error);
-            });
+          console.log('📋 Found', registrations.length, 'service worker registrations to unregister');
+          
+          // Unregister all service workers
+          registrations.forEach(registration => {
+            registration.unregister();
+            console.log('🗑️ Unregistered:', registration.scope);
           });
+          
+          // Clear all caches
+          caches.keys().then(cacheNames => {
+            console.log('🧹 Clearing caches:', cacheNames);
+            return Promise.all(
+              cacheNames.map(cacheName => caches.delete(cacheName))
+            );
+          }).then(() => {
+            console.log('✅ All caches cleared');
+            showUpdateNotification();
+            
+            // Force reload with cache bypass (same as console command)
+            setTimeout(() => {
+              console.log('🔄 Reloading with cache bypass...');
+              window.location.href = window.location.href + '?force=' + Date.now();
+            }, 1000); // Small delay to show notification
+          }).catch(error => {
+            console.log('❌ Failed to clear caches:', error);
+            // Fallback: just reload
+            window.location.reload();
+          });
+        }).catch(error => {
+          console.log('❌ Failed to get service worker registrations:', error);
+          // Fallback: just reload
+          window.location.reload();
         });
       } else {
-        // DISABLED: Fallback reload - CAUSING DESKTOP LOOP
-        console.log('🔄 Service worker not available - RELOAD DISABLED');
-        // window.location.reload(); // DISABLED TO PREVENT LOOP
+        console.log('🔄 Service worker not available, doing simple reload');
+        window.location.reload();
       }
     }
 
@@ -7882,7 +7892,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v5.3 - Tap to Update';
+      versionIndicator.textContent = 'PWA v5.4 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7952,7 +7962,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v5.3 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v5.4 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8039,7 +8049,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v5.3';
+      versionIndicator.textContent = 'PWA v5.4';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8098,7 +8108,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v5.3 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v5.4 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
