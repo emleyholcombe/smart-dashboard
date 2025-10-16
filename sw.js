@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v17-fix-global-function';
+const CACHE_NAME = 'bennett-hub-v18-auto-update-success';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
