@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v61-pwa-calendar-optimizations';
+const CACHE_NAME = 'bennett-hub-v62-custom-calendar-icon';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -16,7 +16,8 @@ const urlsToCache = [
   '/smart-dashboard/icon-192.png',
   '/smart-dashboard/icon-384.png',
   '/smart-dashboard/icon-512.png',
-  '/smart-dashboard/favicon.ico'
+  '/smart-dashboard/favicon.ico',
+  '/smart-dashboard/google_icon.png'
 ];
 
 // Handle messages from main thread
