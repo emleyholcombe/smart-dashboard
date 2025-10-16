@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v13-cache-busting';
+const CACHE_NAME = 'bennett-hub-v14-aggressive-updates';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -18,6 +18,14 @@ const urlsToCache = [
   '/smart-dashboard/icon-512.png',
   '/smart-dashboard/favicon.ico'
 ];
+
+// Handle messages from main thread
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('Service Worker: Received SKIP_WAITING message, activating immediately');
+    self.skipWaiting();
+  }
+});
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {

@@ -7429,17 +7429,35 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             // Check for updates immediately and every 10 seconds for PWA
             const checkForUpdates = () => {
               console.log('🔄 PWA: Checking for updates...', new Date().toLocaleTimeString());
-              registration.update().then(() => {
-                console.log('✅ PWA: Update check completed');
-                // Also check if there's a waiting service worker
-                if (registration.waiting) {
-                  console.log('⚠️ PWA: Service worker is waiting to activate');
+              
+              // Force update by re-registering with cache-busting timestamp
+              const swUrl = `/smart-dashboard/sw.js?v=${Date.now()}`;
+              console.log('🔄 PWA: Force-registering SW with cache-busting:', swUrl);
+              
+              navigator.serviceWorker.register(swUrl).then(newRegistration => {
+                console.log('✅ PWA: Cache-busted registration completed');
+                
+                // Check the new registration state
+                if (newRegistration.waiting) {
+                  console.log('⚠️ PWA: New service worker is waiting to activate');
+                  // Force activation
+                  newRegistration.waiting.postMessage({type: 'SKIP_WAITING'});
                 }
-                if (registration.installing) {
-                  console.log('📦 PWA: Service worker is installing');
+                if (newRegistration.installing) {
+                  console.log('📦 PWA: New service worker is installing');
+                }
+                if (newRegistration.active && newRegistration !== registration) {
+                  console.log('🔄 PWA: New service worker activated, reloading...');
+                  window.location.reload();
                 }
               }).catch(error => {
-                console.log('❌ PWA: Update check failed:', error);
+                console.log('❌ PWA: Cache-busted update failed:', error);
+                // Fallback to regular update
+                registration.update().then(() => {
+                  console.log('✅ PWA: Fallback update check completed');
+                }).catch(fallbackError => {
+                  console.log('❌ PWA: Fallback update also failed:', fallbackError);
+                });
               });
             };
             
@@ -7717,7 +7735,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v1.5';
+      versionIndicator.textContent = 'PWA v1.6';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7786,7 +7804,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v1.5 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v1.6 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -7873,7 +7891,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v1.5';
+      versionIndicator.textContent = 'PWA v1.6';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -7932,7 +7950,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v1.5 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v1.6 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
