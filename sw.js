@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v113-apple-right-1px';
+const CACHE_NAME = 'bennett-hub-v114-remove-white-banner';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
