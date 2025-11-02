@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1245-save-scroll-position';
+const CACHE_NAME = 'bennett-hub-v1246-reset-history-flags';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

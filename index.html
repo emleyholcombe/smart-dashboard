@@ -1680,7 +1680,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.45
+        Desktop v9.46
       </div>
     </div>
   </div>
@@ -7374,6 +7374,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function showFullscreenTodo() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
+      showingTodoHistory = false; // Always show current todos when clicking from home
       openFullscreen('todo');
       updateURL('todo');
     }
@@ -7405,6 +7406,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function showFullscreenMeals() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
+      showingMealHistory = false; // Always show current meals when clicking from home
       openFullscreen('meals');
       updateURL('meals');
     }
@@ -8567,7 +8569,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.45 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.46 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8611,7 +8613,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.45 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.46 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9119,7 +9121,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.45';
+      versionIndicator.textContent = 'PWA v12.46';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9178,7 +9180,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.45 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.46 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
