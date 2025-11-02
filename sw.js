@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1240-swap-button-order-pwa';
+const CACHE_NAME = 'bennett-hub-v1241-disable-title-click-pwa';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

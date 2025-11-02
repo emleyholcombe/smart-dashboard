@@ -1680,7 +1680,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.40
+        Desktop v9.41
       </div>
     </div>
   </div>
@@ -6318,8 +6318,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Configure based on widget type
       if (widgetType === 'calendar') {
         title.textContent = 'Calendar';
+        // Only make title clickable on desktop (not PWA)
+        if (!window.pwaInfo?.isPWA) {
         title.onclick = closeFullscreen;
         title.style.cursor = 'pointer';
+        }
         const iframe = document.createElement('iframe');
         iframe.src = 'https://calendar.google.com/calendar/embed?height=800&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%232952A3&mode=AGENDA&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0&showCalendars=1';
         iframe.style.width = '100%';
@@ -6330,8 +6333,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
       } else if (widgetType === 'todo-calendar') {
         title.textContent = 'To-Do Calendar';
-        title.onclick = closeFullscreen;
-        title.style.cursor = 'pointer';
+        // Only make title clickable on desktop (not PWA)
+        if (!window.pwaInfo?.isPWA) {
+          title.onclick = closeFullscreen;
+          title.style.cursor = 'pointer';
+        }
         
         // Create calendar container
         const calendarContainer = document.createElement('div');
@@ -6349,8 +6355,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
       } else if (widgetType === 'todo') {
         title.textContent = showingTodoHistory ? 'To-Do History' : 'To-Do List';
-        title.onclick = closeFullscreen;
-        title.style.cursor = 'pointer';
+        // Only make title clickable on desktop (not PWA)
+        if (!window.pwaInfo?.isPWA) {
+          title.onclick = closeFullscreen;
+          title.style.cursor = 'pointer';
+        }
         
         // Add Calendar button to the left of History/Current button (desktop only)
         if (!window.pwaInfo?.isPWA) {
@@ -6385,7 +6394,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           buttonContainer.appendChild(historyBtn);
         } else {
           // Desktop: History/Current first, then Home
-          buttonContainer.insertBefore(historyBtn, homeButton);
+        buttonContainer.insertBefore(historyBtn, homeButton);
         }
         
         // Add appropriate input container based on mode
@@ -6514,8 +6523,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
       } else if (widgetType === 'grocery') {
         title.textContent = 'Grocery List';
-        title.onclick = closeFullscreen;
-        title.style.cursor = 'pointer';
+        // Only make title clickable on desktop (not PWA)
+        if (!window.pwaInfo?.isPWA) {
+          title.onclick = closeFullscreen;
+          title.style.cursor = 'pointer';
+        }
         
         // Add input container
         const addContainer = document.createElement('div');
@@ -6547,8 +6559,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
       } else if (widgetType === 'meals') {
         title.textContent = showingMealHistory ? 'Meals History' : 'Meals';
-        title.onclick = closeFullscreen;
-        title.style.cursor = 'pointer';
+        // Only make title clickable on desktop (not PWA)
+        if (!window.pwaInfo?.isPWA) {
+          title.onclick = closeFullscreen;
+          title.style.cursor = 'pointer';
+        }
         
         // Add History/Current button
         const historyBtn = document.createElement('button');
@@ -6571,7 +6586,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           buttonContainer.appendChild(historyBtn);
         } else {
           // Desktop: History/Current first, then Home
-          buttonContainer.insertBefore(historyBtn, homeButton);
+        buttonContainer.insertBefore(historyBtn, homeButton);
         }
         
         // Add search bar for history mode
@@ -8568,7 +8583,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.40 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.41 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8638,7 +8653,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.40 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.41 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8725,7 +8740,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.40';
+      versionIndicator.textContent = 'PWA v12.41';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8784,7 +8799,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.40 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.41 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
