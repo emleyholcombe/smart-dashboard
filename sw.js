@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1258-fix-grocery-drag-drop';
+const CACHE_NAME = 'bennett-hub-v1259-improve-category-drop';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
