@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v118-manual-gist-id';
+const CACHE_NAME = 'bennett-hub-v119-home-in-header';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

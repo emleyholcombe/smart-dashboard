@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v8.8
+        Desktop v8.9
       </div>
     </div>
   </div>
@@ -7916,8 +7916,23 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       if (!main || !header) return;
       
-      // Hide the main widget area and modify header for PWA
+      // Hide the main widget area
       main.style.display = 'none';
+      
+      // Show header and modify it for PWA dashboard
+      header.style.display = 'flex';
+      
+      // Show home button in header for PWA dashboard
+      const homeButton = document.querySelector('.home-button');
+      if (homeButton) {
+        homeButton.style.display = 'block';
+      }
+      
+      // Hide header info items (keep just title and home button)
+      const headerInfo = document.querySelector('.header-info');
+      if (headerInfo) {
+        headerInfo.style.display = 'none';
+      }
       
       // Create simplified PWA dashboard content
       let pwaDashboard = document.getElementById('pwa-dashboard');
@@ -7960,37 +7975,22 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             </div>
           </div>
           
-          <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 300px;">
-            <button onclick="showLandingPage()" style="
-              background: var(--primary-color);
-              color: white;
-              border: none;
-              border-radius: 12px;
-              padding: 16px 32px;
-              font-size: 1.1rem;
-              font-weight: 500;
-              cursor: pointer;
-              transition: all 0.3s ease;
-              min-height: 48px;
-            ">
-              🏠 Home
-            </button>
-            
-            <button onclick="showPWASyncSettings()" style="
-              background: rgba(255, 255, 255, 0.2);
-              color: white;
-              border: 1px solid rgba(255, 255, 255, 0.3);
-              border-radius: 12px;
-              padding: 12px 24px;
-              font-size: 0.95rem;
-              font-weight: 500;
-              cursor: pointer;
-              transition: all 0.3s ease;
-              min-height: 44px;
-            ">
-              <span id="pwa-sync-button-icon">⚙️</span> Sync Settings
-            </button>
-          </div>
+          <button onclick="showPWASyncSettings()" style="
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 44px;
+            max-width: 300px;
+            width: 100%;
+          ">
+            <span id="pwa-sync-button-icon">⚙️</span> Sync Settings
+          </button>
         `;
         
         document.getElementById('dashboard').appendChild(pwaDashboard);
@@ -8013,19 +8013,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
       }, 100);
       
-      // Hide header info items (keep just title)
-      const headerInfo = document.querySelector('.header-info');
-      if (headerInfo) {
-        headerInfo.style.display = 'none';
-      }
-      
-      // Hide home button in header for PWA
-      const homeButton = document.querySelector('.home-button');
-      if (homeButton) {
-        homeButton.style.display = 'none';
-      }
-      
-      console.log('✅ PWA: Applied simplified dashboard layout');
+      console.log('✅ PWA: Applied simplified dashboard layout with header');
     }
     
     // Show PWA Sync Settings
@@ -8426,7 +8414,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v11.8 - Tap to Update';
+      versionIndicator.textContent = 'PWA v11.9 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8496,7 +8484,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v11.8 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v11.9 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8583,7 +8571,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v11.8';
+      versionIndicator.textContent = 'PWA v11.9';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8642,7 +8630,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v11.8 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v11.9 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
