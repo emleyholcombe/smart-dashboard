@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1210-fix-transition';
+const CACHE_NAME = 'bennett-hub-v1211-cleanup-wrapper';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

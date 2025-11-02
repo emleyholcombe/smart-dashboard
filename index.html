@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.10
+        Desktop v9.11
       </div>
     </div>
   </div>
@@ -8432,7 +8432,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.10 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.11 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8502,7 +8502,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.10 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.11 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8589,7 +8589,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.10';
+      versionIndicator.textContent = 'PWA v12.11';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8648,7 +8648,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.10 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.11 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8789,11 +8789,19 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       
       // Initialize content wrapper immediately
       setTimeout(() => {
+        // Clean up any old wrapper first
+        const oldWrapper = document.getElementById('pull-content-wrapper');
+        if (oldWrapper) {
+          // Move children back to body before removing
+          Array.from(oldWrapper.children).forEach(child => document.body.appendChild(child));
+          oldWrapper.remove();
+          console.log('🧹 Cleaned up old wrapper');
+        }
+        
         const wrapper = createContentWrapper();
         console.log('✅ Content wrapper initialized:', wrapper ? 'SUCCESS' : 'FAILED');
         if (wrapper) {
           console.log('📦 Wrapper contains', wrapper.children.length, 'children');
-          console.log('📏 Wrapper styles:', wrapper.style.cssText);
         }
       }, 100);
       
@@ -8940,9 +8948,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
             contentWrapper.style.transform = `translateY(${pullDistance}px)`;
             
             if (wasNotPulling) {
-              console.log('📍 Applied transforms - Overlay:', overlay.style.top, 'Content:', contentWrapper.style.transform);
-              console.log('📍 Content wrapper element:', contentWrapper);
-              console.log('📍 Content wrapper computed style:', window.getComputedStyle(contentWrapper).transform);
+              console.log('📍 Pull active - transforms applied');
             }
             
             // Update content opacity
