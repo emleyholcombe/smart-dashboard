@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1217-remove-haptics';
+const CACHE_NAME = 'bennett-hub-v1218-top-only-pull';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
