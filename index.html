@@ -1680,7 +1680,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.44
+        Desktop v9.45
       </div>
     </div>
   </div>
@@ -8567,7 +8567,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.44 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.45 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8611,7 +8611,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.44 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.45 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8801,6 +8801,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     
     // Show edit token popup
     function showEditTokenPopup() {
+      // Save scroll position before showing edit popup
+      const mainOverlay = document.querySelector('.pwa-info-overlay');
+      if (mainOverlay) {
+        const popup = mainOverlay.querySelector('div[style*="max-height"]');
+        if (popup) {
+          window.pwaPopupScrollPosition = popup.scrollTop;
+        }
+      }
+      
       const currentToken = localStorage.getItem('githubToken') || '';
       
       const overlay = document.createElement('div');
@@ -8875,6 +8884,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     
     // Show edit gist popup
     function showEditGistPopup() {
+      // Save scroll position before showing edit popup
+      const mainOverlay = document.querySelector('.pwa-info-overlay');
+      if (mainOverlay) {
+        const popup = mainOverlay.querySelector('div[style*="max-height"]');
+        if (popup) {
+          window.pwaPopupScrollPosition = popup.scrollTop;
+        }
+      }
+      
       const currentGist = localStorage.getItem('dashboardGistId') || '';
       
       const overlay = document.createElement('div');
@@ -8962,7 +8980,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         console.log('🗑️ GitHub token removed');
       }
       
-      closeAllPopups();
+      backToMainPopup();
     }
     
     // Save gist
@@ -8980,11 +8998,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         console.log('🗑️ Gist ID removed');
       }
       
-      closeAllPopups();
+      backToMainPopup();
     }
     
     // Back to main popup
     function backToMainPopup() {
+      // Get saved scroll position
+      const scrollPosition = window.pwaPopupScrollPosition || 0;
+      
       // Remove edit overlay
       const editOverlay = document.querySelector('.pwa-edit-overlay');
       if (editOverlay) {
@@ -8998,6 +9019,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
       
       showPWAInfoPopup();
+      
+      // Restore scroll position after popup is created
+      setTimeout(() => {
+        const newMainOverlay = document.querySelector('.pwa-info-overlay');
+        if (newMainOverlay) {
+          const newPopup = newMainOverlay.querySelector('div[style*="max-height"]');
+          if (newPopup) {
+            newPopup.scrollTop = scrollPosition;
+          }
+        }
+      }, 0);
     }
     
     // Close all popups
@@ -9087,7 +9119,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.44';
+      versionIndicator.textContent = 'PWA v12.45';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9146,7 +9178,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.44 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.45 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
