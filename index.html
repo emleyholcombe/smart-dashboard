@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.15
+        Desktop v9.16
       </div>
     </div>
   </div>
@@ -8432,7 +8432,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.15 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.16 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8502,7 +8502,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.15 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.16 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8589,7 +8589,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.15';
+      versionIndicator.textContent = 'PWA v12.16';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8648,7 +8648,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.15 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.16 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8966,7 +8966,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
             }
             
             // Change text and trigger when pulled far enough (very low threshold)
-            if (deltaY > 30) {
+            if (deltaY > 20) {
               text.textContent = 'Release to refresh';
               text.style.color = '#4caf50';
               
@@ -9008,7 +9008,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
         const text = document.getElementById('pull-refresh-text');
         
         // Trigger refresh if pulled far enough
-        if (isPulling && deltaY > 30 && pullToRefreshTriggered) {
+        if (isPulling && deltaY > 20 && pullToRefreshTriggered) {
           // Stronger vibration on release - double tap pattern
           console.log('📳 Triggering release vibration');
           if (navigator.vibrate) {
