@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1214-amplify-overlay';
+const CACHE_NAME = 'bennett-hub-v1215-extreme-amplify';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.14
+        Desktop v9.15
       </div>
     </div>
   </div>
@@ -8432,7 +8432,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.14 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.15 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8502,7 +8502,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.14 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.15 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8589,7 +8589,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.14';
+      versionIndicator.textContent = 'PWA v12.15';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8648,7 +8648,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.14 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.15 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8813,10 +8813,10 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           overlay.id = 'pull-refresh-overlay';
           overlay.style.cssText = `
             position: fixed;
-            top: -200px;
+            top: -100px;
             left: 0;
             right: 0;
-            height: 200px;
+            height: 100px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
@@ -8935,17 +8935,17 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
               console.log('📍 Content opacity:', content ? content.style.opacity : 'NOT FOUND');
             }
             
-            // Calculate pull progress (max 200px for more visibility)
-            const pullDistance = Math.min(deltaY, 200);
-            const pullProgress = Math.min(pullDistance / 50, 1); // Full opacity at 50px (faster)
+            // Calculate pull progress (max 150px for more visibility)
+            const pullDistance = Math.min(deltaY, 150);
+            const pullProgress = Math.min(pullDistance / 30, 1); // Full opacity at 30px (very fast)
             
             // Remove transitions during pull for immediate response
             overlay.style.transition = 'none';
             contentWrapper.style.transition = 'none';
             
-            // Move overlay down from top - amplify movement for better visibility
-            const overlayPosition = Math.min(pullDistance * 1.5, 200); // 1.5x amplification
-            overlay.style.top = `${-200 + overlayPosition}px`;
+            // Move overlay down from top - heavy amplification for better visibility
+            const overlayPosition = Math.min(pullDistance * 5, 150); // 5x amplification!
+            overlay.style.top = `${-100 + overlayPosition}px`;
             
             // Move content down
             contentWrapper.style.transform = `translateY(${pullDistance}px)`;
@@ -8965,8 +8965,8 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
               console.log('📍 Content opacity after update:', content.style.opacity);
             }
             
-            // Change text and trigger when pulled far enough (lowered threshold)
-            if (deltaY > 80) {
+            // Change text and trigger when pulled far enough (very low threshold)
+            if (deltaY > 30) {
               text.textContent = 'Release to refresh';
               text.style.color = '#4caf50';
               
@@ -9008,7 +9008,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
         const text = document.getElementById('pull-refresh-text');
         
         // Trigger refresh if pulled far enough
-        if (isPulling && deltaY > 80 && pullToRefreshTriggered) {
+        if (isPulling && deltaY > 30 && pullToRefreshTriggered) {
           // Stronger vibration on release - double tap pattern
           console.log('📳 Triggering release vibration');
           if (navigator.vibrate) {
@@ -9057,7 +9057,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           setTimeout(() => {
             if (overlay) {
               overlay.style.transition = 'top 0.5s ease-out';
-              overlay.style.top = '-200px';
+              overlay.style.top = '-100px';
             }
             if (contentWrapper) {
               contentWrapper.style.transition = 'transform 0.5s ease-out';
@@ -9076,7 +9076,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           // Cancel pull - reset everything
           if (overlay) {
             overlay.style.transition = 'top 0.3s ease-out';
-            overlay.style.top = '-200px';
+            overlay.style.top = '-100px';
           }
           if (contentWrapper) {
             contentWrapper.style.transition = 'transform 0.3s ease-out';
