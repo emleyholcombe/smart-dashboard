@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1228-single-render';
+const CACHE_NAME = 'bennett-hub-v1229-auto-zoom-reset';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

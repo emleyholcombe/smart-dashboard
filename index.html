@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.28
+        Desktop v9.29
       </div>
     </div>
   </div>
@@ -7893,6 +7893,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       addPWAStatusBarFix(); // Fix for iOS status bar white banner
       addPWAVersionIndicator(); // Add version indicator for debugging and manual updates
       addPWAGroceryIconFix(); // Force correct grocery icon positioning via JavaScript
+      addAutoZoomReset(); // Auto zoom out when leaving text inputs
       addPWACalendarOptimizations(); // Optimize calendar for mobile touch interface
       addPWANavigationAlignment(); // Align Calendar title with Dashboard title
       addPWACalendarPositionFix(); // Force Calendar positioning via JavaScript
@@ -8450,7 +8451,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.28 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.29 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8520,7 +8521,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.28 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.29 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8607,7 +8608,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.28';
+      versionIndicator.textContent = 'PWA v12.29';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8666,7 +8667,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.28 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.29 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8789,6 +8790,33 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
     }
 
     // Swipe gestures for PWA
+    function addAutoZoomReset() {
+      console.log('🔍 Adding auto zoom reset for text inputs...');
+      
+      // Listen for blur events on all input and textarea elements
+      document.addEventListener('blur', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          console.log('📱 Input blurred, resetting zoom...');
+          
+          // Reset viewport zoom by temporarily changing viewport meta tag
+          const viewport = document.querySelector('meta[name=viewport]');
+          if (viewport) {
+            const originalContent = viewport.getAttribute('content');
+            
+            // Force zoom reset by setting scale to 1
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0');
+            
+            // Restore original viewport after a brief moment
+            setTimeout(() => {
+              viewport.setAttribute('content', originalContent);
+            }, 100);
+          }
+        }
+      }, true); // Use capture phase to catch all blur events
+      
+      console.log('✅ Auto zoom reset enabled');
+    }
+    
     function addSwipeGestures() {
       console.log('🎯 addSwipeGestures called - PWA Info:', window.pwaInfo);
       if (!window.pwaInfo?.isPWA) {
