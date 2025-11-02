@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v121-pull-to-sync';
+const CACHE_NAME = 'bennett-hub-v122-chrome-style-pull';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

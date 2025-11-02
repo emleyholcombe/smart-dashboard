@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.1
+        Desktop v9.2
       </div>
     </div>
   </div>
@@ -8428,7 +8428,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.1 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.2 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8498,7 +8498,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.1 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.2 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8585,7 +8585,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.1';
+      versionIndicator.textContent = 'PWA v12.2';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8644,7 +8644,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.1 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.2 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8780,11 +8780,72 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       
       let startX, startY, endX, endY;
       let pullToRefreshTriggered = false;
+      let isPulling = false;
+      let hasVibratedOnThreshold = false;
+      
+      // Create pull-to-refresh overlay
+      const createPullOverlay = () => {
+        let overlay = document.getElementById('pull-refresh-overlay');
+        if (!overlay) {
+          overlay = document.createElement('div');
+          overlay.id = 'pull-refresh-overlay';
+          overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            transition: none;
+            overflow: hidden;
+          `;
+          
+          const content = document.createElement('div');
+          content.id = 'pull-refresh-content';
+          content.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+          `;
+          
+          const icon = document.createElement('div');
+          icon.id = 'pull-refresh-icon';
+          icon.innerHTML = '🔄';
+          icon.style.cssText = `
+            font-size: 32px;
+            transition: transform 0.1s ease;
+          `;
+          
+          const text = document.createElement('div');
+          text.id = 'pull-refresh-text';
+          text.textContent = 'Pull to refresh';
+          text.style.cssText = `
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+          `;
+          
+          content.appendChild(icon);
+          content.appendChild(text);
+          overlay.appendChild(content);
+          document.body.appendChild(overlay);
+        }
+        return overlay;
+      };
       
       document.addEventListener('touchstart', (e) => {
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
         pullToRefreshTriggered = false;
+        isPulling = false;
+        hasVibratedOnThreshold = false;
       });
       
       document.addEventListener('touchmove', (e) => {
@@ -8793,80 +8854,46 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           const currentY = e.touches[0].clientY;
           const deltaY = currentY - startY;
           
-          // Show pull indicator when pulling down
-          if (deltaY > 30 && deltaY < 80 && Math.abs(e.touches[0].clientX - startX) < 50) {
-            console.log('📱 Pull-to-refresh: Showing pull indicator, deltaY:', deltaY);
-            showPullToRefreshIndicator('Pull down to sync');
-          }
-          
-          // Trigger refresh when pulled far enough
-          if (deltaY > 80 && Math.abs(e.touches[0].clientX - startX) < 50) {
-            console.log('📱 Pull-to-refresh: Triggering sync, deltaY:', deltaY);
-            pullToRefreshTriggered = true;
+          // Start showing pull effect
+          if (deltaY > 10 && Math.abs(e.touches[0].clientX - startX) < 50) {
+            isPulling = true;
+            const overlay = createPullOverlay();
+            const content = document.getElementById('pull-refresh-content');
+            const icon = document.getElementById('pull-refresh-icon');
+            const text = document.getElementById('pull-refresh-text');
             
-            showPullToRefreshIndicator('Release to sync', true);
+            // Calculate pull progress (max 120px)
+            const pullDistance = Math.min(deltaY, 120);
+            const pullProgress = pullDistance / 120;
             
-            // Add haptic feedback
-            if (navigator.vibrate) {
-              navigator.vibrate(50);
+            // Update overlay height
+            overlay.style.height = `${pullDistance}px`;
+            content.style.opacity = pullProgress;
+            
+            // Rotate icon based on pull distance
+            icon.style.transform = `rotate(${pullProgress * 360}deg)`;
+            
+            // Change text and trigger when pulled far enough
+            if (deltaY > 80) {
+              text.textContent = 'Release to refresh';
+              text.style.color = '#4caf50';
+              
+              // Vibrate when threshold reached (only once)
+              if (!hasVibratedOnThreshold) {
+                hasVibratedOnThreshold = true;
+                if (navigator.vibrate) {
+                  navigator.vibrate(30);
+                }
+              }
+              pullToRefreshTriggered = true;
+            } else {
+              text.textContent = 'Pull to refresh';
+              text.style.color = 'white';
+              pullToRefreshTriggered = false;
             }
-            
-            // Trigger sync after a short delay
-            setTimeout(() => {
-              showPullToRefreshIndicator('Syncing...', true);
-              refreshAppData();
-              setTimeout(() => {
-                hidePullToRefreshIndicator();
-              }, 1000);
-            }, 200);
           }
         }
       });
-      
-      // Show pull-to-refresh indicator
-      function showPullToRefreshIndicator(text, ready = false) {
-        console.log('📱 showPullToRefreshIndicator called:', text, 'ready:', ready);
-        let indicator = document.getElementById('pull-refresh-indicator');
-        if (!indicator) {
-          indicator = document.createElement('div');
-          indicator.id = 'pull-refresh-indicator';
-          indicator.style.cssText = `
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            z-index: 10002;
-            transition: all 0.3s ease;
-            pointer-events: none;
-          `;
-          document.body.appendChild(indicator);
-        }
-        
-        indicator.textContent = text;
-        indicator.style.background = ready ? 
-          'linear-gradient(135deg, #4caf50, #66bb6a)' : 
-          'linear-gradient(135deg, #1976d2, #42a5f5)';
-        indicator.style.color = 'white';
-        indicator.style.opacity = '1';
-        indicator.style.transform = 'translateX(-50%) translateY(0)';
-      }
-      
-      // Hide pull-to-refresh indicator
-      function hidePullToRefreshIndicator() {
-        const indicator = document.getElementById('pull-refresh-indicator');
-        if (indicator) {
-          indicator.style.opacity = '0';
-          indicator.style.transform = 'translateX(-50%) translateY(-20px)';
-          setTimeout(() => {
-            if (document.body.contains(indicator)) {
-              document.body.removeChild(indicator);
-            }
-          }, 300);
-        }
-      }
       
       document.addEventListener('touchend', (e) => {
         endX = e.changedTouches[0].clientX;
@@ -8875,10 +8902,75 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
         const deltaX = endX - startX;
         const deltaY = endY - startY;
         
-        // Hide pull-to-refresh indicator if not triggered
-        if (!pullToRefreshTriggered) {
-          hidePullToRefreshIndicator();
+        const overlay = document.getElementById('pull-refresh-overlay');
+        const icon = document.getElementById('pull-refresh-icon');
+        const text = document.getElementById('pull-refresh-text');
+        
+        // Trigger refresh if pulled far enough
+        if (isPulling && deltaY > 80 && pullToRefreshTriggered) {
+          // Stronger vibration on release
+          if (navigator.vibrate) {
+            navigator.vibrate(50);
+          }
+          
+          // Show syncing state
+          if (text) text.textContent = 'Syncing...';
+          if (icon) {
+            icon.style.animation = 'spin 1s linear infinite';
+            // Add spin animation if not already added
+            if (!document.querySelector('#pull-refresh-spin-style')) {
+              const style = document.createElement('style');
+              style.id = 'pull-refresh-spin-style';
+              style.textContent = `
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              `;
+              document.head.appendChild(style);
+            }
+          }
+          
+          // Keep overlay visible during sync
+          if (overlay) {
+            overlay.style.height = '80px';
+            overlay.style.transition = 'height 0.3s ease';
+          }
+          
+          // Trigger sync
+          refreshAppData();
+          
+          // Hide overlay after sync completes
+          setTimeout(() => {
+            if (overlay) {
+              overlay.style.height = '0';
+              overlay.style.transition = 'height 0.4s ease-out';
+            }
+            if (icon) {
+              icon.style.animation = '';
+            }
+            setTimeout(() => {
+              if (overlay && document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+              }
+            }, 400);
+          }, 1200);
+        } else {
+          // Cancel pull - hide overlay
+          if (overlay) {
+            overlay.style.height = '0';
+            overlay.style.transition = 'height 0.3s ease-out';
+            setTimeout(() => {
+              if (overlay && document.body.contains(overlay)) {
+                document.body.removeChild(overlay);
+              }
+            }, 300);
+          }
         }
+        
+        isPulling = false;
+        pullToRefreshTriggered = false;
+        hasVibratedOnThreshold = false;
         
         // Swipe right to go back (if in fullscreen mode)
         if (deltaX > 50 && Math.abs(deltaY) < 100) {
