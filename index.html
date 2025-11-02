@@ -1763,7 +1763,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.55
+        Desktop v9.56
       </div>
     </div>
   </div>
@@ -4601,6 +4601,22 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
     
+    // Helper function for todo history drag - only considers items in same date group
+    function getDragAfterElementInDateGroup(container, y, dateGroup) {
+      const draggableElements = [...container.querySelectorAll(`.task-item[data-date-group="${dateGroup}"]:not(.dragging):not(.drag-placeholder)`)];
+      
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+    
     function setupDragAndDrop(listElement, items, listType) {
       const listItems = listElement.querySelectorAll('.task-item');
       
@@ -4913,7 +4929,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           dragHandle.title = 'Drag to reorder within this date';
           dragHandle.draggable = true;
           
-          // Only allow dragging from the drag handle
+          // Mouse drag events
           dragHandle.addEventListener('dragstart', (e) => {
             draggedItem = item;
             draggedIndex = index;
@@ -4931,6 +4947,140 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             // Remove all drop indicators
             clearDropIndicators(listItems);
           });
+          
+          // Touch drag events for mobile
+          let touchStartY = 0;
+          let touchStartX = 0;
+          let isDragging = false;
+          let hasMoved = false;
+          let placeholder = null;
+          
+          dragHandle.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+            isDragging = false;
+            hasMoved = false;
+            
+            draggedItem = item;
+            draggedIndex = index;
+            draggedList = { groups, listType: 'todoHistory', dateGroup };
+          }, { passive: false });
+          
+          dragHandle.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            
+            const currentY = e.touches[0].clientY;
+            const currentX = e.touches[0].clientX;
+            const deltaY = currentY - touchStartY;
+            const deltaX = currentX - touchStartX;
+            
+            if (!isDragging && (Math.abs(deltaY) > 5 || Math.abs(deltaX) > 5)) {
+              isDragging = true;
+              item.classList.add('dragging');
+              item.style.opacity = '0.5';
+              
+              placeholder = item.cloneNode(true);
+              placeholder.style.pointerEvents = 'none';
+              placeholder.classList.add('drag-placeholder');
+              placeholder.classList.remove('dragging');
+              placeholder.style.transform = '';
+              placeholder.style.zIndex = '';
+              placeholder.style.position = '';
+              
+              item.parentNode.insertBefore(placeholder, item);
+            }
+            
+            if (isDragging) {
+              hasMoved = true;
+              
+              item.style.transform = `translateY(${deltaY}px)`;
+              item.style.zIndex = '1000';
+              item.style.position = 'relative';
+              
+              // Find valid drop targets (same date group only)
+              const afterElement = getDragAfterElementInDateGroup(listElement, currentY, dateGroup);
+              if (afterElement == null) {
+                // Append to end of date group
+                const dateGroupItems = Array.from(listElement.querySelectorAll(`[data-date-group="${dateGroup}"]`));
+                const lastInGroup = dateGroupItems[dateGroupItems.length - 1];
+                if (lastInGroup && lastInGroup.nextSibling) {
+                  lastInGroup.parentNode.insertBefore(placeholder, lastInGroup.nextSibling);
+                } else if (lastInGroup) {
+                  lastInGroup.parentNode.appendChild(placeholder);
+                }
+              } else {
+                listElement.insertBefore(placeholder, afterElement);
+              }
+            }
+          }, { passive: false });
+          
+          dragHandle.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            
+            if (!isDragging || !hasMoved) {
+              draggedItem = null;
+              draggedIndex = null;
+              draggedList = null;
+              return;
+            }
+            
+            item.classList.remove('dragging');
+            
+            const itemRect = item.getBoundingClientRect();
+            const placeholderRect = placeholder.getBoundingClientRect();
+            const finalOffset = placeholderRect.top - itemRect.top;
+            
+            item.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+            item.style.transform = `translateY(${finalOffset}px)`;
+            item.style.opacity = '1';
+            
+            setTimeout(() => {
+              item.style.transition = '';
+              item.style.transform = '';
+              item.style.opacity = '';
+              item.style.zIndex = '';
+              item.style.position = '';
+              
+              if (placeholder && placeholder.parentNode) {
+                placeholder.parentNode.insertBefore(item, placeholder);
+                placeholder.parentNode.removeChild(placeholder);
+              }
+              
+              // Reorder within date group
+              const draggedItemId = parseFloat(item.getAttribute('data-item-id'));
+              const dateGroupItems = groups[dateGroup];
+              
+              if (dateGroupItems) {
+                // Get new order based on DOM position
+                const allDateGroupElements = Array.from(listElement.querySelectorAll(`[data-date-group="${dateGroup}"]`));
+                const newOrder = allDateGroupElements.map(el => parseFloat(el.getAttribute('data-item-id')));
+                
+                // Reorder the dateGroupItems array to match DOM order
+                const reorderedItems = newOrder.map(id => dateGroupItems.find(i => i.id === id)).filter(Boolean);
+                
+                // Update order values
+                const baseOrder = Date.now();
+                reorderedItems.forEach((groupItem, idx) => {
+                  groupItem.order = baseOrder - idx;
+                  const historyItem = todoHistory.find(h => h.id === groupItem.id);
+                  if (historyItem) {
+                    historyItem.order = groupItem.order;
+                  }
+                });
+                
+                saveTodoHistory();
+              }
+              
+              draggedItem = null;
+              draggedIndex = null;
+              draggedList = null;
+              isDragging = false;
+              hasMoved = false;
+              placeholder = null;
+            }, 200);
+          }, { passive: false });
         }
         
         // Make sure only drag handle is draggable
@@ -4979,38 +5129,43 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             
             // Only allow drop within same date group
             if (draggedList.dateGroup === targetDateGroup) {
-              const dropIndex = Array.from(listItems).indexOf(item);
+              const dateGroupItems = groups[targetDateGroup];
               
-              if (draggedIndex !== dropIndex) {
-                // Find the items in the specific date group
-                const dateGroupItems = groups[targetDateGroup];
-                // Get the actual item being dragged
-                const draggedItemId = parseFloat(draggedItem.getAttribute('data-item-id'));
-                const targetItemId = parseFloat(item.getAttribute('data-item-id'));
+              if (dateGroupItems) {
+                // Determine if we should insert before or after the target
+                const rect = item.getBoundingClientRect();
+                const mouseY = e.clientY;
+                const insertBefore = mouseY < rect.top + rect.height / 2;
                 
-                // Find positions within the date group using the group items directly
-                const draggedGroupIndex = dateGroupItems.findIndex(i => i.id === draggedItemId);
-                const targetGroupIndex = dateGroupItems.findIndex(i => i.id === targetItemId);
-                
-                if (draggedGroupIndex !== -1 && targetGroupIndex !== -1) {
-                  // Reorder within the date group
-                  reorderItems(dateGroupItems, draggedGroupIndex, targetGroupIndex);
-                  
-                  // Update the main todoHistory array with new order
-                  dateGroupItems.forEach(groupItem => {
-                    const historyItem = todoHistory.find(h => h.id === groupItem.id);
-                    if (historyItem) {
-                      historyItem.order = groupItem.order;
-                    }
-                  });
-                  
-                  saveTodoHistory();
-                  if (document.getElementById('fullscreen-container')) {
-                    renderTodoListFullscreen();
+                // Insert in DOM
+                if (insertBefore) {
+                  item.parentNode.insertBefore(draggedItem, item);
+                } else {
+                  if (item.nextSibling) {
+                    item.parentNode.insertBefore(draggedItem, item.nextSibling);
                   } else {
-                    renderTodoList();
+                    item.parentNode.appendChild(draggedItem);
                   }
                 }
+                
+                // Get new order based on DOM position
+                const allDateGroupElements = Array.from(listElement.querySelectorAll(`[data-date-group="${targetDateGroup}"]`));
+                const newOrder = allDateGroupElements.map(el => parseFloat(el.getAttribute('data-item-id')));
+                
+                // Reorder the dateGroupItems array to match DOM order
+                const reorderedItems = newOrder.map(id => dateGroupItems.find(i => i.id === id)).filter(Boolean);
+                
+                // Update order values
+                const baseOrder = Date.now();
+                reorderedItems.forEach((groupItem, idx) => {
+                  groupItem.order = baseOrder - idx;
+                  const historyItem = todoHistory.find(h => h.id === groupItem.id);
+                  if (historyItem) {
+                    historyItem.order = groupItem.order;
+                  }
+                });
+                
+                saveTodoHistory();
               }
             }
           }
@@ -8823,7 +8978,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.55 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.56 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8867,7 +9022,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.55 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.56 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9399,7 +9554,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.55';
+      versionIndicator.textContent = 'PWA v12.56';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9458,7 +9613,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.55 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.56 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 

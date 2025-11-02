@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1255-enhanced-drop-indicator';
+const CACHE_NAME = 'bennett-hub-v1256-fix-history-drag-drop';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
