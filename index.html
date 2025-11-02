@@ -1680,7 +1680,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.39
+        Desktop v9.40
       </div>
     </div>
   </div>
@@ -6361,7 +6361,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           buttonContainer.insertBefore(calendarBtn, homeButton);
         }
         
-        // Add History/Current button to the left of Home button in header
+        // Add History/Current button
         const historyBtn = document.createElement('button');
         historyBtn.className = 'back-button'; // Use same styling as other header buttons
         historyBtn.textContent = showingTodoHistory ? 'Current' : 'History';
@@ -6378,8 +6378,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           renderTodoListFullscreen();
         };
         
-        // Insert the History/Current button
-        buttonContainer.insertBefore(historyBtn, homeButton);
+        // Insert buttons in different order for PWA vs Desktop
+        if (window.pwaInfo?.isPWA) {
+          // PWA: Home first, then History/Current
+          buttonContainer.appendChild(homeButton);
+          buttonContainer.appendChild(historyBtn);
+        } else {
+          // Desktop: History/Current first, then Home
+          buttonContainer.insertBefore(historyBtn, homeButton);
+        }
         
         // Add appropriate input container based on mode
         const addContainer = document.createElement('div');
@@ -6543,7 +6550,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         title.onclick = closeFullscreen;
         title.style.cursor = 'pointer';
         
-        // Add History/Current button to the left of Home button in header
+        // Add History/Current button
         const historyBtn = document.createElement('button');
         historyBtn.className = 'back-button'; // Use same styling as other header buttons
         historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
@@ -6557,8 +6564,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           renderMealsListFullscreen();
         };
         
-        // Insert the history button at the beginning of the button container
-        buttonContainer.insertBefore(historyBtn, homeButton);
+        // Insert buttons in different order for PWA vs Desktop
+        if (window.pwaInfo?.isPWA) {
+          // PWA: Home first, then History/Current
+          buttonContainer.appendChild(homeButton);
+          buttonContainer.appendChild(historyBtn);
+        } else {
+          // Desktop: History/Current first, then Home
+          buttonContainer.insertBefore(historyBtn, homeButton);
+        }
         
         // Add search bar for history mode
         if (showingMealHistory) {
@@ -8554,7 +8568,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.39 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.40 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8624,7 +8638,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.39 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.40 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8711,7 +8725,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.39';
+      versionIndicator.textContent = 'PWA v12.40';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8770,7 +8784,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.39 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.40 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 

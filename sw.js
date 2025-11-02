@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1239-hide-calendar-button-pwa';
+const CACHE_NAME = 'bennett-hub-v1240-swap-button-order-pwa';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
