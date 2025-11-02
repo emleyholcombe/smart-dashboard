@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1247-smooth-popup-transition';
+const CACHE_NAME = 'bennett-hub-v1248-dual-calendars';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
