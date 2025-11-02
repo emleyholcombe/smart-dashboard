@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.3
+        Desktop v9.4
       </div>
     </div>
   </div>
@@ -8428,7 +8428,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.3 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.4 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8498,7 +8498,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.3 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.4 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8585,7 +8585,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.3';
+      versionIndicator.textContent = 'PWA v12.4';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8644,7 +8644,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.3 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.4 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8862,9 +8862,9 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
             const icon = document.getElementById('pull-refresh-icon');
             const text = document.getElementById('pull-refresh-text');
             
-            // Calculate pull progress (max 120px)
-            const pullDistance = Math.min(deltaY, 120);
-            const pullProgress = pullDistance / 120;
+            // Calculate pull progress (max 150px for better visibility)
+            const pullDistance = Math.min(deltaY, 150);
+            const pullProgress = Math.min(pullDistance / 100, 1); // Full opacity at 100px
             
             // Update overlay height
             overlay.style.height = `${pullDistance}px`;
@@ -8874,15 +8874,15 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
             icon.style.transform = `rotate(${pullProgress * 360}deg)`;
             
             // Change text and trigger when pulled far enough
-            if (deltaY > 80) {
+            if (deltaY > 90) {
               text.textContent = 'Release to refresh';
               text.style.color = '#4caf50';
               
-              // Vibrate when threshold reached (only once)
+              // Vibrate when threshold reached (only once) - stronger feedback
               if (!hasVibratedOnThreshold) {
                 hasVibratedOnThreshold = true;
                 if (navigator.vibrate) {
-                  navigator.vibrate(30);
+                  navigator.vibrate([40, 20, 40]); // Pattern: vibrate-pause-vibrate
                 }
               }
               pullToRefreshTriggered = true;
@@ -8907,10 +8907,10 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
         const text = document.getElementById('pull-refresh-text');
         
         // Trigger refresh if pulled far enough
-        if (isPulling && deltaY > 80 && pullToRefreshTriggered) {
-          // Stronger vibration on release
+        if (isPulling && deltaY > 90 && pullToRefreshTriggered) {
+          // Stronger vibration on release - double tap pattern
           if (navigator.vibrate) {
-            navigator.vibrate(50);
+            navigator.vibrate([60, 30, 60]); // Pattern: vibrate-pause-vibrate (stronger)
           }
           
           // Show syncing state
@@ -8931,9 +8931,9 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
             }
           }
           
-          // Keep overlay visible during sync
+          // Keep overlay visible during sync at comfortable height
           if (overlay) {
-            overlay.style.height = '80px';
+            overlay.style.height = '100px';
             overlay.style.transition = 'height 0.3s ease';
           }
           
@@ -8944,7 +8944,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           setTimeout(() => {
             if (overlay) {
               overlay.style.height = '0';
-              overlay.style.transition = 'height 0.4s ease-out';
+              overlay.style.transition = 'height 0.5s ease-out';
             }
             if (icon) {
               icon.style.animation = '';
@@ -8953,8 +8953,8 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
               if (overlay && document.body.contains(overlay)) {
                 document.body.removeChild(overlay);
               }
-            }, 400);
-          }, 1200);
+            }, 500);
+          }, 1500);
         } else {
           // Cancel pull - hide overlay
           if (overlay) {
