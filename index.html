@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.20
+        Desktop v9.21
       </div>
     </div>
   </div>
@@ -8439,7 +8439,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.20 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.21 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8509,7 +8509,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.20 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.21 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8596,7 +8596,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.20';
+      versionIndicator.textContent = 'PWA v12.21';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8655,7 +8655,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.20 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.21 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8700,6 +8700,13 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
         // Small delay to show the refresh animation
         new Promise(resolve => setTimeout(resolve, 500))
       ]).then(() => {
+        console.log('🔄 Refreshing all displays after data load...');
+        console.log('📊 Current data counts:', {
+          todoItems: todoItems.length,
+          groceryItems: groceryItems.length,
+          mealItems: mealItems.length
+        });
+        
         // Update all displays
         renderTodoList();
         renderGroceryList();
@@ -8712,12 +8719,16 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           if (content) {
             // Determine which view is open and refresh it
             if (content.querySelector('#fullscreen-todo-container')) {
+              console.log('🔄 Refreshing fullscreen todo list...');
               renderTodoListFullscreen();
             } else if (content.querySelector('#fullscreen-grocery-container')) {
+              console.log('🔄 Refreshing fullscreen grocery list...');
               renderGroceryListFullscreen();
             } else if (content.querySelector('#fullscreen-meals-container')) {
+              console.log('🔄 Refreshing fullscreen meals list...');
               renderMealsListFullscreen();
             } else if (content.querySelector('#fullscreen-todo-calendar-container')) {
+              console.log('🔄 Refreshing fullscreen calendar...');
               renderTodoCalendarFullscreen();
             }
           }
