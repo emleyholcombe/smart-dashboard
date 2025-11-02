@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.21
+        Desktop v9.22
       </div>
     </div>
   </div>
@@ -8439,7 +8439,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.21 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.22 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8509,7 +8509,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.21 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.22 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8596,7 +8596,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.21';
+      versionIndicator.textContent = 'PWA v12.22';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8655,7 +8655,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.21 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.22 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8714,6 +8714,15 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
         
         // Update fullscreen views if open
         const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+        console.log('🔍 Checking for fullscreen views...', {
+          overlayExists: !!fullscreenOverlay,
+          overlayDisplay: fullscreenOverlay?.style.display,
+          hasTodoContainer: !!document.getElementById('fullscreen-todo-container'),
+          hasGroceryContainer: !!document.getElementById('fullscreen-grocery-container'),
+          hasMealsContainer: !!document.getElementById('fullscreen-meals-container'),
+          hasCalendarContainer: !!document.getElementById('fullscreen-todo-calendar-container')
+        });
+        
         if (fullscreenOverlay && fullscreenOverlay.style.display === 'flex') {
           const content = fullscreenOverlay.querySelector('.fullscreen-content');
           if (content) {
@@ -8731,6 +8740,21 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
               console.log('🔄 Refreshing fullscreen calendar...');
               renderTodoCalendarFullscreen();
             }
+          }
+        } else {
+          // Also check if we're in PWA dashboard view
+          if (document.getElementById('fullscreen-todo-container')) {
+            console.log('🔄 Detected PWA fullscreen todo (no overlay), refreshing...');
+            renderTodoListFullscreen();
+          } else if (document.getElementById('fullscreen-grocery-container')) {
+            console.log('🔄 Detected PWA fullscreen grocery (no overlay), refreshing...');
+            renderGroceryListFullscreen();
+          } else if (document.getElementById('fullscreen-meals-container')) {
+            console.log('🔄 Detected PWA fullscreen meals (no overlay), refreshing...');
+            renderMealsListFullscreen();
+          } else if (document.getElementById('fullscreen-todo-calendar-container')) {
+            console.log('🔄 Detected PWA fullscreen calendar (no overlay), refreshing...');
+            renderTodoCalendarFullscreen();
           }
         }
         
