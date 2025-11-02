@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.16
+        Desktop v9.17
       </div>
     </div>
   </div>
@@ -8432,7 +8432,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.16 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.17 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8502,7 +8502,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.16 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.17 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8589,7 +8589,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.16';
+      versionIndicator.textContent = 'PWA v12.17';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8648,7 +8648,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.16 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.17 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8785,7 +8785,6 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       let startX, startY, endX, endY;
       let pullToRefreshTriggered = false;
       let isPulling = false;
-      let hasVibratedOnThreshold = false;
       
       // Initialize content wrapper immediately
       setTimeout(() => {
@@ -8902,7 +8901,6 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
         startY = e.touches[0].clientY;
         pullToRefreshTriggered = false;
         isPulling = false;
-        hasVibratedOnThreshold = false;
       });
       
       document.addEventListener('touchmove', (e) => {
@@ -8969,22 +8967,6 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
             if (deltaY > 20) {
               text.textContent = 'Release to refresh';
               text.style.color = '#4caf50';
-              
-              // Vibrate when threshold reached (only once) - stronger feedback
-              if (!hasVibratedOnThreshold) {
-                hasVibratedOnThreshold = true;
-                console.log('📳 Triggering threshold vibration');
-                if (navigator.vibrate) {
-                  try {
-                    navigator.vibrate([40, 20, 40]); // Pattern: vibrate-pause-vibrate
-                    console.log('✅ Vibration triggered');
-                  } catch (e) {
-                    console.log('❌ Vibration failed:', e);
-                  }
-                } else {
-                  console.log('❌ Vibration API not available');
-                }
-              }
               pullToRefreshTriggered = true;
             } else {
               text.textContent = 'Pull to refresh';
@@ -9009,19 +8991,6 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
         
         // Trigger refresh if pulled far enough
         if (isPulling && deltaY > 20 && pullToRefreshTriggered) {
-          // Stronger vibration on release - double tap pattern
-          console.log('📳 Triggering release vibration');
-          if (navigator.vibrate) {
-            try {
-              navigator.vibrate([60, 30, 60]); // Pattern: vibrate-pause-vibrate (stronger)
-              console.log('✅ Release vibration triggered');
-            } catch (e) {
-              console.log('❌ Release vibration failed:', e);
-            }
-          } else {
-            console.log('❌ Vibration API not available');
-          }
-          
           // Show syncing state
           if (text) text.textContent = 'Syncing...';
           if (icon) {
