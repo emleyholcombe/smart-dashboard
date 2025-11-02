@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1223-force-refresh-all';
+const CACHE_NAME = 'bennett-hub-v1224-desktop-refresh';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
