@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v8.6
+        Desktop v8.7
       </div>
     </div>
   </div>
@@ -2648,6 +2648,21 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // Update weather every 10 minutes
       setInterval(updateWeather, 10 * 60 * 1000);
+      
+      // Auto-sync: Check for cloud updates every 30 seconds
+      setInterval(async () => {
+        if (isOnline && !syncInProgress && (GIST_ID || JSONBIN_ID)) {
+          console.log('🔄 Auto-sync: Checking for cloud updates...');
+          await loadAllData();
+          
+          // Re-render lists if data changed
+          renderTodoList();
+          renderGroceryList();
+          renderMealsList();
+          
+          console.log('✅ Auto-sync: Data refreshed from cloud');
+        }
+      }, 30000); // Check every 30 seconds
       
       // Add Enter key support for inputs
       document.getElementById('todo-input').addEventListener('keypress', function(e) {
@@ -7945,20 +7960,37 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             </div>
           </div>
           
-          <button onclick="showLandingPage()" style="
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 16px 32px;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-height: 48px;
-          ">
-            🏠 Home
-          </button>
+          <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 300px;">
+            <button onclick="showLandingPage()" style="
+              background: var(--primary-color);
+              color: white;
+              border: none;
+              border-radius: 12px;
+              padding: 16px 32px;
+              font-size: 1.1rem;
+              font-weight: 500;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              min-height: 48px;
+            ">
+              🏠 Home
+            </button>
+            
+            <button onclick="showPWASyncSettings()" style="
+              background: rgba(255, 255, 255, 0.2);
+              color: white;
+              border: 1px solid rgba(255, 255, 255, 0.3);
+              border-radius: 12px;
+              padding: 12px 24px;
+              font-size: 0.95rem;
+              font-weight: 500;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              min-height: 44px;
+            ">
+              <span id="pwa-sync-button-icon">⚙️</span> Sync Settings
+            </button>
+          </div>
         `;
         
         document.getElementById('dashboard').appendChild(pwaDashboard);
@@ -7968,6 +8000,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // Update PWA dashboard with current data
       updatePWADashboardData();
+      
+      // Update sync button icon based on current sync status
+      setTimeout(() => {
+        const syncIcon = document.getElementById('pwa-sync-button-icon');
+        if (syncIcon) {
+          if (GITHUB_TOKEN && GIST_ID) {
+            syncIcon.textContent = '✅';
+          } else {
+            syncIcon.textContent = '⚙️';
+          }
+        }
+      }, 100);
       
       // Hide header info items (keep just title)
       const headerInfo = document.querySelector('.header-info');
@@ -7982,6 +8026,59 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
       
       console.log('✅ PWA: Applied simplified dashboard layout');
+    }
+    
+    // Show PWA Sync Settings
+    function showPWASyncSettings() {
+      const hasToken = !!GITHUB_TOKEN;
+      const hasGist = !!GIST_ID;
+      
+      let message = `🔄 SYNC SETTINGS\n\n`;
+      
+      if (hasToken && hasGist) {
+        message += `✅ Sync is configured!\n\n`;
+        message += `🐙 GitHub Gist ID:\n${GIST_ID}\n\n`;
+        message += `🔑 Token: ${GITHUB_TOKEN.substring(0, 8)}...\n\n`;
+        message += `📱 Your PWA will automatically sync with desktop every 30 seconds.\n\n`;
+        message += `What would you like to do?\n\n`;
+        message += `• OK = Close\n`;
+        message += `• Cancel = Reconfigure sync`;
+        
+        const keepSettings = confirm(message);
+        if (!keepSettings) {
+          setupGithubAuth();
+        }
+      } else if (hasGist && !hasToken) {
+        message += `⚠️ Gist ID found but no token!\n\n`;
+        message += `🐙 Gist ID: ${GIST_ID}\n\n`;
+        message += `You need to add your GitHub token to enable sync.\n\n`;
+        message += `Click OK to set up your token now.`;
+        
+        if (confirm(message)) {
+          setupGithubAuth();
+        }
+      } else {
+        message += `❌ Sync is not configured\n\n`;
+        message += `To sync between your PWA and desktop:\n\n`;
+        message += `1. Set up GitHub token (one time)\n`;
+        message += `2. Your Gist ID will be created automatically\n`;
+        message += `3. All devices will sync every 30 seconds\n\n`;
+        message += `Click OK to set up sync now.`;
+        
+        if (confirm(message)) {
+          setupGithubAuth();
+        }
+      }
+      
+      // Update sync button icon based on status
+      const syncIcon = document.getElementById('pwa-sync-button-icon');
+      if (syncIcon) {
+        if (hasToken && hasGist) {
+          syncIcon.textContent = '✅';
+        } else {
+          syncIcon.textContent = '⚙️';
+        }
+      }
     }
     
     // Update PWA dashboard with current header data
@@ -8296,7 +8393,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v11.6 - Tap to Update';
+      versionIndicator.textContent = 'PWA v11.7 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8366,7 +8463,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v11.6 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v11.7 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8453,7 +8550,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v11.6';
+      versionIndicator.textContent = 'PWA v11.7';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8512,7 +8609,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v11.6 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v11.7 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
