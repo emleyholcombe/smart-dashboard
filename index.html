@@ -1680,7 +1680,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.41
+        Desktop v9.42
       </div>
     </div>
   </div>
@@ -8583,7 +8583,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.41 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.42 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8616,35 +8616,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }, 200);
       });
       
-      // Add click handler for debug info and manual update
+      // Add click handler to show enhanced info popup
       versionIndicator.addEventListener('click', () => {
-        const debugInfo = debugPWADataLoading();
-        const totalItems = debugInfo.currentData.todoItems.length + 
-                          debugInfo.currentData.groceryItems.length + 
-                          debugInfo.currentData.mealItems.length;
-        
-        const message = `🔍 PWA Debug Info:
-        
-📱 Mode: ${debugInfo.pwaMode ? 'PWA' : 'Browser'}
-🌐 Online: ${debugInfo.isOnline ? 'Yes' : 'No'}
-🔑 GitHub Token: ${debugInfo.hasGithubToken ? 'Yes' : 'No'}
-📝 Gist ID: ${debugInfo.hasGistId ? 'Yes' : 'No'}
-
-📊 Current Data: ${totalItems} items
-📝 Todos: ${debugInfo.currentData.todoItems.length}
-🛒 Grocery: ${debugInfo.currentData.groceryItems.length}  
-🍽️ Meals: ${debugInfo.currentData.mealItems.length}
-
-${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '✅ Data loaded successfully'}
-
-🔄 Tap OK to manually update app
-📊 Tap CANCEL for debug info only`;
-        
-        if (confirm(message)) {
-          forceAppUpdate();
-        } else {
-          showDebugPanel();
-        }
+        showPWAInfoPopup();
       });
       
       document.body.appendChild(versionIndicator);
@@ -8653,7 +8627,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.41 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.42 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8666,6 +8640,414 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       
       // Store update function globally so other parts can call it
       window.updatePWAVersionIndicator = updateVersionIndicator;
+    }
+    
+    // Show enhanced PWA info popup
+    function showPWAInfoPopup() {
+      const debugInfo = debugPWADataLoading();
+      const totalItems = debugInfo.currentData.todoItems.length + 
+                        debugInfo.currentData.groceryItems.length + 
+                        debugInfo.currentData.mealItems.length;
+      
+      const token = localStorage.getItem('githubToken') || 'No';
+      const gistId = localStorage.getItem('dashboardGistId') || 'No';
+      
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      `;
+      
+      // Create popup
+      const popup = document.createElement('div');
+      popup.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        position: relative;
+      `;
+      
+      popup.innerHTML = `
+        <div style="padding: 20px; position: relative;">
+          <button onclick="this.closest('.pwa-info-overlay').remove()" style="
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+          ">✕</button>
+          
+          <h2 style="margin: 0 0 20px 0; color: #333; font-size: 20px;">PWA Info</h2>
+          
+          <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">MODE</div>
+              <div style="color: #333; font-size: 14px;">${debugInfo.pwaMode ? 'PWA' : 'Browser'}</div>
+            </div>
+            
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">GITHUB TOKEN</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="color: #333; font-size: 14px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${token === 'No' ? 'No' : token.substring(0, 20) + '...'}</div>
+                ${token !== 'No' ? `<button onclick="navigator.clipboard.writeText('${token}'); this.textContent='✓'; setTimeout(() => this.textContent='Copy', 1000)" style="padding: 4px 8px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; white-space: nowrap;">Copy</button>` : ''}
+              </div>
+            </div>
+            
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">GIST ID</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="color: #333; font-size: 14px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${gistId}</div>
+                ${gistId !== 'No' ? `<button onclick="navigator.clipboard.writeText('${gistId}'); this.textContent='✓'; setTimeout(() => this.textContent='Copy', 1000)" style="padding: 4px 8px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; white-space: nowrap;">Copy</button>` : ''}
+              </div>
+            </div>
+            
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">ONLINE</div>
+              <div style="color: #333; font-size: 14px;">${debugInfo.isOnline ? 'Yes' : 'No'}</div>
+            </div>
+            
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">CURRENT DATA</div>
+              <div style="color: #333; font-size: 14px;">${totalItems} items total</div>
+            </div>
+            
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">TODOS</div>
+              <div style="color: #333; font-size: 14px;">${debugInfo.currentData.todoItems.length} items</div>
+            </div>
+            
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">GROCERY</div>
+              <div style="color: #333; font-size: 14px;">${debugInfo.currentData.groceryItems.length} items</div>
+            </div>
+            
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">MEALS</div>
+              <div style="color: #333; font-size: 14px;">${debugInfo.currentData.mealItems.length} items</div>
+            </div>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button onclick="showEditTokenPopup()" style="
+              padding: 12px;
+              background: #667eea;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">Edit/Add GitHub Token</button>
+            
+            <button onclick="showEditGistPopup()" style="
+              padding: 12px;
+              background: #667eea;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">Edit/Add Gist ID</button>
+            
+            <button onclick="manualVersionUpdate()" style="
+              padding: 12px;
+              background: #4caf50;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">Update App Version</button>
+            
+            <button onclick="showDebugPanel()" style="
+              padding: 12px;
+              background: #ff9800;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">Debug Info</button>
+          </div>
+        </div>
+      `;
+      
+      overlay.className = 'pwa-info-overlay';
+      overlay.appendChild(popup);
+      document.body.appendChild(overlay);
+      
+      // Close on overlay click (but not popup click)
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.remove();
+        }
+      });
+    }
+    
+    // Show edit token popup
+    function showEditTokenPopup() {
+      const currentToken = localStorage.getItem('githubToken') || '';
+      
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10002;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      `;
+      
+      const popup = document.createElement('div');
+      popup.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        padding: 20px;
+      `;
+      
+      popup.innerHTML = `
+        <h2 style="margin: 0 0 20px 0; color: #333; font-size: 20px;">Edit GitHub Token</h2>
+        
+        <input type="text" id="token-input" value="${currentToken}" placeholder="Enter GitHub token..." style="
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 14px;
+          margin-bottom: 20px;
+          box-sizing: border-box;
+        ">
+        
+        <div style="display: flex; gap: 10px;">
+          <button onclick="saveToken()" style="
+            flex: 1;
+            padding: 12px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+          ">Save</button>
+          
+          <button onclick="backToMainPopup()" style="
+            flex: 1;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+          ">Back</button>
+          
+          <button onclick="closeAllPopups()" style="
+            flex: 1;
+            padding: 12px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+          ">Cancel</button>
+        </div>
+      `;
+      
+      overlay.className = 'pwa-edit-overlay';
+      overlay.appendChild(popup);
+      document.body.appendChild(overlay);
+    }
+    
+    // Show edit gist popup
+    function showEditGistPopup() {
+      const currentGist = localStorage.getItem('dashboardGistId') || '';
+      
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10002;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      `;
+      
+      const popup = document.createElement('div');
+      popup.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        padding: 20px;
+      `;
+      
+      popup.innerHTML = `
+        <h2 style="margin: 0 0 20px 0; color: #333; font-size: 20px;">Edit Gist ID</h2>
+        
+        <input type="text" id="gist-input" value="${currentGist}" placeholder="Enter Gist ID..." style="
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 14px;
+          margin-bottom: 20px;
+          box-sizing: border-box;
+        ">
+        
+        <div style="display: flex; gap: 10px;">
+          <button onclick="saveGist()" style="
+            flex: 1;
+            padding: 12px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+          ">Save</button>
+          
+          <button onclick="backToMainPopup()" style="
+            flex: 1;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+          ">Back</button>
+          
+          <button onclick="closeAllPopups()" style="
+            flex: 1;
+            padding: 12px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+          ">Cancel</button>
+        </div>
+      `;
+      
+      overlay.className = 'pwa-edit-overlay';
+      overlay.appendChild(popup);
+      document.body.appendChild(overlay);
+    }
+    
+    // Save token
+    function saveToken() {
+      const input = document.getElementById('token-input');
+      const token = input.value.trim();
+      
+      if (token) {
+        localStorage.setItem('githubToken', token);
+        GITHUB_TOKEN = token;
+        console.log('✅ GitHub token saved');
+      } else {
+        localStorage.removeItem('githubToken');
+        GITHUB_TOKEN = null;
+        console.log('🗑️ GitHub token removed');
+      }
+      
+      closeAllPopups();
+    }
+    
+    // Save gist
+    function saveGist() {
+      const input = document.getElementById('gist-input');
+      const gist = input.value.trim();
+      
+      if (gist) {
+        localStorage.setItem('dashboardGistId', gist);
+        GIST_ID = gist;
+        console.log('✅ Gist ID saved');
+      } else {
+        localStorage.removeItem('dashboardGistId');
+        GIST_ID = null;
+        console.log('🗑️ Gist ID removed');
+      }
+      
+      closeAllPopups();
+    }
+    
+    // Back to main popup
+    function backToMainPopup() {
+      // Remove edit overlay
+      const editOverlay = document.querySelector('.pwa-edit-overlay');
+      if (editOverlay) {
+        editOverlay.remove();
+      }
+      
+      // Remove old main overlay and show fresh one
+      const mainOverlay = document.querySelector('.pwa-info-overlay');
+      if (mainOverlay) {
+        mainOverlay.remove();
+      }
+      
+      showPWAInfoPopup();
+    }
+    
+    // Close all popups
+    function closeAllPopups() {
+      const editOverlay = document.querySelector('.pwa-edit-overlay');
+      const mainOverlay = document.querySelector('.pwa-info-overlay');
+      
+      if (editOverlay) editOverlay.remove();
+      if (mainOverlay) mainOverlay.remove();
+    }
+    
+    // Manual version update
+    function manualVersionUpdate() {
+      forceAppUpdate();
+      closeAllPopups();
     }
 
     // Fix iOS status bar white banner in PWA mode
@@ -8740,7 +9122,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.41';
+      versionIndicator.textContent = 'PWA v12.42';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8799,7 +9181,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.41 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.42 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
