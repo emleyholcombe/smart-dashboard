@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v125-content-pulls-down';
+const CACHE_NAME = 'bennett-hub-v126-fix-wrapper-haptics';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

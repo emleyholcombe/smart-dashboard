@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.5
+        Desktop v9.6
       </div>
     </div>
   </div>
@@ -8428,7 +8428,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.5 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.6 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8498,7 +8498,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.5 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.6 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8585,7 +8585,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.5';
+      versionIndicator.textContent = 'PWA v12.6';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8644,7 +8644,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.5 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.6 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8783,6 +8783,12 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       let isPulling = false;
       let hasVibratedOnThreshold = false;
       
+      // Initialize content wrapper immediately
+      setTimeout(() => {
+        createContentWrapper();
+        console.log('✅ Content wrapper initialized');
+      }, 100);
+      
       // Create pull-to-refresh overlay
       const createPullOverlay = () => {
         let overlay = document.getElementById('pull-refresh-overlay');
@@ -8879,12 +8885,19 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           
           // Start showing pull effect
           if (deltaY > 10 && Math.abs(e.touches[0].clientX - startX) < 50) {
+            if (!isPulling) {
+              console.log('🎯 Starting pull effect');
+            }
             isPulling = true;
             const overlay = createPullOverlay();
             const contentWrapper = createContentWrapper();
             const content = document.getElementById('pull-refresh-content');
             const icon = document.getElementById('pull-refresh-icon');
             const text = document.getElementById('pull-refresh-text');
+            
+            if (!contentWrapper) {
+              console.log('❌ Content wrapper not found!');
+            }
             
             // Calculate pull progress (max 120px)
             const pullDistance = Math.min(deltaY, 120);
@@ -8894,7 +8907,9 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
             overlay.style.top = `${-120 + pullDistance}px`;
             
             // Move content down
-            contentWrapper.style.transform = `translateY(${pullDistance}px)`;
+            if (contentWrapper) {
+              contentWrapper.style.transform = `translateY(${pullDistance}px)`;
+            }
             
             // Update content opacity
             content.style.opacity = pullProgress;
@@ -8910,8 +8925,16 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
               // Vibrate when threshold reached (only once) - stronger feedback
               if (!hasVibratedOnThreshold) {
                 hasVibratedOnThreshold = true;
+                console.log('📳 Triggering threshold vibration');
                 if (navigator.vibrate) {
-                  navigator.vibrate([40, 20, 40]); // Pattern: vibrate-pause-vibrate
+                  try {
+                    navigator.vibrate([40, 20, 40]); // Pattern: vibrate-pause-vibrate
+                    console.log('✅ Vibration triggered');
+                  } catch (e) {
+                    console.log('❌ Vibration failed:', e);
+                  }
+                } else {
+                  console.log('❌ Vibration API not available');
                 }
               }
               pullToRefreshTriggered = true;
@@ -8939,8 +8962,16 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
         // Trigger refresh if pulled far enough
         if (isPulling && deltaY > 80 && pullToRefreshTriggered) {
           // Stronger vibration on release - double tap pattern
+          console.log('📳 Triggering release vibration');
           if (navigator.vibrate) {
-            navigator.vibrate([60, 30, 60]); // Pattern: vibrate-pause-vibrate (stronger)
+            try {
+              navigator.vibrate([60, 30, 60]); // Pattern: vibrate-pause-vibrate (stronger)
+              console.log('✅ Release vibration triggered');
+            } catch (e) {
+              console.log('❌ Release vibration failed:', e);
+            }
+          } else {
+            console.log('❌ Vibration API not available');
           }
           
           // Show syncing state
