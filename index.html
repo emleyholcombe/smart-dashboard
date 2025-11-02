@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.0
+        Desktop v9.1
       </div>
     </div>
   </div>
@@ -8428,7 +8428,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.0 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.1 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8498,7 +8498,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.0 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.1 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8585,7 +8585,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.0';
+      versionIndicator.textContent = 'PWA v12.1';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8644,7 +8644,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.0 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.1 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8796,25 +8796,28 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           // Show pull indicator when pulling down
           if (deltaY > 30 && deltaY < 80 && Math.abs(e.touches[0].clientX - startX) < 50) {
             console.log('📱 Pull-to-refresh: Showing pull indicator, deltaY:', deltaY);
-            showPullToRefreshIndicator('Pull down to refresh');
+            showPullToRefreshIndicator('Pull down to sync');
           }
           
           // Trigger refresh when pulled far enough
           if (deltaY > 80 && Math.abs(e.touches[0].clientX - startX) < 50) {
-            console.log('📱 Pull-to-refresh: Triggering refresh, deltaY:', deltaY);
+            console.log('📱 Pull-to-refresh: Triggering sync, deltaY:', deltaY);
             pullToRefreshTriggered = true;
             
-            showPullToRefreshIndicator('Release to refresh', true);
+            showPullToRefreshIndicator('Release to sync', true);
             
             // Add haptic feedback
             if (navigator.vibrate) {
               navigator.vibrate(50);
             }
             
-            // Trigger refresh after a short delay
+            // Trigger sync after a short delay
             setTimeout(() => {
+              showPullToRefreshIndicator('Syncing...', true);
               refreshAppData();
-              hidePullToRefreshIndicator();
+              setTimeout(() => {
+                hidePullToRefreshIndicator();
+              }, 1000);
             }, 200);
           }
         }
