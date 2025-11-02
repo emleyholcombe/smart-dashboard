@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1234-check-scrollable-parents';
+const CACHE_NAME = 'bennett-hub-v1235-improved-logging';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
