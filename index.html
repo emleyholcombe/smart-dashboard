@@ -1114,11 +1114,34 @@
       transform: scale(1.1);
     }
     
-    /* PWA: Larger checkboxes for touch */
+    /* PWA: Larger checkboxes for touch with visible border */
     .pwa-mode .task-checkbox {
       width: 28px;
       height: 28px;
       margin-right: 16px;
+      border: 2px solid #667eea;
+      border-radius: 4px;
+      appearance: none;
+      -webkit-appearance: none;
+      background: white;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    /* PWA: Checkmark when checked */
+    .pwa-mode .task-checkbox:checked {
+      background: #667eea;
+    }
+    
+    .pwa-mode .task-checkbox:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
     }
 
     .task-text {
@@ -1687,7 +1710,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.49
+        Desktop v9.51
       </div>
     </div>
   </div>
@@ -8576,7 +8599,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.49 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.51 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8620,7 +8643,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.49 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.51 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8700,6 +8723,52 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         <div style="padding: 20px;">
           
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <button onclick="showEditTokenPopup()" style="
+              padding: 12px;
+              background: #667eea;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">Edit GitHub Token</button>
+            
+            <button onclick="showEditGistPopup()" style="
+              padding: 12px;
+              background: #667eea;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">Edit Gist ID</button>
+            
+            <button onclick="manualVersionUpdate()" style="
+              padding: 12px;
+              background: #4caf50;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">Update App Version</button>
+            
+            <button onclick="showDebugPanel()" style="
+              padding: 12px;
+              background: #ff9800;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">Debug Info</button>
+          </div>
+          
           <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
             <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
               <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">MODE</div>
@@ -8746,52 +8815,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">MEALS</div>
               <div style="color: #333; font-size: 14px;">${debugInfo.currentData.mealItems.length} items</div>
             </div>
-          </div>
-          
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <button onclick="showEditTokenPopup()" style="
-              padding: 12px;
-              background: #667eea;
-              color: white;
-              border: none;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 14px;
-              font-weight: 500;
-            ">Edit GitHub Token</button>
-            
-            <button onclick="showEditGistPopup()" style="
-              padding: 12px;
-              background: #667eea;
-              color: white;
-              border: none;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 14px;
-              font-weight: 500;
-            ">Edit Gist ID</button>
-            
-            <button onclick="manualVersionUpdate()" style="
-              padding: 12px;
-              background: #4caf50;
-              color: white;
-              border: none;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 14px;
-              font-weight: 500;
-            ">Update App Version</button>
-            
-            <button onclick="showDebugPanel()" style="
-              padding: 12px;
-              background: #ff9800;
-              color: white;
-              border: none;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 14px;
-              font-weight: 500;
-            ">Debug Info</button>
           </div>
         </div>
       `;
@@ -9152,7 +9175,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.49';
+      versionIndicator.textContent = 'PWA v12.51';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9211,7 +9234,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.49 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.51 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
