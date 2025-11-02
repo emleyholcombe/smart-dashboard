@@ -1680,7 +1680,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.37
+        Desktop v9.38
       </div>
     </div>
   </div>
@@ -8031,20 +8031,46 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Hide the main widget area
       main.style.display = 'none';
       
-      // Show header and modify it for PWA dashboard
-      header.style.display = 'flex';
+      // Hide the default header (we'll create our own)
+      header.style.display = 'none';
       
-      // Show home button in header for PWA dashboard
-      const homeButton = document.querySelector('.home-button');
-      if (homeButton) {
-        homeButton.style.display = 'block';
+      // Create custom header for PWA dashboard (matching fullscreen views)
+      let pwaDashboardHeader = document.getElementById('pwa-dashboard-header');
+      if (!pwaDashboardHeader) {
+        pwaDashboardHeader = document.createElement('div');
+        pwaDashboardHeader.id = 'pwa-dashboard-header';
+        pwaDashboardHeader.className = 'fullscreen-header';
+        pwaDashboardHeader.style.cssText = `
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem 2rem;
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        `;
+        
+        const title = document.createElement('h1');
+        title.className = 'fullscreen-title';
+        title.textContent = 'Bennett Hub';
+        title.style.cssText = `
+          margin: 0;
+          font-size: 1.5rem;
+          color: white;
+        `;
+        
+        const homeButton = document.createElement('button');
+        homeButton.className = 'back-button';
+        homeButton.onclick = showLandingPage;
+        homeButton.textContent = 'Home';
+        
+        pwaDashboardHeader.appendChild(title);
+        pwaDashboardHeader.appendChild(homeButton);
+        
+        document.getElementById('dashboard').insertBefore(pwaDashboardHeader, document.getElementById('dashboard').firstChild);
       }
       
-      // Hide header info items (keep just title and home button)
-      const headerInfo = document.querySelector('.header-info');
-      if (headerInfo) {
-        headerInfo.style.display = 'none';
-      }
+      pwaDashboardHeader.style.display = 'flex';
       
       // Create simplified PWA dashboard content
       let pwaDashboard = document.getElementById('pwa-dashboard');
@@ -8526,7 +8552,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.37 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.38 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8596,7 +8622,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.37 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.38 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8683,7 +8709,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.37';
+      versionIndicator.textContent = 'PWA v12.38';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8742,7 +8768,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.37 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.38 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
