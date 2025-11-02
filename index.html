@@ -34,6 +34,41 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
+    /* PWA Loading Screen */
+    #pwa-loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      opacity: 1;
+      transition: opacity 0.3s ease-out;
+    }
+    
+    #pwa-loading-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
     /* Landing Page Styles */
     .landing-page {
       min-height: 100vh;
@@ -1572,6 +1607,11 @@
   </style>
 </head>
 <body>
+  <!-- PWA Loading Screen -->
+  <div id="pwa-loading-screen">
+    <div class="loading-spinner"></div>
+  </div>
+  
   <!-- Landing Page -->
   <div id="landing-page" class="landing-page">
     <div class="landing-container">
@@ -1640,7 +1680,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.29
+        Desktop v9.30
       </div>
     </div>
   </div>
@@ -7899,6 +7939,19 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       addPWACalendarPositionFix(); // Force Calendar positioning via JavaScript
       // addMobileOptimizations(); // DISABLED - this was breaking layout
       // addAppSpecificUI(); // DISABLED - this was adding unwanted UI elements
+      
+      // Hide loading screen after all customizations are applied
+      setTimeout(() => {
+        const loadingScreen = document.getElementById('pwa-loading-screen');
+        if (loadingScreen) {
+          loadingScreen.classList.add('hidden');
+          console.log('✅ PWA loading screen hidden');
+          // Remove from DOM after fade out
+          setTimeout(() => {
+            loadingScreen.remove();
+          }, 300);
+        }
+      }, 100); // Small delay to ensure all positioning is complete
     }
 
     // Force correct PWA grocery icon positioning via JavaScript
@@ -8451,7 +8504,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.29 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.30 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8521,7 +8574,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.29 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.30 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8608,7 +8661,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.29';
+      versionIndicator.textContent = 'PWA v12.30';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8667,7 +8720,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.29 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.30 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9129,6 +9182,12 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
         console.log('PWA customizations: essential features only (no layout changes)');
       } else {
         console.log('🌐 Desktop Browser: PWA customizations disabled');
+        // Hide loading screen immediately for desktop
+        const loadingScreen = document.getElementById('pwa-loading-screen');
+        if (loadingScreen) {
+          loadingScreen.classList.add('hidden');
+          setTimeout(() => loadingScreen.remove(), 300);
+        }
       }
     });
 
