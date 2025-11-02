@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.57
+        Desktop v9.58
       </div>
     </div>
   </div>
@@ -4134,27 +4134,51 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           if (groceryDraggedItem) {
             const targetItemId = parseFloat(item.getAttribute('data-item-id'));
             const targetItem = groceryItems.find(item => item.id === targetItemId);
+            const draggedItemElement = listElement.querySelector(`[data-item-id="${groceryDraggedItem.id}"]`);
             
-            if (targetItem && targetItem.id !== groceryDraggedItem.id) {
+            if (targetItem && targetItem.id !== groceryDraggedItem.id && draggedItemElement) {
               const targetCategory = categorizeGroceryItem(targetItem.text, targetItem.manualCategory);
               
               // Check if we're dropping within the same category (reorder) or different category (move)
               if (targetCategory === groceryDraggedCategory) {
-                // Reorder within same category
-                reorderGroceryItemsWithinCategory(groceryDraggedItem, targetItem, targetCategory);
+                // Reorder within same category using DOM position
+                const rect = item.getBoundingClientRect();
+                const mouseY = e.clientY;
+                const insertBefore = mouseY < rect.top + rect.height / 2;
+                
+                // Insert in DOM
+                if (insertBefore) {
+                  item.parentNode.insertBefore(draggedItemElement, item);
+                } else {
+                  if (item.nextSibling) {
+                    item.parentNode.insertBefore(draggedItemElement, item.nextSibling);
+                  } else {
+                    item.parentNode.appendChild(draggedItemElement);
+                  }
+                }
+                
+                // Get all items in this category from DOM order
+                const categoryElements = Array.from(listElement.querySelectorAll('.task-item')).filter(el => {
+                  const id = parseFloat(el.getAttribute('data-item-id'));
+                  const groceryItem = groceryItems.find(item => item.id === id);
+                  return groceryItem && categorizeGroceryItem(groceryItem.text, groceryItem.manualCategory) === targetCategory;
+                });
+                
+                // Update order values based on DOM position
+                const baseOrder = Date.now();
+                categoryElements.forEach((el, idx) => {
+                  const id = parseFloat(el.getAttribute('data-item-id'));
+                  const groceryItem = groceryItems.find(item => item.id === id);
+                  if (groceryItem) {
+                    groceryItem.order = baseOrder - idx;
+                  }
+                });
               } else {
                 // Move to different category - set manual category and place at end
                 groceryDraggedItem.manualCategory = targetCategory;
               }
               
               saveGroceryItems();
-              
-              // Re-render appropriate view
-              if (document.getElementById('fullscreen-grocery-list')) {
-                renderGroceryListFullscreen();
-              } else {
-                renderGroceryList();
-              }
             }
           }
         });
@@ -9006,7 +9030,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.57 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.58 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9050,7 +9074,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.57 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.58 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9582,7 +9606,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.57';
+      versionIndicator.textContent = 'PWA v12.58';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9641,7 +9665,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.57 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.58 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
