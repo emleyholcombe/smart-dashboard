@@ -1680,7 +1680,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.46
+        Desktop v9.47
       </div>
     </div>
   </div>
@@ -8569,7 +8569,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.46 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.47 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8613,7 +8613,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.46 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.47 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9005,33 +9005,57 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     
     // Back to main popup
     function backToMainPopup() {
-      // Get saved scroll position
-      const scrollPosition = window.pwaPopupScrollPosition || 0;
-      
-      // Remove edit overlay
+      // Just remove the edit overlay - keep main popup in place
       const editOverlay = document.querySelector('.pwa-edit-overlay');
       if (editOverlay) {
         editOverlay.remove();
       }
       
-      // Remove old main overlay and show fresh one
+      // Update the main popup content to reflect any changes
       const mainOverlay = document.querySelector('.pwa-info-overlay');
       if (mainOverlay) {
-        mainOverlay.remove();
-      }
-      
-      showPWAInfoPopup();
-      
-      // Restore scroll position after popup is created
-      setTimeout(() => {
-        const newMainOverlay = document.querySelector('.pwa-info-overlay');
-        if (newMainOverlay) {
-          const newPopup = newMainOverlay.querySelector('div[style*="max-height"]');
-          if (newPopup) {
-            newPopup.scrollTop = scrollPosition;
+        // Get current scroll position
+        const popup = mainOverlay.querySelector('div[style*="max-height"]');
+        const scrollPosition = popup ? popup.scrollTop : 0;
+        
+        // Update the content
+        const debugInfo = debugPWADataLoading();
+        const totalItems = debugInfo.currentData.todoItems.length + 
+                          debugInfo.currentData.groceryItems.length + 
+                          debugInfo.currentData.mealItems.length;
+        
+        const token = localStorage.getItem('githubToken') || 'No';
+        const gistId = localStorage.getItem('dashboardGistId') || 'No';
+        
+        // Update token display
+        const tokenContainer = mainOverlay.querySelector('div[style*="GITHUB TOKEN"]')?.parentElement;
+        if (tokenContainer) {
+          const tokenValueDiv = tokenContainer.querySelector('div[style*="flex: 1"]');
+          if (tokenValueDiv) {
+            tokenValueDiv.innerHTML = `
+              <div style="color: #333; font-size: 14px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${token === 'No' ? 'No' : token.substring(0, 20) + '...'}</div>
+              ${token !== 'No' ? `<button onclick="navigator.clipboard.writeText('${token}'); this.textContent='✓'; setTimeout(() => this.textContent='Copy', 1000)" style="padding: 4px 8px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; white-space: nowrap;">Copy</button>` : ''}
+            `;
           }
         }
-      }, 0);
+        
+        // Update gist display
+        const gistContainer = mainOverlay.querySelector('div[style*="GIST ID"]')?.parentElement;
+        if (gistContainer) {
+          const gistValueDiv = gistContainer.querySelector('div[style*="flex: 1"]');
+          if (gistValueDiv) {
+            gistValueDiv.innerHTML = `
+              <div style="color: #333; font-size: 14px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${gistId}</div>
+              ${gistId !== 'No' ? `<button onclick="navigator.clipboard.writeText('${gistId}'); this.textContent='✓'; setTimeout(() => this.textContent='Copy', 1000)" style="padding: 4px 8px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; white-space: nowrap;">Copy</button>` : ''}
+            `;
+          }
+        }
+        
+        // Restore scroll position
+        if (popup) {
+          popup.scrollTop = scrollPosition;
+        }
+      }
     }
     
     // Close all popups
@@ -9121,7 +9145,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.46';
+      versionIndicator.textContent = 'PWA v12.47';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9180,7 +9204,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.46 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.47 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
