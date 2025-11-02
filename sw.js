@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1212-increase-pull';
+const CACHE_NAME = 'bennett-hub-v1213-debug-opacity';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
