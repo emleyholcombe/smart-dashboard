@@ -1680,7 +1680,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.35
+        Desktop v9.36
       </div>
     </div>
   </div>
@@ -7895,6 +7895,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         desktopVersionIndicator.style.display = 'none';
       }
       
+      // Check if sync is configured and show warning if not
+      checkSyncConfiguration();
+      
       // Keep essential features that don't break layout
       addHapticFeedback();
       addSwipeGestures(); // This includes pull-to-refresh with visual feedback
@@ -7922,6 +7925,57 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }, 500); // Longer delay to ensure all positioning is complete
     }
 
+    // Check if sync is configured and show warning banner if not
+    function checkSyncConfiguration() {
+      const hasGistId = !!localStorage.getItem('dashboardGistId');
+      const hasToken = !!localStorage.getItem('githubToken');
+      
+      if (!hasGistId || !hasToken) {
+        console.log('⚠️ Sync not configured - showing warning banner');
+        
+        // Create warning banner
+        const banner = document.createElement('div');
+        banner.id = 'sync-warning-banner';
+        banner.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+          color: white;
+          padding: 12px 16px;
+          text-align: center;
+          font-size: 14px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+          cursor: pointer;
+        `;
+        banner.innerHTML = `
+          ⚠️ Sync Not Configured - Tap to Set Up
+        `;
+        
+        // Click to open sync settings
+        banner.addEventListener('click', () => {
+          showPWASyncSettings();
+          banner.remove();
+        });
+        
+        document.body.appendChild(banner);
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+          if (document.body.contains(banner)) {
+            banner.style.transition = 'opacity 0.3s ease';
+            banner.style.opacity = '0';
+            setTimeout(() => banner.remove(), 300);
+          }
+        }, 10000);
+      } else {
+        console.log('✅ Sync is configured');
+      }
+    }
+    
     // Force correct PWA grocery icon positioning via JavaScript
     function addPWAGroceryIconFix() {
       // Wait for DOM to be ready, then apply correct positioning
@@ -8472,7 +8526,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.35 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.36 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8542,7 +8596,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.35 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.36 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8629,7 +8683,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.35';
+      versionIndicator.textContent = 'PWA v12.36';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8688,7 +8742,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.35 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.36 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
