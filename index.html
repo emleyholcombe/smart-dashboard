@@ -1166,6 +1166,35 @@
     
     .drag-placeholder {
       transition: none;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%) !important;
+      border: 2px dashed #667eea !important;
+      border-radius: 8px !important;
+      opacity: 1 !important;
+      position: relative;
+    }
+    
+    .drag-placeholder::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #667eea;
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(102, 126, 234, 0.6);
+    }
+    
+    .drag-placeholder::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #667eea;
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(102, 126, 234, 0.6);
     }
 
     .task-text {
@@ -1734,7 +1763,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.54
+        Desktop v9.55
       </div>
     </div>
   </div>
@@ -4637,11 +4666,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               item.classList.add('dragging');
               item.style.opacity = '0.5';
               
-              // Create placeholder
+              // Create placeholder with enhanced visibility
               placeholder = item.cloneNode(true);
-              placeholder.style.opacity = '0.3';
               placeholder.style.pointerEvents = 'none';
               placeholder.classList.add('drag-placeholder');
+              placeholder.classList.remove('dragging');
+              
+              // Remove any inline styles that might override CSS
+              placeholder.style.transform = '';
+              placeholder.style.zIndex = '';
+              placeholder.style.position = '';
+              
               item.parentNode.insertBefore(placeholder, item);
             }
             
@@ -8788,7 +8823,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.54 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.55 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8832,7 +8867,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.54 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.55 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9364,7 +9399,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.54';
+      versionIndicator.textContent = 'PWA v12.55';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9423,7 +9458,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.54 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.55 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
