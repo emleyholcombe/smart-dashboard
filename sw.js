@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1226-log-timestamps';
+const CACHE_NAME = 'bennett-hub-v1227-multi-render';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
