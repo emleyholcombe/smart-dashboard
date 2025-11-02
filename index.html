@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.7
+        Desktop v9.8
       </div>
     </div>
   </div>
@@ -2649,34 +2649,36 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Update weather every 10 minutes
       setInterval(updateWeather, 10 * 60 * 1000);
       
+      // DISABLED: Auto-sync for debugging pull-to-refresh
       // Auto-sync: Check for cloud updates every 30 seconds
-      setInterval(async () => {
-        if (isOnline && !syncInProgress && (GIST_ID || JSONBIN_ID)) {
-          console.log('🔄 Auto-sync: Checking for cloud updates...');
-          await loadAllData();
-          
-          // Re-render all lists (both dashboard and fullscreen views)
-          renderTodoList();
-          renderGroceryList();
-          renderMealsList();
-          
-          // Also update fullscreen views if they're open
-          if (document.getElementById('fullscreen-todo-list')) {
-            renderTodoListFullscreen();
-          }
-          if (document.getElementById('fullscreen-grocery-list')) {
-            renderGroceryListFullscreen();
-          }
-          if (document.getElementById('fullscreen-meals-list')) {
-            renderMealsListFullscreen();
-          }
-          if (document.getElementById('fullscreen-todo-calendar-container')) {
-            renderTodoCalendarFullscreen();
-          }
-          
-          console.log('✅ Auto-sync: Data refreshed from cloud');
-        }
-      }, 30000); // Check every 30 seconds
+      // setInterval(async () => {
+      //   if (isOnline && !syncInProgress && (GIST_ID || JSONBIN_ID)) {
+      //     console.log('🔄 Auto-sync: Checking for cloud updates...');
+      //     await loadAllData();
+      //     
+      //     // Re-render all lists (both dashboard and fullscreen views)
+      //     renderTodoList();
+      //     renderGroceryList();
+      //     renderMealsList();
+      //     
+      //     // Also update fullscreen views if they're open
+      //     if (document.getElementById('fullscreen-todo-list')) {
+      //       renderTodoListFullscreen();
+      //     }
+      //     if (document.getElementById('fullscreen-grocery-list')) {
+      //       renderGroceryListFullscreen();
+      //     }
+      //     if (document.getElementById('fullscreen-meals-list')) {
+      //       renderMealsListFullscreen();
+      //     }
+      //     if (document.getElementById('fullscreen-todo-calendar-container')) {
+      //       renderTodoCalendarFullscreen();
+      //     }
+      //     
+      //     console.log('✅ Auto-sync: Data refreshed from cloud');
+      //   }
+      // }, 30000); // Check every 30 seconds
+      console.log('⚠️ Auto-sync DISABLED for debugging');
       
       // Add Enter key support for inputs
       document.getElementById('todo-input').addEventListener('keypress', function(e) {
@@ -7657,12 +7659,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               }
             };
             
+            // DISABLED: Auto-updates for debugging pull-to-refresh
             // Add safeguard: only start auto-updates after initial load
-            console.log('⏰ PWA: Setting 5-second timeout for auto-update startup...');
-            setTimeout(() => {
-              console.log('⏰ PWA: 5-second timeout triggered, starting auto-updates...');
-              window.startAutoUpdates();
-            }, 5000); // Wait 5 seconds before starting auto-updates
+            // console.log('⏰ PWA: Setting 5-second timeout for auto-update startup...');
+            // setTimeout(() => {
+            //   console.log('⏰ PWA: 5-second timeout triggered, starting auto-updates...');
+            //   window.startAutoUpdates();
+            // }, 5000); // Wait 5 seconds before starting auto-updates
+            console.log('⚠️ PWA auto-updates DISABLED for debugging');
             
             // Handle updates
             registration.addEventListener('updatefound', () => {
@@ -8428,7 +8432,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.7 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.8 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8498,7 +8502,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.7 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.8 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8585,7 +8589,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.7';
+      versionIndicator.textContent = 'PWA v12.8';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8644,7 +8648,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.7 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.8 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8785,8 +8789,12 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       
       // Initialize content wrapper immediately
       setTimeout(() => {
-        createContentWrapper();
-        console.log('✅ Content wrapper initialized');
+        const wrapper = createContentWrapper();
+        console.log('✅ Content wrapper initialized:', wrapper ? 'SUCCESS' : 'FAILED');
+        if (wrapper) {
+          console.log('📦 Wrapper contains', wrapper.children.length, 'children');
+          console.log('📏 Wrapper styles:', wrapper.style.cssText);
+        }
       }, 100);
       
       // Create pull-to-refresh overlay
@@ -8898,7 +8906,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           // Start showing pull effect
           if (deltaY > 10 && Math.abs(e.touches[0].clientX - startX) < 50) {
             if (!isPulling) {
-              console.log('🎯 Starting pull effect');
+              console.log('🎯 Starting pull effect, deltaY:', deltaY);
             }
             isPulling = true;
             const overlay = createPullOverlay();
@@ -8912,6 +8920,10 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
               return; // Exit if wrapper doesn't exist
             }
             
+            if (!isPulling) {
+              console.log('✅ Content wrapper found, children:', contentWrapper.children.length);
+            }
+            
             // Calculate pull progress (max 120px)
             const pullDistance = Math.min(deltaY, 120);
             const pullProgress = Math.min(pullDistance / 80, 1); // Full opacity at 80px
@@ -8921,6 +8933,10 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
             
             // Move content down
             contentWrapper.style.transform = `translateY(${pullDistance}px)`;
+            
+            if (!isPulling) {
+              console.log('📍 Applied transforms - Overlay:', overlay.style.top, 'Content:', contentWrapper.style.transform);
+            }
             
             // Update content opacity
             content.style.opacity = pullProgress;
