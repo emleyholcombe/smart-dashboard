@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1252-touch-drag-drop-pwa';
+const CACHE_NAME = 'bennett-hub-v1253-fix-touch-drag-selection';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
