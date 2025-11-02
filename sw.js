@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1231-longer-delay';
+const CACHE_NAME = 'bennett-hub-v1232-no-update-banner';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
