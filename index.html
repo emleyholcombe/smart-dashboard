@@ -1710,7 +1710,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.51
+        Desktop v9.52
       </div>
     </div>
   </div>
@@ -4532,6 +4532,22 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       });
     }
 
+    // Helper function for touch drag to find where to insert the dragged item
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.task-item:not(.dragging)')];
+      
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+    
     function setupDragAndDrop(listElement, items, listType) {
       const listItems = listElement.querySelectorAll('.task-item');
       
@@ -4542,7 +4558,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           dragHandle.title = 'Drag to reorder';
           dragHandle.draggable = true;
           
-          // Only allow dragging from the drag handle
+          // Mouse drag events
           dragHandle.addEventListener('dragstart', (e) => {
             draggedItem = item;
             draggedIndex = index;
@@ -4560,6 +4576,137 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             // Remove all drop indicators
             clearDropIndicators(listItems);
           });
+          
+          // Touch drag events for mobile
+          let touchStartY = 0;
+          let touchCurrentY = 0;
+          let isDragging = false;
+          let placeholder = null;
+          
+          dragHandle.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+            touchCurrentY = touchStartY;
+            isDragging = false;
+            
+            // Small delay to distinguish between tap and drag
+            setTimeout(() => {
+              if (Math.abs(touchCurrentY - touchStartY) > 5) {
+                isDragging = true;
+                draggedItem = item;
+                draggedIndex = index;
+                draggedList = { items, listType };
+                item.classList.add('dragging');
+                item.style.opacity = '0.5';
+                
+                // Create placeholder
+                placeholder = item.cloneNode(true);
+                placeholder.style.opacity = '0.3';
+                placeholder.style.pointerEvents = 'none';
+                item.parentNode.insertBefore(placeholder, item);
+              }
+            }, 100);
+          }, { passive: true });
+          
+          dragHandle.addEventListener('touchmove', (e) => {
+            if (!isDragging) {
+              touchCurrentY = e.touches[0].clientY;
+              return;
+            }
+            
+            e.preventDefault();
+            touchCurrentY = e.touches[0].clientY;
+            const deltaY = touchCurrentY - touchStartY;
+            
+            // Move the item visually
+            item.style.transform = `translateY(${deltaY}px)`;
+            item.style.zIndex = '1000';
+            
+            // Find the item we're hovering over
+            const afterElement = getDragAfterElement(listElement, touchCurrentY);
+            if (afterElement == null) {
+              listElement.appendChild(placeholder);
+            } else {
+              listElement.insertBefore(placeholder, afterElement);
+            }
+          }, { passive: false });
+          
+          dragHandle.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            
+            // Get final position
+            const placeholderIndex = Array.from(listItems).indexOf(placeholder);
+            
+            // Reset styles
+            item.classList.remove('dragging');
+            item.style.opacity = '';
+            item.style.transform = '';
+            item.style.zIndex = '';
+            
+            // Remove placeholder
+            if (placeholder && placeholder.parentNode) {
+              placeholder.parentNode.removeChild(placeholder);
+            }
+            
+            // Reorder if position changed
+            if (draggedIndex !== placeholderIndex && draggedList) {
+              reorderItems(draggedList.items, draggedIndex, placeholderIndex);
+              
+              // Save and re-render based on list type
+              switch (draggedList.listType) {
+                case 'todo':
+                  saveTodoItems();
+                  if (document.getElementById('fullscreen-container')) {
+                    renderTodoListFullscreen();
+                  } else {
+                    renderTodoList();
+                  }
+                  break;
+                case 'todoHistory':
+                  saveTodoHistory();
+                  if (document.getElementById('fullscreen-container')) {
+                    renderTodoListFullscreen();
+                  } else {
+                    renderTodoList();
+                  }
+                  break;
+                case 'grocery':
+                  saveGroceryItems();
+                  if (document.getElementById('fullscreen-container')) {
+                    renderGroceryListFullscreen();
+                  } else {
+                    renderGroceryList();
+                  }
+                  break;
+                case 'meals':
+                  saveMealItems();
+                  syncMealOrderToHistory();
+                  if (document.getElementById('fullscreen-container')) {
+                    renderMealsListFullscreen();
+                  } else {
+                    renderMealsList();
+                  }
+                  break;
+                case 'mealHistory':
+                  saveMealHistory();
+                  syncHistoryOrderToMeal();
+                  if (document.getElementById('fullscreen-container')) {
+                    renderMealsListFullscreen();
+                  } else {
+                    renderMealsList();
+                  }
+                  break;
+              }
+            }
+            
+            // Reset drag state
+            draggedItem = null;
+            draggedIndex = null;
+            draggedList = null;
+            isDragging = false;
+            placeholder = null;
+          }, { passive: false });
         }
         
         // Make sure only drag handle is draggable
@@ -8599,7 +8746,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.51 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.52 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8643,7 +8790,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.51 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.52 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9175,7 +9322,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.51';
+      versionIndicator.textContent = 'PWA v12.52';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9234,7 +9381,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.51 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.52 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
