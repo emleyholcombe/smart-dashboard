@@ -1680,7 +1680,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.42
+        Desktop v9.43
       </div>
     </div>
   </div>
@@ -7335,6 +7335,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function showLandingPage() {
       document.getElementById('landing-page').style.display = 'flex';
       document.getElementById('dashboard').style.display = 'none';
+      
+      // Show version indicator on home view
+      const versionIndicator = document.getElementById('pwa-version-indicator');
+      if (versionIndicator) {
+        versionIndicator.style.display = 'block';
+      }
+      
       closeFullscreen();
       updateURL('home');
     }
@@ -7342,6 +7349,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function showDashboard() {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
+      
+      // Hide version indicator on dashboard
+      const versionIndicator = document.getElementById('pwa-version-indicator');
+      if (versionIndicator) {
+        versionIndicator.style.display = 'none';
+      }
       
       // Apply PWA-specific dashboard layout if in PWA mode
       if (window.pwaInfo?.isPWA) {
@@ -8143,23 +8156,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <span id="pwa-precip-details">--</span>
             </div>
           </div>
-          
-          <button onclick="showPWASyncSettings()" style="
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            padding: 12px 24px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-height: 44px;
-            max-width: 300px;
-            width: 100%;
-          ">
-            <span id="pwa-sync-button-icon">⚙️</span> Sync Settings
-          </button>
         `;
         
         document.getElementById('dashboard').appendChild(pwaDashboard);
@@ -8169,18 +8165,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // Update PWA dashboard with current data
       updatePWADashboardData();
-      
-      // Update sync button icon based on current sync status
-      setTimeout(() => {
-        const syncIcon = document.getElementById('pwa-sync-button-icon');
-        if (syncIcon) {
-          if (GITHUB_TOKEN && GIST_ID) {
-            syncIcon.textContent = '✅';
-          } else {
-            syncIcon.textContent = '⚙️';
-          }
-        }
-      }, 100);
       
       console.log('✅ PWA: Applied simplified dashboard layout with header');
     }
@@ -8583,7 +8567,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.42 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.43 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8627,7 +8611,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.42 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.43 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8682,7 +8666,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       `;
       
       popup.innerHTML = `
-        <div style="padding: 20px; position: relative;">
+        <div style="position: sticky; top: 0; background: white; padding: 20px 20px 10px 20px; border-bottom: 1px solid #eee; z-index: 1;">
           <button onclick="this.closest('.pwa-info-overlay').remove()" style="
             position: absolute;
             top: 15px;
@@ -8700,7 +8684,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             padding: 0;
           ">✕</button>
           
-          <h2 style="margin: 0 0 20px 0; color: #333; font-size: 20px;">PWA Info</h2>
+          <h2 style="margin: 0; color: #333; font-size: 20px;">PWA Info</h2>
+        </div>
+        
+        <div style="padding: 20px;">
           
           <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
             <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
@@ -8760,7 +8747,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               cursor: pointer;
               font-size: 14px;
               font-weight: 500;
-            ">Edit/Add GitHub Token</button>
+            ">Edit GitHub Token</button>
             
             <button onclick="showEditGistPopup()" style="
               padding: 12px;
@@ -8771,7 +8758,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               cursor: pointer;
               font-size: 14px;
               font-weight: 500;
-            ">Edit/Add Gist ID</button>
+            ">Edit Gist ID</button>
             
             <button onclick="manualVersionUpdate()" style="
               padding: 12px;
@@ -8853,18 +8840,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         ">
         
         <div style="display: flex; gap: 10px;">
-          <button onclick="saveToken()" style="
-            flex: 1;
-            padding: 12px;
-            background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-          ">Save</button>
-          
           <button onclick="backToMainPopup()" style="
             flex: 1;
             padding: 12px;
@@ -8877,17 +8852,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             font-weight: 500;
           ">Back</button>
           
-          <button onclick="closeAllPopups()" style="
+          <button onclick="saveToken()" style="
             flex: 1;
             padding: 12px;
-            background: #f44336;
+            background: #4caf50;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
-          ">Cancel</button>
+          ">Save</button>
         </div>
       `;
       
@@ -8939,18 +8914,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         ">
         
         <div style="display: flex; gap: 10px;">
-          <button onclick="saveGist()" style="
-            flex: 1;
-            padding: 12px;
-            background: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-          ">Save</button>
-          
           <button onclick="backToMainPopup()" style="
             flex: 1;
             padding: 12px;
@@ -8963,17 +8926,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             font-weight: 500;
           ">Back</button>
           
-          <button onclick="closeAllPopups()" style="
+          <button onclick="saveGist()" style="
             flex: 1;
             padding: 12px;
-            background: #f44336;
+            background: #4caf50;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
-          ">Cancel</button>
+          ">Save</button>
         </div>
       `;
       
@@ -9122,7 +9085,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.42';
+      versionIndicator.textContent = 'PWA v12.43';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9181,7 +9144,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.42 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.43 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
