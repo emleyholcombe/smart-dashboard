@@ -1640,7 +1640,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.6
+        Desktop v9.7
       </div>
     </div>
   </div>
@@ -8428,7 +8428,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.6 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.7 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8498,7 +8498,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.6 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.7 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8585,7 +8585,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.6';
+      versionIndicator.textContent = 'PWA v12.7';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -8644,7 +8644,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.6 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.7 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -8857,6 +8857,8 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           wrapper.style.cssText = `
             transition: transform 0.1s ease-out;
             transform: translateY(0);
+            width: 100%;
+            min-height: 100vh;
           `;
           
           // Wrap all body content
@@ -8865,6 +8867,16 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
           );
           bodyContent.forEach(child => wrapper.appendChild(child));
           document.body.appendChild(wrapper);
+          console.log('✅ Content wrapper created with', bodyContent.length, 'children');
+        } else {
+          // Re-wrap any new content that was added outside the wrapper
+          const bodyContent = Array.from(document.body.children).filter(
+            child => child.id !== 'pull-refresh-overlay' && child.id !== 'pull-content-wrapper'
+          );
+          if (bodyContent.length > 0) {
+            bodyContent.forEach(child => wrapper.appendChild(child));
+            console.log('✅ Re-wrapped', bodyContent.length, 'new children');
+          }
         }
         return wrapper;
       };
@@ -8897,6 +8909,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
             
             if (!contentWrapper) {
               console.log('❌ Content wrapper not found!');
+              return; // Exit if wrapper doesn't exist
             }
             
             // Calculate pull progress (max 120px)
@@ -8907,9 +8920,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
             overlay.style.top = `${-120 + pullDistance}px`;
             
             // Move content down
-            if (contentWrapper) {
-              contentWrapper.style.transform = `translateY(${pullDistance}px)`;
-            }
+            contentWrapper.style.transform = `translateY(${pullDistance}px)`;
             
             // Update content opacity
             content.style.opacity = pullProgress;
