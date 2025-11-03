@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.81
+        Desktop v9.82
       </div>
     </div>
   </div>
@@ -4143,7 +4143,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               initialRect = item.getBoundingClientRect();
               
               item.classList.add('dragging');
-              item.style.opacity = '0.6';
+              item.style.opacity = '0'; // Hide dragged item, only show placeholder
               item.style.position = 'fixed';
               item.style.left = `${initialRect.left}px`;
               item.style.top = `${initialRect.top}px`;
@@ -4168,7 +4168,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               
               // Auto-scroll when near edges of viewport
               const scrollThreshold = 100; // pixels from edge to trigger scroll
-              const scrollSpeed = 8; // pixels per frame (reduced from 15)
+              const scrollSpeed = 4; // pixels per frame (reduced for smoother control)
               
               // Find the scrollable container (could be window or a scrollable div)
               let scrollableElement = window;
@@ -5023,7 +5023,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               initialRect = item.getBoundingClientRect();
               
               item.classList.add('dragging');
-              item.style.opacity = '0.6';
+              item.style.opacity = '0'; // Hide dragged item, only show placeholder
               item.style.position = 'fixed';
               item.style.left = `${initialRect.left}px`;
               item.style.top = `${initialRect.top}px`;
@@ -5050,7 +5050,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               
               // Auto-scroll when near edges of viewport
               const scrollThreshold = 100;
-              const scrollSpeed = 8; // Reduced from 15
+              const scrollSpeed = 4; // Reduced for smoother control
               
               // Find the scrollable container
               let scrollableElement = window;
@@ -5388,7 +5388,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               initialRect = item.getBoundingClientRect();
               
               item.classList.add('dragging');
-              item.style.opacity = '0.6';
+              item.style.opacity = '0'; // Hide dragged item, only show placeholder
               item.style.position = 'fixed';
               item.style.left = `${initialRect.left}px`;
               item.style.top = `${initialRect.top}px`;
@@ -5413,7 +5413,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               
               // Auto-scroll when near edges of viewport
               const scrollThreshold = 100;
-              const scrollSpeed = 8; // Reduced from 15
+              const scrollSpeed = 4; // Reduced for smoother control
               
               // Find the scrollable container
               let scrollableElement = window;
@@ -9470,7 +9470,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.81 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.82 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9514,7 +9514,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.81 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.82 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -10046,7 +10046,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.81';
+      versionIndicator.textContent = 'PWA v12.82';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -10105,7 +10105,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.81 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.82 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
