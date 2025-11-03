@@ -1171,18 +1171,9 @@
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%) !important;
       border: 2px dashed #667eea !important;
       border-radius: 8px !important;
-      opacity: 1 !important;
+      opacity: 0.4 !important;
       position: relative;
       animation: placeholderPulse 1.5s ease-in-out infinite;
-      height: 8px !important;
-      min-height: 8px !important;
-      padding: 0 !important;
-      overflow: hidden !important;
-      margin: 4px 0 !important;
-    }
-    
-    .drag-placeholder * {
-      display: none !important;
     }
     
     @keyframes placeholderPulse {
@@ -1800,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.64
+        Desktop v9.65
       </div>
     </div>
   </div>
@@ -4937,8 +4928,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             // Start dragging if moved more than 3px (faster response)
             if (!isDragging && (Math.abs(deltaY) > 3 || Math.abs(deltaX) > 3)) {
               isDragging = true;
+              
+              // Get rect BEFORE changing position
+              initialRect = item.getBoundingClientRect();
+              
               item.classList.add('dragging');
               item.style.opacity = '0.6';
+              item.style.position = 'fixed';
+              item.style.left = `${initialRect.left}px`;
+              item.style.top = `${initialRect.top}px`;
+              item.style.width = `${initialRect.width}px`;
+              item.style.zIndex = '1000';
               
               // Create placeholder (but don't insert yet - will be positioned on move)
               placeholder = item.cloneNode(true);
@@ -4950,15 +4950,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               placeholder.style.transform = '';
               placeholder.style.zIndex = '';
               placeholder.style.position = '';
+              placeholder.style.left = '';
+              placeholder.style.top = '';
+              placeholder.style.width = '';
             }
             
             if (isDragging) {
               hasMoved = true;
               
-              // Move the item visually
-              item.style.transform = `translateY(${deltaY}px)`;
-              item.style.zIndex = '1000';
-              item.style.position = 'relative';
+              // Update position based on finger movement
+              item.style.top = `${initialRect.top + (currentY - touchStartY)}px`;
               
               // Find the item we're hovering over
               const afterElement = getDragAfterElement(listElement, currentY);
@@ -9245,7 +9246,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.64 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.65 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9289,7 +9290,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.64 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.65 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9821,7 +9822,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.64';
+      versionIndicator.textContent = 'PWA v12.65';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9880,7 +9881,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.64 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.65 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
