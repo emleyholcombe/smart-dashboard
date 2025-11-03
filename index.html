@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.70
+        Desktop v9.71
       </div>
     </div>
   </div>
@@ -4165,8 +4165,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               // Update position based on finger movement
               item.style.top = `${initialRect.top + (currentY - touchStartY)}px`;
               
-              // Check if hovering over a category header (to move to that category)
+              // Auto-scroll when near edges of the list container
+              const scrollThreshold = 80; // pixels from edge to trigger scroll
+              const scrollSpeed = 8; // pixels per frame
+              const listRect = listElement.getBoundingClientRect();
+              
+              if (currentY < listRect.top + scrollThreshold && window.scrollY > 0) {
+                // Near top of list - scroll up
+                window.scrollBy(0, -scrollSpeed);
+              } else if (currentY > listRect.bottom - scrollThreshold && 
+                         window.scrollY < document.documentElement.scrollHeight - window.innerHeight) {
+                // Near bottom of list - scroll down
+                window.scrollBy(0, scrollSpeed);
+              }
+              
+              // Temporarily hide dragged item to detect what's underneath
+              item.style.pointerEvents = 'none';
               const elementAtPoint = document.elementFromPoint(currentX, currentY);
+              item.style.pointerEvents = '';
+              
               let hoveringOverHeader = null;
               if (elementAtPoint) {
                 hoveringOverHeader = elementAtPoint.closest('.category-header');
@@ -9384,7 +9401,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.70 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.71 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9428,7 +9445,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.70 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.71 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9960,7 +9977,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.70';
+      versionIndicator.textContent = 'PWA v12.71';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -10019,7 +10036,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.70 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.71 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 

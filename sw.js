@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1270-fix-cross-category-drag';
+const CACHE_NAME = 'bennett-hub-v1271-fix-cross-category-and-autoscroll';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
