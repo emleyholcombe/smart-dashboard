@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1277-autoscroll-all-lists';
+const CACHE_NAME = 'bennett-hub-v1278-debug-drop-detection';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
