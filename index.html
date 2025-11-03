@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.79
+        Desktop v9.80
       </div>
     </div>
   </div>
@@ -4168,7 +4168,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               
               // Auto-scroll when near edges of viewport
               const scrollThreshold = 100; // pixels from edge to trigger scroll
-              const scrollSpeed = 15; // pixels per frame
+              const scrollSpeed = 8; // pixels per frame (reduced from 15)
               
               // Find the scrollable container (could be window or a scrollable div)
               let scrollableElement = window;
@@ -5054,15 +5054,19 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               
               // Auto-scroll when near edges of viewport
               const scrollThreshold = 100;
-              const scrollSpeed = 15;
+              const scrollSpeed = 8; // Reduced from 15
               
               // Find the scrollable container
               let scrollableElement = window;
               let scrollableContainer = document.documentElement;
-              let parent = listElement.parentElement;
+              let parent = listElement;
               while (parent && parent !== document.body) {
-                const overflowY = window.getComputedStyle(parent).overflowY;
-                if ((overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
+                const style = window.getComputedStyle(parent);
+                const overflowY = style.overflowY;
+                const isScrollable = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay');
+                const hasScroll = parent.scrollHeight > parent.clientHeight;
+                
+                if (isScrollable && hasScroll) {
                   scrollableElement = parent;
                   scrollableContainer = parent;
                   break;
@@ -5079,16 +5083,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                 } else {
                   scrollableContainer.scrollTop -= scrollSpeed;
                 }
+                scrollOffset -= scrollSpeed;
               } else if (currentY > window.innerHeight - scrollThreshold && currentScrollY < maxScrollY) {
                 if (scrollableElement === window) {
                   window.scrollBy(0, scrollSpeed);
                 } else {
                   scrollableContainer.scrollTop += scrollSpeed;
                 }
+                scrollOffset += scrollSpeed;
               }
               
-              // Update position based on finger movement
-              item.style.top = `${initialRect.top + (currentY - touchStartY)}px`;
+              // Update position based on finger movement + scroll offset
+              item.style.top = `${initialRect.top + (currentY - touchStartY) + scrollOffset}px`;
               
               // Find the item we're hovering over
               const afterElement = getDragAfterElement(listElement, currentY);
@@ -5344,6 +5350,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           let hasMoved = false;
           let placeholder = null;
           let initialRect = null;
+          let scrollOffset = 0; // Track cumulative scroll offset
           
           dragHandle.addEventListener('touchstart', (e) => {
             e.preventDefault();
@@ -5352,6 +5359,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             touchStartX = e.touches[0].clientX;
             isDragging = false;
             hasMoved = false;
+            scrollOffset = 0;
             
             draggedItem = item;
             draggedIndex = index;
@@ -5398,15 +5406,19 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               
               // Auto-scroll when near edges of viewport
               const scrollThreshold = 100;
-              const scrollSpeed = 15;
+              const scrollSpeed = 8; // Reduced from 15
               
               // Find the scrollable container
               let scrollableElement = window;
               let scrollableContainer = document.documentElement;
-              let parent = listElement.parentElement;
+              let parent = listElement;
               while (parent && parent !== document.body) {
-                const overflowY = window.getComputedStyle(parent).overflowY;
-                if ((overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
+                const style = window.getComputedStyle(parent);
+                const overflowY = style.overflowY;
+                const isScrollable = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay');
+                const hasScroll = parent.scrollHeight > parent.clientHeight;
+                
+                if (isScrollable && hasScroll) {
                   scrollableElement = parent;
                   scrollableContainer = parent;
                   break;
@@ -5423,16 +5435,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                 } else {
                   scrollableContainer.scrollTop -= scrollSpeed;
                 }
+                scrollOffset -= scrollSpeed;
               } else if (currentY > window.innerHeight - scrollThreshold && currentScrollY < maxScrollY) {
                 if (scrollableElement === window) {
                   window.scrollBy(0, scrollSpeed);
                 } else {
                   scrollableContainer.scrollTop += scrollSpeed;
                 }
+                scrollOffset += scrollSpeed;
               }
               
-              // Update position based on finger movement
-              item.style.top = `${initialRect.top + (currentY - touchStartY)}px`;
+              // Update position based on finger movement + scroll offset
+              item.style.top = `${initialRect.top + (currentY - touchStartY) + scrollOffset}px`;
               
               // Find valid drop targets (same date group only)
               const afterElement = getDragAfterElementInDateGroup(listElement, currentY, dateGroup);
@@ -9438,7 +9452,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.79 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.80 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9482,7 +9496,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.79 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.80 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -10014,7 +10028,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.79';
+      versionIndicator.textContent = 'PWA v12.80';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -10073,7 +10087,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.79 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.80 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
