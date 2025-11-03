@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.68
+        Desktop v9.69
       </div>
     </div>
   </div>
@@ -5970,7 +5970,32 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const inputs = container.querySelectorAll('input[type="text"]');
         const ingredients = Array.from(inputs)
           .map(input => input.value.trim())
-          .filter(value => value.length > 0);
+          .filter(value => {
+            if (value.length === 0) return false;
+            
+            // Exclude water in all its forms
+            const lowerValue = value.toLowerCase();
+            const waterVariants = [
+              'water',
+              'cold water',
+              'warm water',
+              'hot water',
+              'boiling water',
+              'ice water',
+              'filtered water',
+              'tap water',
+              'distilled water'
+            ];
+            
+            // Check if the ingredient is just water (with optional measurements)
+            const isWater = waterVariants.some(variant => {
+              // Match exact water or water with measurements like "1 cup water"
+              const pattern = new RegExp(`^(\\d+\\s*)?(cup[s]?|tablespoon[s]?|teaspoon[s]?|tbsp|tsp|oz|ml|l|liter[s]?|gallon[s]?|quart[s]?|pint[s]?)?\\s*${variant}$`, 'i');
+              return pattern.test(lowerValue) || lowerValue === variant;
+            });
+            
+            return !isWater;
+          });
         
         if (ingredients.length === 0) {
           // Silently do nothing if no ingredients
@@ -9313,7 +9338,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.68 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.69 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9357,7 +9382,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.68 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.69 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9889,7 +9914,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.68';
+      versionIndicator.textContent = 'PWA v12.69';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9948,7 +9973,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.68 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.69 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
