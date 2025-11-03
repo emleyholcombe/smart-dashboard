@@ -4166,16 +4166,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             if (isDragging) {
               hasMoved = true;
               
-              // Auto-scroll when near edges of viewport (not list container)
+              // Auto-scroll when near edges of viewport
               const scrollThreshold = 100; // pixels from edge to trigger scroll
-              const scrollSpeed = 15; // pixels per frame - increased for visibility
+              const scrollSpeed = 15; // pixels per frame
               
               if (currentY < scrollThreshold && window.scrollY > 0) {
                 // Near top of viewport - scroll up
                 window.scrollBy(0, -scrollSpeed);
                 scrollOffset -= scrollSpeed; // Adjust item position for scroll
               } else if (currentY > window.innerHeight - scrollThreshold && 
-                         window.scrollY + window.innerHeight < document.documentElement.scrollHeight) {
+                         window.scrollY < document.documentElement.scrollHeight - window.innerHeight) {
                 // Near bottom of viewport - scroll down
                 window.scrollBy(0, scrollSpeed);
                 scrollOffset += scrollSpeed; // Adjust item position for scroll
