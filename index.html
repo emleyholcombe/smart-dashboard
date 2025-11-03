@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.76
+        Desktop v9.77
       </div>
     </div>
   </div>
@@ -5025,6 +5025,41 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             if (isDragging) {
               hasMoved = true;
               
+              // Auto-scroll when near edges of viewport
+              const scrollThreshold = 100;
+              const scrollSpeed = 15;
+              
+              // Find the scrollable container
+              let scrollableElement = window;
+              let scrollableContainer = document.documentElement;
+              let parent = listElement.parentElement;
+              while (parent && parent !== document.body) {
+                const overflowY = window.getComputedStyle(parent).overflowY;
+                if ((overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
+                  scrollableElement = parent;
+                  scrollableContainer = parent;
+                  break;
+                }
+                parent = parent.parentElement;
+              }
+              
+              const currentScrollY = scrollableElement === window ? window.scrollY : scrollableContainer.scrollTop;
+              const maxScrollY = scrollableContainer.scrollHeight - scrollableContainer.clientHeight;
+              
+              if (currentY < scrollThreshold && currentScrollY > 0) {
+                if (scrollableElement === window) {
+                  window.scrollBy(0, -scrollSpeed);
+                } else {
+                  scrollableContainer.scrollTop -= scrollSpeed;
+                }
+              } else if (currentY > window.innerHeight - scrollThreshold && currentScrollY < maxScrollY) {
+                if (scrollableElement === window) {
+                  window.scrollBy(0, scrollSpeed);
+                } else {
+                  scrollableContainer.scrollTop += scrollSpeed;
+                }
+              }
+              
               // Update position based on finger movement
               item.style.top = `${initialRect.top + (currentY - touchStartY)}px`;
               
@@ -5333,6 +5368,41 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             
             if (isDragging) {
               hasMoved = true;
+              
+              // Auto-scroll when near edges of viewport
+              const scrollThreshold = 100;
+              const scrollSpeed = 15;
+              
+              // Find the scrollable container
+              let scrollableElement = window;
+              let scrollableContainer = document.documentElement;
+              let parent = listElement.parentElement;
+              while (parent && parent !== document.body) {
+                const overflowY = window.getComputedStyle(parent).overflowY;
+                if ((overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
+                  scrollableElement = parent;
+                  scrollableContainer = parent;
+                  break;
+                }
+                parent = parent.parentElement;
+              }
+              
+              const currentScrollY = scrollableElement === window ? window.scrollY : scrollableContainer.scrollTop;
+              const maxScrollY = scrollableContainer.scrollHeight - scrollableContainer.clientHeight;
+              
+              if (currentY < scrollThreshold && currentScrollY > 0) {
+                if (scrollableElement === window) {
+                  window.scrollBy(0, -scrollSpeed);
+                } else {
+                  scrollableContainer.scrollTop -= scrollSpeed;
+                }
+              } else if (currentY > window.innerHeight - scrollThreshold && currentScrollY < maxScrollY) {
+                if (scrollableElement === window) {
+                  window.scrollBy(0, scrollSpeed);
+                } else {
+                  scrollableContainer.scrollTop += scrollSpeed;
+                }
+              }
               
               // Update position based on finger movement
               item.style.top = `${initialRect.top + (currentY - touchStartY)}px`;
@@ -9341,7 +9411,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.76 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.77 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9385,7 +9455,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.76 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.77 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9917,7 +9987,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.76';
+      versionIndicator.textContent = 'PWA v12.77';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9976,7 +10046,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.76 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.77 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
