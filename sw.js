@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1263-thin-placeholder';
+const CACHE_NAME = 'bennett-hub-v1264-fix-drag-origin-gap';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
