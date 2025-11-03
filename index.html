@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.72
+        Desktop v9.73
       </div>
     </div>
   </div>
@@ -4166,9 +4166,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             if (isDragging) {
               hasMoved = true;
               
-              // Update position based on finger movement + scroll offset
-              item.style.top = `${initialRect.top + (currentY - touchStartY) + scrollOffset}px`;
-              
               // Auto-scroll when near edges of the list container
               const scrollThreshold = 80; // pixels from edge to trigger scroll
               const scrollSpeed = 8; // pixels per frame
@@ -4185,132 +4182,23 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                 scrollOffset += scrollSpeed; // Adjust item position for scroll
               }
               
-              // Throttle placeholder updates to every 16ms (60fps) for smoother performance
+              // ALWAYS update position (don't throttle this - it needs to be smooth)
+              item.style.top = `${initialRect.top + (currentY - touchStartY) + scrollOffset}px`;
+              
+              // Throttle placeholder updates to every 32ms for smoother performance
               const now = Date.now();
-              if (now - lastUpdateTime < 16) {
-                return; // Skip this frame
+              if (now - lastUpdateTime < 32) {
+                return; // Skip placeholder update but keep item moving
               }
               lastUpdateTime = now;
               
-              // Temporarily hide dragged item to detect what's underneath
-              item.style.pointerEvents = 'none';
-              const elementAtPoint = document.elementFromPoint(currentX, currentY);
-              item.style.pointerEvents = '';
-              
-              let hoveringOverHeader = null;
-              if (elementAtPoint) {
-                hoveringOverHeader = elementAtPoint.closest('.category-header');
-              }
-              
-              // Check if hovering over an item from a different category
-              let hoveringOverItem = null;
-              let hoveringOverItemCategory = null;
-              if (elementAtPoint && elementAtPoint.classList.contains('task-item')) {
-                hoveringOverItem = elementAtPoint;
-                const hoveredId = parseFloat(hoveringOverItem.getAttribute('data-item-id'));
-                const hoveredGroceryItem = groceryItems.find(item => item.id === hoveredId);
-                if (hoveredGroceryItem) {
-                  hoveringOverItemCategory = categorizeGroceryItem(hoveredGroceryItem.text, hoveredGroceryItem.manualCategory);
-                }
-              }
-              
-              if (hoveringOverHeader) {
-                // Hovering over a category header - place at start of that category
-                const categoryName = hoveringOverHeader.getAttribute('data-category');
-                const categoryItems = Array.from(listElement.querySelectorAll('.task-item:not(.dragging):not(.drag-placeholder)')).filter(el => {
-                  const id = parseFloat(el.getAttribute('data-item-id'));
-                  const groceryItem = groceryItems.find(item => item.id === id);
-                  return groceryItem && categorizeGroceryItem(groceryItem.text, groceryItem.manualCategory) === categoryName;
-                });
-                
-                if (categoryItems.length > 0) {
-                  listElement.insertBefore(placeholder, categoryItems[0]);
-                } else {
-                  // Empty category - place after header
-                  hoveringOverHeader.parentNode.insertBefore(placeholder, hoveringOverHeader.nextSibling);
-                }
-              } else if (hoveringOverItemCategory && hoveringOverItemCategory !== groceryDraggedCategory) {
-                // Hovering over an item from a DIFFERENT category - allow cross-category drop
-                const targetCategoryItems = Array.from(listElement.querySelectorAll('.task-item:not(.dragging):not(.drag-placeholder)')).filter(el => {
-                  const id = parseFloat(el.getAttribute('data-item-id'));
-                  const groceryItem = groceryItems.find(item => item.id === id);
-                  return groceryItem && categorizeGroceryItem(groceryItem.text, groceryItem.manualCategory) === hoveringOverItemCategory;
-                });
-                
-                // Find closest item in the target category
-                let dropTarget = null;
-                let minDistance = Infinity;
-                
-                for (const categoryItem of targetCategoryItems) {
-                  const box = categoryItem.getBoundingClientRect();
-                  const itemMidY = box.top + box.height / 2;
-                  const distance = Math.abs(currentY - itemMidY);
-                  
-                  if (distance < minDistance) {
-                    minDistance = distance;
-                    dropTarget = categoryItem;
-                  }
-                }
-                
-                if (dropTarget) {
-                  const box = dropTarget.getBoundingClientRect();
-                  const itemMidY = box.top + box.height / 2;
-                  
-                  if (currentY < itemMidY) {
-                    listElement.insertBefore(placeholder, dropTarget);
-                  } else {
-                    if (dropTarget.nextSibling) {
-                      listElement.insertBefore(placeholder, dropTarget.nextSibling);
-                    } else {
-                      listElement.appendChild(placeholder);
-                    }
-                  }
-                }
+              // Simple drop detection - just use standard getDragAfterElement
+              // This allows cross-category moves and is much simpler/smoother
+              const afterElement = getDragAfterElement(listElement, currentY);
+              if (afterElement == null) {
+                listElement.appendChild(placeholder);
               } else {
-                // Hovering in current category or empty space - stay in current category
-                const currentCategoryItems = Array.from(listElement.querySelectorAll('.task-item:not(.dragging):not(.drag-placeholder)')).filter(el => {
-                  const id = parseFloat(el.getAttribute('data-item-id'));
-                  const groceryItem = groceryItems.find(item => item.id === id);
-                  return groceryItem && categorizeGroceryItem(groceryItem.text, groceryItem.manualCategory) === groceryDraggedCategory;
-                });
-                
-                // Find the best drop position within current category
-                let dropTarget = null;
-                let minDistance = Infinity;
-                
-                for (const categoryItem of currentCategoryItems) {
-                  const box = categoryItem.getBoundingClientRect();
-                  const itemMidY = box.top + box.height / 2;
-                  const distance = Math.abs(currentY - itemMidY);
-                  
-                  if (distance < minDistance) {
-                    minDistance = distance;
-                    dropTarget = categoryItem;
-                  }
-                }
-                
-                if (dropTarget) {
-                  const box = dropTarget.getBoundingClientRect();
-                  const itemMidY = box.top + box.height / 2;
-                  
-                  if (currentY < itemMidY) {
-                    listElement.insertBefore(placeholder, dropTarget);
-                  } else {
-                    if (dropTarget.nextSibling) {
-                      listElement.insertBefore(placeholder, dropTarget.nextSibling);
-                    } else {
-                      listElement.appendChild(placeholder);
-                    }
-                  }
-                } else {
-                  // No items in current category - shouldn't happen, but fallback
-                  const afterElement = getDragAfterElement(listElement, currentY);
-                  if (afterElement == null) {
-                    listElement.appendChild(placeholder);
-                  } else {
-                    listElement.insertBefore(placeholder, afterElement);
-                  }
-                }
+                listElement.insertBefore(placeholder, afterElement);
               }
             }
           }, { passive: false });
@@ -9414,7 +9302,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.72 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.73 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9458,7 +9346,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.72 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.73 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9990,7 +9878,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.72';
+      versionIndicator.textContent = 'PWA v12.73';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -10049,7 +9937,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.72 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.73 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
