@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1269-exclude-water-from-grocery';
+const CACHE_NAME = 'bennett-hub-v1270-fix-cross-category-drag';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
