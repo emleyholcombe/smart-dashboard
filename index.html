@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.60
+        Desktop v9.61
       </div>
     </div>
   </div>
@@ -4100,6 +4100,156 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             // Remove all drop indicators
             clearGroceryDropIndicators(listElement);
           });
+          
+          // Touch drag events for mobile
+          let touchStartY = 0;
+          let touchStartX = 0;
+          let isDragging = false;
+          let hasMoved = false;
+          let placeholder = null;
+          
+          handle.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+            isDragging = false;
+            hasMoved = false;
+            
+            const itemId = parseFloat(item.getAttribute('data-item-id'));
+            if (itemId) {
+              groceryDraggedItem = groceryItems.find(item => item.id === itemId);
+              groceryDraggedCategory = categorizeGroceryItem(groceryDraggedItem.text, groceryDraggedItem.manualCategory);
+            }
+          }, { passive: false });
+          
+          handle.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            
+            const currentY = e.touches[0].clientY;
+            const currentX = e.touches[0].clientX;
+            const deltaY = currentY - touchStartY;
+            const deltaX = currentX - touchStartX;
+            
+            if (!isDragging && (Math.abs(deltaY) > 3 || Math.abs(deltaX) > 3)) {
+              isDragging = true;
+              item.classList.add('dragging');
+              item.style.opacity = '0.6';
+              
+              // Create placeholder (but don't insert yet)
+              placeholder = item.cloneNode(true);
+              placeholder.style.pointerEvents = 'none';
+              placeholder.classList.add('drag-placeholder');
+              placeholder.classList.remove('dragging');
+              placeholder.style.transform = '';
+              placeholder.style.zIndex = '';
+              placeholder.style.position = '';
+            }
+            
+            if (isDragging) {
+              hasMoved = true;
+              
+              item.style.transform = `translateY(${deltaY}px)`;
+              item.style.zIndex = '1000';
+              item.style.position = 'relative';
+              
+              // Find drop target
+              const afterElement = getDragAfterElement(listElement, currentY);
+              if (afterElement == null) {
+                listElement.appendChild(placeholder);
+              } else {
+                listElement.insertBefore(placeholder, afterElement);
+              }
+            }
+          }, { passive: false });
+          
+          handle.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            
+            if (!isDragging || !hasMoved) {
+              groceryDraggedItem = null;
+              groceryDraggedCategory = null;
+              return;
+            }
+            
+            item.classList.remove('dragging');
+            
+            const itemRect = item.getBoundingClientRect();
+            const placeholderRect = placeholder.getBoundingClientRect();
+            const finalOffset = placeholderRect.top - itemRect.top;
+            
+            item.style.transition = 'transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease';
+            item.style.transform = `translateY(${finalOffset}px)`;
+            item.style.opacity = '1';
+            
+            setTimeout(() => {
+              item.style.transition = '';
+              item.style.transform = '';
+              item.style.opacity = '';
+              item.style.zIndex = '';
+              item.style.position = '';
+              
+              if (placeholder && placeholder.parentNode) {
+                placeholder.parentNode.insertBefore(item, placeholder);
+                placeholder.parentNode.removeChild(placeholder);
+              }
+              
+              if (groceryDraggedItem) {
+                // Determine target category from placeholder position
+                const placeholderPrevSibling = placeholder.previousElementSibling;
+                const placeholderNextSibling = placeholder.nextElementSibling;
+                
+                let targetCategory = groceryDraggedCategory;
+                
+                // Check siblings to determine category
+                if (placeholderNextSibling && placeholderNextSibling.classList.contains('task-item')) {
+                  const nextId = parseFloat(placeholderNextSibling.getAttribute('data-item-id'));
+                  const nextItem = groceryItems.find(i => i.id === nextId);
+                  if (nextItem) {
+                    targetCategory = categorizeGroceryItem(nextItem.text, nextItem.manualCategory);
+                  }
+                } else if (placeholderPrevSibling && placeholderPrevSibling.classList.contains('task-item')) {
+                  const prevId = parseFloat(placeholderPrevSibling.getAttribute('data-item-id'));
+                  const prevItem = groceryItems.find(i => i.id === prevId);
+                  if (prevItem) {
+                    targetCategory = categorizeGroceryItem(prevItem.text, prevItem.manualCategory);
+                  }
+                } else if (placeholderPrevSibling && placeholderPrevSibling.classList.contains('category-header')) {
+                  targetCategory = placeholderPrevSibling.getAttribute('data-category');
+                }
+                
+                // Update category if different
+                if (targetCategory !== groceryDraggedCategory) {
+                  groceryDraggedItem.manualCategory = targetCategory;
+                }
+                
+                // Get all items in target category from DOM order
+                const categoryElements = Array.from(listElement.querySelectorAll('.task-item')).filter(el => {
+                  const id = parseFloat(el.getAttribute('data-item-id'));
+                  const groceryItem = groceryItems.find(item => item.id === id);
+                  return groceryItem && categorizeGroceryItem(groceryItem.text, groceryItem.manualCategory) === targetCategory;
+                });
+                
+                // Update order values
+                const baseOrder = Date.now();
+                categoryElements.forEach((el, idx) => {
+                  const id = parseFloat(el.getAttribute('data-item-id'));
+                  const groceryItem = groceryItems.find(item => item.id === id);
+                  if (groceryItem) {
+                    groceryItem.order = baseOrder - idx;
+                  }
+                });
+                
+                saveGroceryItems();
+              }
+              
+              groceryDraggedItem = null;
+              groceryDraggedCategory = null;
+              isDragging = false;
+              hasMoved = false;
+              placeholder = null;
+            }, 150);
+          }, { passive: false });
         }
         
         // Make sure only drag handle is draggable
@@ -9059,7 +9209,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.60 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.61 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9103,7 +9253,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.60 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.61 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9635,7 +9785,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.60';
+      versionIndicator.textContent = 'PWA v12.61';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9694,7 +9844,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.60 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.61 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
