@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.78
+        Desktop v9.79
       </div>
     </div>
   </div>
@@ -4174,13 +4174,28 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               let scrollableElement = window;
               let scrollableContainer = document.documentElement;
               
-              // Check if listElement has a scrollable parent
-              let parent = listElement.parentElement;
+              // Check if listElement itself or its parents are scrollable
+              let parent = listElement;
               while (parent && parent !== document.body) {
-                const overflowY = window.getComputedStyle(parent).overflowY;
-                if ((overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
+                const style = window.getComputedStyle(parent);
+                const overflowY = style.overflowY;
+                const isScrollable = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay');
+                const hasScroll = parent.scrollHeight > parent.clientHeight;
+                
+                console.log('🔍 Checking element:', {
+                  tagName: parent.tagName,
+                  id: parent.id,
+                  overflowY,
+                  isScrollable,
+                  scrollHeight: parent.scrollHeight,
+                  clientHeight: parent.clientHeight,
+                  hasScroll
+                });
+                
+                if (isScrollable && hasScroll) {
                   scrollableElement = parent;
                   scrollableContainer = parent;
+                  console.log('✅ Found scrollable container:', parent.tagName, parent.id);
                   break;
                 }
                 parent = parent.parentElement;
@@ -4978,6 +4993,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           let hasMoved = false;
           let placeholder = null;
           let initialRect = null;
+          let scrollOffset = 0; // Track cumulative scroll offset
           
           dragHandle.addEventListener('touchstart', (e) => {
             // Prevent text selection
@@ -4987,6 +5003,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             touchStartX = e.touches[0].clientX;
             isDragging = false;
             hasMoved = false;
+            scrollOffset = 0;
             
             // Immediately set up drag state
             draggedItem = item;
@@ -9421,7 +9438,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.78 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.79 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9465,7 +9482,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.78 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.79 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9997,7 +10014,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.78';
+      versionIndicator.textContent = 'PWA v12.79';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -10056,7 +10073,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.78 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.79 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
