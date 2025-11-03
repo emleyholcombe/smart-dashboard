@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.67
+        Desktop v9.68
       </div>
     </div>
   </div>
@@ -3878,7 +3878,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         keywords: ['chicken', 'beef', 'pork', 'lamb', 'turkey', 'duck', 'steak', 'ground beef', 'ground turkey', 'chicken breast', 'chicken thigh', 'pork chop', 'bacon', 'sausage', 'fish', 'salmon', 'tuna', 'cod', 'tilapia', 'shrimp', 'crab', 'lobster', 'scallops', 'mussels', 'clams', 'oysters', 'meat', 'poultry', 'seafood']
       },
       'Dairy': {
-        keywords: ['milk', 'yogurt', 'cheese', 'butter', 'eggs', 'cream', 'sour cream', 'cottage cheese', 'cream cheese', 'mozzarella', 'cheddar', 'swiss', 'parmesan', 'feta', 'goat cheese', 'ricotta', 'half and half', 'heavy cream', 'whipping cream', 'buttermilk', 'kefir']
+        keywords: ['milk', 'yogurt', 'cheese', 'butter', 'egg', 'eggs', 'cream', 'sour cream', 'cottage cheese', 'cream cheese', 'mozzarella', 'cheddar', 'swiss', 'parmesan', 'feta', 'goat cheese', 'ricotta', 'half and half', 'heavy cream', 'whipping cream', 'buttermilk', 'kefir']
       },
       'Canned & Packaged Goods': {
         keywords: ['canned', 'can of', 'soup', 'broth', 'stock', 'beans', 'chickpeas', 'lentils', 'tomatoes', 'tomato sauce', 'pasta sauce', 'marinara', 'salsa', 'diced tomatoes', 'tomato paste', 'coconut milk', 'canned fruit', 'canned vegetables', 'corn', 'green beans', 'peas', 'carrots', 'jar', 'bottle', 'packaged', 'boxed']
@@ -9313,7 +9313,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.67 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.68 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9357,7 +9357,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.67 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.68 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9889,7 +9889,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.67';
+      versionIndicator.textContent = 'PWA v12.68';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9948,7 +9948,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.67 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.68 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 

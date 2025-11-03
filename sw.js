@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1267-fix-grocery-category-boundary';
+const CACHE_NAME = 'bennett-hub-v1268-add-egg-singular-dairy';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
