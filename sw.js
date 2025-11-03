@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1265-full-placeholder-all-lists';
+const CACHE_NAME = 'bennett-hub-v1266-fix-history-fly-off';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
