@@ -1791,7 +1791,7 @@
         z-index: 1000;
         pointer-events: none;
       ">
-        Desktop v9.75
+        Desktop v9.76
       </div>
     </div>
   </div>
@@ -4170,6 +4170,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               const scrollThreshold = 100; // pixels from edge to trigger scroll
               const scrollSpeed = 15; // pixels per frame
               
+              // Debug: Always log position to see if we're in the right place
+              if (currentY < scrollThreshold || currentY > window.innerHeight - scrollThreshold) {
+                console.log('📍 In scroll zone:', { 
+                  currentY, 
+                  topZone: currentY < scrollThreshold,
+                  bottomZone: currentY > window.innerHeight - scrollThreshold,
+                  windowHeight: window.innerHeight,
+                  scrollY: window.scrollY,
+                  maxScroll: document.documentElement.scrollHeight - window.innerHeight,
+                  canScrollUp: window.scrollY > 0,
+                  canScrollDown: window.scrollY < document.documentElement.scrollHeight - window.innerHeight
+                });
+              }
+              
               if (currentY < scrollThreshold && window.scrollY > 0) {
                 // Near top of viewport - scroll up
                 console.log('🔼 Scrolling up:', { currentY, scrollY: window.scrollY, scrollOffset });
@@ -4177,13 +4191,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                 scrollOffset -= scrollSpeed; // Adjust item position for scroll
               } else if (currentY > window.innerHeight - scrollThreshold) {
                 const canScrollDown = window.scrollY < document.documentElement.scrollHeight - window.innerHeight;
-                console.log('🔽 Scroll down check:', { 
-                  currentY, 
-                  threshold: window.innerHeight - scrollThreshold,
-                  scrollY: window.scrollY,
-                  maxScroll: document.documentElement.scrollHeight - window.innerHeight,
-                  canScrollDown
-                });
                 if (canScrollDown) {
                   // Near bottom of viewport - scroll down
                   console.log('🔽 Scrolling down:', { scrollOffset });
@@ -9313,7 +9320,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.75 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.76 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9357,7 +9364,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.75 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.76 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9889,7 +9896,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.75';
+      versionIndicator.textContent = 'PWA v12.76';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9948,7 +9955,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.75 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.76 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 

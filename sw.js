@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1275-fix-drop-detection-debug-scroll';
+const CACHE_NAME = 'bennett-hub-v1276-add-scroll-zone-logging';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
