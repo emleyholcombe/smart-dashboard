@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1282-slower-scroll-hide-dragged';
+const CACHE_NAME = 'bennett-hub-v1283-desktop-settings-popup';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

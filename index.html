@@ -1789,9 +1789,10 @@
         border-radius: 4px;
         font-family: monospace;
         z-index: 1000;
-        pointer-events: none;
-      ">
-        Desktop v9.82
+        cursor: pointer;
+        transition: all 0.2s ease;
+      " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
+        Desktop v9.83
       </div>
     </div>
   </div>
@@ -9470,7 +9471,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.82 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.83 - Tap to Update';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -9514,7 +9515,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.82 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.83 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -9963,9 +9964,144 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function closeAllPopups() {
       const editOverlay = document.querySelector('.pwa-edit-overlay');
       const mainOverlay = document.querySelector('.pwa-info-overlay');
+      const desktopOverlay = document.querySelector('.desktop-info-overlay');
       
       if (editOverlay) editOverlay.remove();
       if (mainOverlay) mainOverlay.remove();
+      if (desktopOverlay) desktopOverlay.remove();
+    }
+    
+    // Desktop info popup (similar to PWA)
+    function showDesktopInfoPopup() {
+      const token = localStorage.getItem('githubToken') || 'No';
+      const gistId = localStorage.getItem('dashboardGistId') || 'No';
+      
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'desktop-info-overlay';
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      `;
+      
+      // Create popup
+      const popup = document.createElement('div');
+      popup.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        position: relative;
+      `;
+      
+      popup.innerHTML = `
+        <div style="position: sticky; top: 0; background: white; padding: 20px 20px 10px 20px; border-bottom: 1px solid #eee; z-index: 1;">
+          <button onclick="closeAllPopups()" style="
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+          " onmouseover="this.style.background='rgba(0, 0, 0, 0.1)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.05)'">✕</button>
+          
+          <h2 style="margin: 0; color: #333; font-size: 20px;">Desktop Settings</h2>
+        </div>
+        
+        <div style="padding: 20px;">
+          
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <button onclick="showEditTokenPopup()" style="
+              padding: 12px;
+              background: #667eea;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">Edit GitHub Token</button>
+            
+            <button onclick="showEditGistPopup()" style="
+              padding: 12px;
+              background: #667eea;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">Edit Gist ID</button>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px;">
+            <div style="display: flex; justify-content: space-between; padding: 10px; background: #f5f5f5; border-radius: 6px;">
+              <strong>Mode:</strong>
+              <span>Desktop</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 6px;">
+              <strong>GitHub Token:</strong>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-family: monospace; font-size: 12px; max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${token}</span>
+                ${token !== 'No' ? `<button onclick="navigator.clipboard.writeText('${token}'); this.textContent='✓'; setTimeout(() => this.textContent='📋', 1000)" style="background: #667eea; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">📋</button>` : ''}
+              </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 6px;">
+              <strong>Gist ID:</strong>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-family: monospace; font-size: 12px;">${gistId}</span>
+                ${gistId !== 'No' ? `<button onclick="navigator.clipboard.writeText('${gistId}'); this.textContent='✓'; setTimeout(() => this.textContent='📋', 1000)" style="background: #667eea; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">📋</button>` : ''}
+              </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 10px; background: #f5f5f5; border-radius: 6px;">
+              <strong>Online:</strong>
+              <span>${navigator.onLine ? '✅ Yes' : '❌ No'}</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; padding: 10px; background: #f5f5f5; border-radius: 6px;">
+              <strong>Current Data:</strong>
+              <div style="text-align: right;">
+                <div>Todos: ${todoItems.length}</div>
+                <div>Grocery: ${groceryItems.length}</div>
+                <div>Meals: ${mealItems.length}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      overlay.appendChild(popup);
+      document.body.appendChild(overlay);
+      
+      // Close on overlay click
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeAllPopups();
+      });
     }
     
     // Manual version update
@@ -10046,7 +10182,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.82';
+      versionIndicator.textContent = 'PWA v12.83';
       versionIndicator.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -10105,7 +10241,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.82 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.83 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
