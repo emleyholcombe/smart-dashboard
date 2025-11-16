@@ -1775,6 +1775,11 @@
           <span class="nav-icon">📚</span>
           <span class="nav-label">Meal History</span>
         </button>
+        
+        <button class="nav-button" onclick="showFullscreenMedications()">
+          <span class="nav-icon">💊</span>
+          <span class="nav-label">Medications</span>
+        </button>
       </div>
       
       <!-- Desktop Version Indicator -->
@@ -1792,7 +1797,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v9.83
+        Desktop v9.84
       </div>
     </div>
   </div>
@@ -1914,6 +1919,11 @@
     let groceryItems = [];
     let mealItems = [];
     let mealHistory = [];
+    let medications = {
+      morning: { taken: false, timestamp: null },
+      evening: { taken: false, timestamp: null },
+      lastReset: new Date().toDateString() // Reset daily
+    };
     
     // Data sync status
     let isOnline = navigator.onLine;
@@ -2323,6 +2333,7 @@ Token:`);
         groceryItems,
         mealItems,
         mealHistory,
+        medications,
         lastUpdated: new Date().toISOString()
       };
     }
@@ -2348,6 +2359,10 @@ Token:`);
         mealHistory = data.mealHistory;
         updateItemOrders(mealHistory); // Ensure all items have order property
       }
+      if (data.medications) {
+        medications = data.medications;
+        checkAndResetMedications(); // Ensure daily reset
+      }
     }
     
     // Save to both localStorage and GitHub Gist (master storage)
@@ -2364,6 +2379,7 @@ Token:`);
       localStorage.setItem('groceryItems', JSON.stringify(groceryItems));
       localStorage.setItem('mealItems', JSON.stringify(mealItems));
       localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
+      localStorage.setItem('medications', JSON.stringify(medications));
       
       // Try to sync to GitHub Gist (master storage) if online
       if (isOnline) {
@@ -2629,13 +2645,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const localGroceryItems = JSON.parse(localStorage.getItem('groceryItems') || '[]');
       const localMealItems = JSON.parse(localStorage.getItem('mealItems') || '[]');
       const localMealHistory = JSON.parse(localStorage.getItem('mealHistory') || '[]');
+      const localMedications = JSON.parse(localStorage.getItem('medications') || 'null');
       
       console.log('📱 Local storage data:', {
         todoItems: localTodoItems.length,
         todoHistory: localTodoHistory.length,
         groceryItems: localGroceryItems.length,
         mealItems: localMealItems.length,
-        mealHistory: localMealHistory.length
+        mealHistory: localMealHistory.length,
+        medications: localMedications ? localMedications.lastReset : 'none'
       });
       
       // If online, try to load from master storage (GitHub Gist)
@@ -2655,13 +2673,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             localStorage.setItem('groceryItems', JSON.stringify(cloudData.groceryItems || []));
             localStorage.setItem('mealItems', JSON.stringify(cloudData.mealItems || []));
             localStorage.setItem('mealHistory', JSON.stringify(cloudData.mealHistory || []));
+            localStorage.setItem('medications', JSON.stringify(cloudData.medications || medications));
             
             console.log('✅ Successfully loaded data from GitHub master storage:', {
               todoItems: todoItems.length,
               todoHistory: todoHistory.length,
               groceryItems: groceryItems.length,
               mealItems: mealItems.length,
-              mealHistory: mealHistory.length
+              mealHistory: mealHistory.length,
+              medications: medications.lastReset
             });
             return;
           } else {
@@ -2682,6 +2702,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             localStorage.setItem('groceryItems', JSON.stringify(cloudData.groceryItems || []));
             localStorage.setItem('mealItems', JSON.stringify(cloudData.mealItems || []));
             localStorage.setItem('mealHistory', JSON.stringify(cloudData.mealHistory || []));
+            localStorage.setItem('medications', JSON.stringify(cloudData.medications || medications));
             
             console.log('✅ Successfully loaded data from JSONBin fallback');
             
@@ -2707,13 +2728,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       groceryItems = localGroceryItems;
       mealItems = localMealItems;
       mealHistory = localMealHistory;
+      if (localMedications) {
+        medications = localMedications;
+        checkAndResetMedications();
+      }
       
       console.log('📱 Using local storage data:', {
         todoItems: todoItems.length,
         todoHistory: todoHistory.length,
         groceryItems: groceryItems.length,
         mealItems: mealItems.length,
-        mealHistory: mealHistory.length
+        mealHistory: mealHistory.length,
+        medications: medications.lastReset
       });
       
       // If we have local data but no cloud storage, offer to create master storage
@@ -8335,10 +8361,234 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
     }
 
+    // Medications functions
+    function showFullscreenMedications() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      openFullscreenMedications();
+      updateURL('medications');
+    }
+
+    function openFullscreenMedications() {
+      const main = document.querySelector('main');
+      const header = document.querySelector('header');
+      
+      // Hide main dashboard
+      main.classList.add('hidden');
+      header.classList.add('hidden');
+      
+      // Create full-screen container
+      const fullscreenDiv = document.createElement('div');
+      fullscreenDiv.className = 'fullscreen-mode';
+      fullscreenDiv.id = 'fullscreen-container';
+      
+      // Create header with back button
+      const fullscreenHeader = document.createElement('div');
+      fullscreenHeader.className = 'fullscreen-header';
+      
+      const title = document.createElement('h1');
+      title.className = 'fullscreen-title';
+      title.textContent = 'Medications';
+      
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.display = 'flex';
+      buttonContainer.style.gap = '1rem';
+      
+      const homeButton = document.createElement('button');
+      homeButton.className = 'back-button';
+      homeButton.onclick = showLandingPage;
+      homeButton.innerHTML = 'Home';
+      
+      const backButton = document.createElement('button');
+      backButton.className = 'back-button';
+      backButton.onclick = closeFullscreen;
+      backButton.innerHTML = '← Dashboard';
+      
+      fullscreenHeader.appendChild(title);
+      
+      // Check if PWA mode
+      const isPWA = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      
+      if (isPWA) {
+        // PWA: Home button first, then Dashboard button
+        buttonContainer.appendChild(homeButton);
+        buttonContainer.appendChild(backButton);
+      } else {
+        // Desktop: Dashboard button first, then Home button
+        buttonContainer.appendChild(backButton);
+        buttonContainer.appendChild(homeButton);
+      }
+      
+      fullscreenHeader.appendChild(buttonContainer);
+      
+      // Create content area
+      const content = document.createElement('div');
+      content.className = 'fullscreen-content';
+      content.style.maxWidth = '600px';
+      content.style.margin = '0 auto';
+      
+      // Check if we need to reset daily
+      checkAndResetMedications();
+      
+      // Create medications UI
+      const medsContainer = document.createElement('div');
+      medsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 2rem; padding: 2rem;';
+      
+      // Morning medication
+      const morningCard = createMedicationCard('morning', '🌅', 'Morning Medication');
+      medsContainer.appendChild(morningCard);
+      
+      // Evening medication
+      const eveningCard = createMedicationCard('evening', '🌙', 'Evening Medication');
+      medsContainer.appendChild(eveningCard);
+      
+      content.appendChild(medsContainer);
+      
+      fullscreenDiv.appendChild(fullscreenHeader);
+      fullscreenDiv.appendChild(content);
+      document.body.appendChild(fullscreenDiv);
+      
+      // Start inactivity detection (desktop only)
+      if (!isPWA) {
+        setupInactivityDetection();
+      }
+    }
+
+    function createMedicationCard(type, icon, label) {
+      const card = document.createElement('div');
+      card.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+      `;
+      
+      const iconSpan = document.createElement('span');
+      iconSpan.style.cssText = 'font-size: 3rem;';
+      iconSpan.textContent = icon;
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.style.cssText = 'flex: 1;';
+      
+      const labelDiv = document.createElement('div');
+      labelDiv.style.cssText = 'font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;';
+      labelDiv.textContent = label;
+      
+      const statusDiv = document.createElement('div');
+      statusDiv.id = `${type}-status`;
+      statusDiv.style.cssText = 'font-size: 0.9rem; color: var(--text-secondary);';
+      
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = `${type}-checkbox`;
+      checkbox.checked = medications[type].taken;
+      checkbox.style.cssText = `
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        accent-color: var(--primary-color);
+      `;
+      checkbox.onchange = () => toggleMedication(type);
+      
+      contentDiv.appendChild(labelDiv);
+      contentDiv.appendChild(statusDiv);
+      
+      card.appendChild(iconSpan);
+      card.appendChild(contentDiv);
+      card.appendChild(checkbox);
+      
+      // Update status text
+      updateMedicationStatus(type);
+      
+      return card;
+    }
+
+    function checkAndResetMedications() {
+      const today = new Date().toDateString();
+      if (medications.lastReset !== today) {
+        // Reset for new day
+        medications.morning = { taken: false, timestamp: null };
+        medications.evening = { taken: false, timestamp: null };
+        medications.lastReset = today;
+        saveMedications();
+      }
+    }
+
+    function toggleMedication(type) {
+      const checkbox = document.getElementById(`${type}-checkbox`);
+      medications[type].taken = checkbox.checked;
+      medications[type].timestamp = checkbox.checked ? new Date().toISOString() : null;
+      
+      updateMedicationStatus(type);
+      saveMedications();
+    }
+
+    function updateMedicationStatus(type) {
+      const statusDiv = document.getElementById(`${type}-status`);
+      if (!statusDiv) return;
+      
+      if (medications[type].taken && medications[type].timestamp) {
+        const time = new Date(medications[type].timestamp).toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+        statusDiv.textContent = `✅ Taken at ${time}`;
+        statusDiv.style.color = 'var(--success-color)';
+      } else {
+        statusDiv.textContent = '⏳ Not taken yet';
+        statusDiv.style.color = 'var(--text-secondary)';
+      }
+    }
+
+    function saveMedications() {
+      localStorage.setItem('medications', JSON.stringify(medications));
+      saveAllData(); // Sync to cloud
+    }
+
+    function loadMedications() {
+      const saved = localStorage.getItem('medications');
+      if (saved) {
+        medications = JSON.parse(saved);
+        checkAndResetMedications();
+      }
+    }
+
     // URL parameter handling
     function handleURLParameters() {
       const urlParams = new URLSearchParams(window.location.search);
       const view = urlParams.get('view');
+      const med = urlParams.get('med'); // For NFC tag support
+      
+      // Handle medication NFC tags
+      if (med === 'morning' || med === 'evening') {
+        console.log(`💊 NFC tag detected: ${med} medication`);
+        
+        // Auto-check the medication
+        checkAndResetMedications();
+        medications[med].taken = true;
+        medications[med].timestamp = new Date().toISOString();
+        saveMedications();
+        
+        // Show medications view
+        document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        openFullscreenMedications();
+        
+        // Show a confirmation message
+        setTimeout(() => {
+          const statusDiv = document.getElementById(`${med}-status`);
+          if (statusDiv) {
+            statusDiv.style.animation = 'pulse 0.5s ease-in-out';
+          }
+        }, 100);
+        
+        return; // Exit early, don't process view parameter
+      }
       
       switch(view) {
         case 'dashboard':
@@ -8390,6 +8640,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           showingMealHistory = true;
           updateMealsButtonState();
           openFullscreen('meals');
+          break;
+        case 'medications':
+          // Show fullscreen medications without updating URL
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          openFullscreenMedications();
           break;
         case 'home':
         case null:
