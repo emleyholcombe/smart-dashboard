@@ -1797,7 +1797,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v9.84
+        Desktop v9.85
       </div>
     </div>
   </div>
@@ -1924,6 +1924,8 @@
       evening: { taken: false, timestamp: null },
       lastReset: new Date().toDateString() // Reset daily
     };
+    let medicationsHistory = []; // Array of { date, morning: {taken, timestamp}, evening: {taken, timestamp} }
+    let showingMedicationsHistory = false;
     
     // Data sync status
     let isOnline = navigator.onLine;
@@ -2334,6 +2336,7 @@ Token:`);
         mealItems,
         mealHistory,
         medications,
+        medicationsHistory,
         lastUpdated: new Date().toISOString()
       };
     }
@@ -2363,6 +2366,9 @@ Token:`);
         medications = data.medications;
         checkAndResetMedications(); // Ensure daily reset
       }
+      if (data.medicationsHistory) {
+        medicationsHistory = data.medicationsHistory;
+      }
     }
     
     // Save to both localStorage and GitHub Gist (master storage)
@@ -2380,6 +2386,7 @@ Token:`);
       localStorage.setItem('mealItems', JSON.stringify(mealItems));
       localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
       localStorage.setItem('medications', JSON.stringify(medications));
+      localStorage.setItem('medicationsHistory', JSON.stringify(medicationsHistory));
       
       // Try to sync to GitHub Gist (master storage) if online
       if (isOnline) {
@@ -2646,6 +2653,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const localMealItems = JSON.parse(localStorage.getItem('mealItems') || '[]');
       const localMealHistory = JSON.parse(localStorage.getItem('mealHistory') || '[]');
       const localMedications = JSON.parse(localStorage.getItem('medications') || 'null');
+      const localMedicationsHistory = JSON.parse(localStorage.getItem('medicationsHistory') || '[]');
       
       console.log('📱 Local storage data:', {
         todoItems: localTodoItems.length,
@@ -2653,7 +2661,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         groceryItems: localGroceryItems.length,
         mealItems: localMealItems.length,
         mealHistory: localMealHistory.length,
-        medications: localMedications ? localMedications.lastReset : 'none'
+        medications: localMedications ? localMedications.lastReset : 'none',
+        medicationsHistory: localMedicationsHistory.length
       });
       
       // If online, try to load from master storage (GitHub Gist)
@@ -2674,6 +2683,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             localStorage.setItem('mealItems', JSON.stringify(cloudData.mealItems || []));
             localStorage.setItem('mealHistory', JSON.stringify(cloudData.mealHistory || []));
             localStorage.setItem('medications', JSON.stringify(cloudData.medications || medications));
+            localStorage.setItem('medicationsHistory', JSON.stringify(cloudData.medicationsHistory || []));
             
             console.log('✅ Successfully loaded data from GitHub master storage:', {
               todoItems: todoItems.length,
@@ -2681,7 +2691,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               groceryItems: groceryItems.length,
               mealItems: mealItems.length,
               mealHistory: mealHistory.length,
-              medications: medications.lastReset
+              medications: medications.lastReset,
+              medicationsHistory: medicationsHistory.length
             });
             return;
           } else {
@@ -2703,6 +2714,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             localStorage.setItem('mealItems', JSON.stringify(cloudData.mealItems || []));
             localStorage.setItem('mealHistory', JSON.stringify(cloudData.mealHistory || []));
             localStorage.setItem('medications', JSON.stringify(cloudData.medications || medications));
+            localStorage.setItem('medicationsHistory', JSON.stringify(cloudData.medicationsHistory || []));
             
             console.log('✅ Successfully loaded data from JSONBin fallback');
             
@@ -2732,6 +2744,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         medications = localMedications;
         checkAndResetMedications();
       }
+      if (localMedicationsHistory) {
+        medicationsHistory = localMedicationsHistory;
+      }
       
       console.log('📱 Using local storage data:', {
         todoItems: todoItems.length,
@@ -2739,7 +2754,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         groceryItems: groceryItems.length,
         mealItems: mealItems.length,
         mealHistory: mealHistory.length,
-        medications: medications.lastReset
+        medications: medications.lastReset,
+        medicationsHistory: medicationsHistory.length
       });
       
       // If we have local data but no cloud storage, offer to create master storage
@@ -8388,7 +8404,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       const title = document.createElement('h1');
       title.className = 'fullscreen-title';
-      title.textContent = 'Medications';
+      title.textContent = showingMedicationsHistory ? 'Medications History' : 'Medications';
       
       const buttonContainer = document.createElement('div');
       buttonContainer.style.display = 'flex';
@@ -8404,17 +8420,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       backButton.onclick = closeFullscreen;
       backButton.innerHTML = '← Dashboard';
       
+      const historyButton = document.createElement('button');
+      historyButton.className = 'back-button';
+      historyButton.onclick = toggleMedicationsHistory;
+      historyButton.innerHTML = showingMedicationsHistory ? 'Current' : 'History';
+      historyButton.style.background = 'var(--primary-color)';
+      
       fullscreenHeader.appendChild(title);
       
       // Check if PWA mode
       const isPWA = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
       
       if (isPWA) {
-        // PWA: Home button first, then Dashboard button
+        // PWA: Home button first, then Dashboard button, then History button
         buttonContainer.appendChild(homeButton);
         buttonContainer.appendChild(backButton);
+        buttonContainer.appendChild(historyButton);
       } else {
-        // Desktop: Dashboard button first, then Home button
+        // Desktop: History button first, then Dashboard button, then Home button
+        buttonContainer.appendChild(historyButton);
         buttonContainer.appendChild(backButton);
         buttonContainer.appendChild(homeButton);
       }
@@ -8424,25 +8448,30 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Create content area
       const content = document.createElement('div');
       content.className = 'fullscreen-content';
-      content.style.maxWidth = '600px';
+      content.style.maxWidth = showingMedicationsHistory ? '800px' : '600px';
       content.style.margin = '0 auto';
       
       // Check if we need to reset daily
       checkAndResetMedications();
       
-      // Create medications UI
-      const medsContainer = document.createElement('div');
-      medsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 2rem; padding: 2rem;';
-      
-      // Morning medication
-      const morningCard = createMedicationCard('morning', '🌅', 'Morning Medication');
-      medsContainer.appendChild(morningCard);
-      
-      // Evening medication
-      const eveningCard = createMedicationCard('evening', '🌙', 'Evening Medication');
-      medsContainer.appendChild(eveningCard);
-      
-      content.appendChild(medsContainer);
+      if (showingMedicationsHistory) {
+        // Show history view
+        renderMedicationsHistory(content);
+      } else {
+        // Create current medications UI
+        const medsContainer = document.createElement('div');
+        medsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 2rem; padding: 2rem;';
+        
+        // Morning medication
+        const morningCard = createMedicationCard('morning', '🌅', 'Morning Medication');
+        medsContainer.appendChild(morningCard);
+        
+        // Evening medication
+        const eveningCard = createMedicationCard('evening', '🌙', 'Evening Medication');
+        medsContainer.appendChild(eveningCard);
+        
+        content.appendChild(medsContainer);
+      }
       
       fullscreenDiv.appendChild(fullscreenHeader);
       fullscreenDiv.appendChild(content);
@@ -8510,6 +8539,31 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function checkAndResetMedications() {
       const today = new Date().toDateString();
       if (medications.lastReset !== today) {
+        // Save previous day to history before resetting (if either medication was taken)
+        if (medications.morning.taken || medications.evening.taken) {
+          const historyEntry = {
+            date: medications.lastReset,
+            morning: { ...medications.morning },
+            evening: { ...medications.evening }
+          };
+          
+          // Check if this date already exists in history (avoid duplicates)
+          const existingIndex = medicationsHistory.findIndex(entry => entry.date === medications.lastReset);
+          if (existingIndex >= 0) {
+            medicationsHistory[existingIndex] = historyEntry;
+          } else {
+            medicationsHistory.push(historyEntry);
+          }
+          
+          // Sort history by date (newest first)
+          medicationsHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+          
+          // Save history to localStorage
+          localStorage.setItem('medicationsHistory', JSON.stringify(medicationsHistory));
+          
+          console.log('💊 Saved medications to history:', historyEntry);
+        }
+        
         // Reset for new day
         medications.morning = { taken: false, timestamp: null };
         medications.evening = { taken: false, timestamp: null };
@@ -8547,6 +8601,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     function saveMedications() {
       localStorage.setItem('medications', JSON.stringify(medications));
+      localStorage.setItem('medicationsHistory', JSON.stringify(medicationsHistory));
       saveAllData(); // Sync to cloud
     }
 
@@ -8556,6 +8611,197 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         medications = JSON.parse(saved);
         checkAndResetMedications();
       }
+      
+      const savedHistory = localStorage.getItem('medicationsHistory');
+      if (savedHistory) {
+        medicationsHistory = JSON.parse(savedHistory);
+      }
+    }
+
+    function toggleMedicationsHistory() {
+      showingMedicationsHistory = !showingMedicationsHistory;
+      closeFullscreen();
+      openFullscreenMedications();
+    }
+
+    function renderMedicationsHistory(container) {
+      // Calculate statistics
+      const stats = calculateMedicationStats();
+      
+      // Stats section
+      const statsContainer = document.createElement('div');
+      statsContainer.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 2rem; padding-bottom: 1rem;';
+      
+      // Streak card
+      const streakCard = document.createElement('div');
+      streakCard.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+      `;
+      streakCard.innerHTML = `
+        <div style="font-size: 2.5rem; font-weight: bold;">${stats.currentStreak}</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">Day Streak 🔥</div>
+      `;
+      
+      // Compliance card
+      const complianceCard = document.createElement('div');
+      complianceCard.style.cssText = `
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+      `;
+      complianceCard.innerHTML = `
+        <div style="font-size: 2.5rem; font-weight: bold;">${stats.complianceRate}%</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">Compliance Rate 📊</div>
+      `;
+      
+      // Total days card
+      const totalCard = document.createElement('div');
+      totalCard.style.cssText = `
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+      `;
+      totalCard.innerHTML = `
+        <div style="font-size: 2.5rem; font-weight: bold;">${stats.totalDays}</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">Days Tracked 📅</div>
+      `;
+      
+      statsContainer.appendChild(streakCard);
+      statsContainer.appendChild(complianceCard);
+      statsContainer.appendChild(totalCard);
+      container.appendChild(statsContainer);
+      
+      // History list
+      const historyContainer = document.createElement('div');
+      historyContainer.style.cssText = 'padding: 0 2rem 2rem 2rem;';
+      
+      if (medicationsHistory.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.style.cssText = 'text-align: center; padding: 3rem; color: var(--text-secondary);';
+        emptyMessage.innerHTML = `
+          <div style="font-size: 3rem; margin-bottom: 1rem;">💊</div>
+          <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">No History Yet</div>
+          <div>Start tracking your medications to see history here!</div>
+        `;
+        historyContainer.appendChild(emptyMessage);
+      } else {
+        medicationsHistory.forEach(entry => {
+          const card = createHistoryCard(entry);
+          historyContainer.appendChild(card);
+        });
+      }
+      
+      container.appendChild(historyContainer);
+    }
+
+    function createHistoryCard(entry) {
+      const date = new Date(entry.date);
+      const isToday = date.toDateString() === new Date().toDateString();
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const isYesterday = date.toDateString() === yesterday.toDateString();
+      
+      let dateLabel = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      if (isToday) dateLabel = `Today (${dateLabel})`;
+      if (isYesterday) dateLabel = `Yesterday (${dateLabel})`;
+      
+      const card = document.createElement('div');
+      card.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      `;
+      
+      const dateHeader = document.createElement('div');
+      dateHeader.style.cssText = 'font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary);';
+      dateHeader.textContent = dateLabel;
+      
+      const dosesContainer = document.createElement('div');
+      dosesContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;';
+      
+      // Morning dose
+      const morningDiv = document.createElement('div');
+      morningDiv.style.cssText = 'display: flex; align-items: center; gap: 0.5rem;';
+      const morningIcon = entry.morning.taken ? '✅' : '❌';
+      const morningTime = entry.morning.taken && entry.morning.timestamp 
+        ? new Date(entry.morning.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+        : 'Not taken';
+      morningDiv.innerHTML = `
+        <span style="font-size: 1.5rem;">🌅</span>
+        <div>
+          <div style="font-weight: 500;">Morning ${morningIcon}</div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary);">${morningTime}</div>
+        </div>
+      `;
+      
+      // Evening dose
+      const eveningDiv = document.createElement('div');
+      eveningDiv.style.cssText = 'display: flex; align-items: center; gap: 0.5rem;';
+      const eveningIcon = entry.evening.taken ? '✅' : '❌';
+      const eveningTime = entry.evening.taken && entry.evening.timestamp 
+        ? new Date(entry.evening.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+        : 'Not taken';
+      eveningDiv.innerHTML = `
+        <span style="font-size: 1.5rem;">🌙</span>
+        <div>
+          <div style="font-weight: 500;">Evening ${eveningIcon}</div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary);">${eveningTime}</div>
+        </div>
+      `;
+      
+      dosesContainer.appendChild(morningDiv);
+      dosesContainer.appendChild(eveningDiv);
+      
+      card.appendChild(dateHeader);
+      card.appendChild(dosesContainer);
+      
+      return card;
+    }
+
+    function calculateMedicationStats() {
+      if (medicationsHistory.length === 0) {
+        return {
+          currentStreak: 0,
+          complianceRate: 0,
+          totalDays: 0
+        };
+      }
+      
+      // Calculate current streak (consecutive days with both doses taken)
+      let currentStreak = 0;
+      const sortedHistory = [...medicationsHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      for (let i = 0; i < sortedHistory.length; i++) {
+        const entry = sortedHistory[i];
+        if (entry.morning.taken && entry.evening.taken) {
+          currentStreak++;
+        } else {
+          break; // Streak broken
+        }
+      }
+      
+      // Calculate compliance rate (percentage of doses taken)
+      const totalDoses = medicationsHistory.length * 2; // 2 doses per day
+      const takenDoses = medicationsHistory.reduce((sum, entry) => {
+        return sum + (entry.morning.taken ? 1 : 0) + (entry.evening.taken ? 1 : 0);
+      }, 0);
+      const complianceRate = Math.round((takenDoses / totalDoses) * 100);
+      
+      return {
+        currentStreak,
+        complianceRate,
+        totalDays: medicationsHistory.length
+      };
     }
 
     // URL parameter handling
