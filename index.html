@@ -1729,6 +1729,9 @@
       <h1 class="landing-title">Bennett Hub</h1>
       <p class="landing-subtitle">Your Smart Dashboard</p>
       
+      <!-- PWA Version Indicator Placeholder -->
+      <div id="pwa-version-placeholder" style="text-align: center; margin-bottom: 1rem;"></div>
+      
       <div class="navigation-grid">
         <button class="nav-button" onclick="showDashboard()">
           <span class="nav-icon">🏠</span>
@@ -1797,7 +1800,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v9.86
+        Desktop v9.87
       </div>
     </div>
   </div>
@@ -9975,19 +9978,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       versionIndicator.id = 'pwa-version-indicator';
       versionIndicator.textContent = 'PWA v12.83 - Tap to Update';
       versionIndicator.style.cssText = `
-        position: fixed !important;
-        bottom: 10px !important;
-        left: 10px !important;
+        display: inline-block;
         font-size: 11px;
-        color: rgba(255, 255, 255, 0.8);
-        z-index: 99999 !important;
+        color: rgba(255, 255, 255, 0.7);
         cursor: pointer;
         padding: 6px 12px;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.3);
         border-radius: 8px;
         opacity: 0.8;
         transition: all 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         font-weight: 500;
       `;
       
@@ -10000,9 +10000,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       versionIndicator.addEventListener('touchend', () => {
         setTimeout(() => {
-          versionIndicator.style.opacity = '0.7';
+          versionIndicator.style.opacity = '0.8';
           versionIndicator.style.background = 'rgba(0, 0, 0, 0.3)';
-          versionIndicator.style.color = 'rgba(255, 255, 255, 0.6)';
+          versionIndicator.style.color = 'rgba(255, 255, 255, 0.7)';
         }, 200);
       });
       
@@ -10011,7 +10011,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         showPWAInfoPopup();
       });
       
-      document.body.appendChild(versionIndicator);
+      // Append to placeholder instead of body
+      const placeholder = document.getElementById('pwa-version-placeholder');
+      if (placeholder) {
+        placeholder.appendChild(versionIndicator);
+      } else {
+        document.body.appendChild(versionIndicator);
+      }
       
       // Update version indicator with sync status
       const updateVersionIndicator = () => {
@@ -10098,28 +10104,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         <div style="padding: 20px;">
           
           <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-            <button onclick="showEditTokenPopup()" style="
-              padding: 12px;
-              background: #667eea;
-              color: white;
-              border: none;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 14px;
-              font-weight: 500;
-            ">Edit GitHub Token</button>
-            
-            <button onclick="showEditGistPopup()" style="
-              padding: 12px;
-              background: #667eea;
-              color: white;
-              border: none;
-              border-radius: 8px;
-              cursor: pointer;
-              font-size: 14px;
-              font-weight: 500;
-            ">Edit Gist ID</button>
-            
             <button onclick="manualVersionUpdate()" style="
               padding: 12px;
               background: #4caf50;
@@ -10149,19 +10133,19 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <div style="color: #333; font-size: 14px;">${debugInfo.pwaMode ? 'PWA' : 'Browser'}</div>
             </div>
             
-            <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
-              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">GITHUB TOKEN</div>
+            <div onclick="showEditTokenPopup()" style="background: #f5f5f5; padding: 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s ease;" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">GITHUB TOKEN (tap to edit)</div>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="color: #333; font-size: 14px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${token === 'No' ? 'No' : token.substring(0, 20) + '...'}</div>
-                ${token !== 'No' ? `<button onclick="navigator.clipboard.writeText('${token}'); this.textContent='✓'; setTimeout(() => this.textContent='Copy', 1000)" style="padding: 4px 8px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; white-space: nowrap;">Copy</button>` : ''}
+                <div style="color: #333; font-size: 14px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${token === 'No' ? 'Not set - tap to add' : token.substring(0, 20) + '...'}</div>
+                ${token !== 'No' ? `<button onclick="event.stopPropagation(); navigator.clipboard.writeText('${token}'); this.textContent='✓'; setTimeout(() => this.textContent='Copy', 1000)" style="padding: 4px 8px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; white-space: nowrap;">Copy</button>` : ''}
               </div>
             </div>
             
-            <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
-              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">GIST ID</div>
+            <div onclick="showEditGistPopup()" style="background: #f5f5f5; padding: 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s ease;" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">GIST ID (tap to edit)</div>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="color: #333; font-size: 14px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${gistId}</div>
-                ${gistId !== 'No' ? `<button onclick="navigator.clipboard.writeText('${gistId}'); this.textContent='✓'; setTimeout(() => this.textContent='Copy', 1000)" style="padding: 4px 8px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; white-space: nowrap;">Copy</button>` : ''}
+                <div style="color: #333; font-size: 14px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${gistId === 'No' ? 'Not set - tap to add' : gistId}</div>
+                ${gistId !== 'No' ? `<button onclick="event.stopPropagation(); navigator.clipboard.writeText('${gistId}'); this.textContent='✓'; setTimeout(() => this.textContent='Copy', 1000)" style="padding: 4px 8px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; white-space: nowrap;">Copy</button>` : ''}
               </div>
             </div>
             
