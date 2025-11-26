@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.25
+        Desktop v10.26
       </div>
     </div>
   </div>
@@ -8481,7 +8481,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const historyButton = document.createElement('button');
       historyButton.className = 'back-button';
       historyButton.onclick = toggleMedicationsHistory;
-      historyButton.innerHTML = showingMedicationsHistory ? 'Current' : 'History';
+      historyButton.innerHTML = showingMedicationsHistory ? 'Current' : '<img src="medication.png?v=1126" style="width: 20px; height: 20px; object-fit: cover; border-radius: 0; vertical-align: middle; margin-right: 6px; display: inline-block;">History';
       historyButton.style.background = 'var(--primary-color)';
       
       fullscreenHeader.appendChild(title);
@@ -8984,7 +8984,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const emptyMessage = document.createElement('div');
         emptyMessage.style.cssText = 'text-align: center; padding: 3rem; color: var(--text-secondary);';
         emptyMessage.innerHTML = `
-          <div style="font-size: 3rem; margin-bottom: 1rem;">💊</div>
+          <div style="margin-bottom: 1rem;"><img src="medication.png?v=1126" style="width: 80px; height: 80px; object-fit: cover;"></div>
           <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">No History Yet</div>
           <div>Start tracking your medications to see history here!</div>
         `;
