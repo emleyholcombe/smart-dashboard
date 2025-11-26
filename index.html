@@ -1807,7 +1807,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v9.96
+        Desktop v9.97
       </div>
     </div>
   </div>
@@ -1930,11 +1930,12 @@
     let mealItems = [];
     let mealHistory = [];
     let medications = {
+      earlyMorning: { taken: false, timestamp: null },
       morning: { taken: false, timestamp: null },
       evening: { taken: false, timestamp: null },
       lastReset: new Date().toDateString() // Reset daily
     };
-    let medicationsHistory = []; // Array of { date, morning: {taken, timestamp}, evening: {taken, timestamp} }
+    let medicationsHistory = []; // Array of { date, earlyMorning: {taken, timestamp}, morning: {taken, timestamp}, evening: {taken, timestamp} }
     let showingMedicationsHistory = false;
     let dishwasher = {
       status: 'dirty', // 'clean' or 'dirty'
@@ -8486,12 +8487,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       } else {
         // Create current medications UI
         const medsContainer = document.createElement('div');
-        // Desktop: side-by-side grid, Mobile: stacked
+        // Desktop: side-by-side grid (3 columns), Mobile: stacked
         if (isPWA) {
           medsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 2rem; padding: 2rem;';
         } else {
-          medsContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem;';
+          medsContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; padding: 2rem;';
         }
+        
+        // Early Morning medication
+        const earlyMorningCard = createMedicationCard('earlyMorning', '🌄', 'Early Morning Medication');
+        medsContainer.appendChild(earlyMorningCard);
         
         // Morning medication
         const morningCard = createMedicationCard('morning', '🌅', 'Morning Medication');
@@ -8578,10 +8583,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     function checkAndResetMedications() {
       const today = new Date().toDateString();
       if (medications.lastReset !== today) {
-        // Save previous day to history before resetting (if either medication was taken)
-        if (medications.morning.taken || medications.evening.taken) {
+        // Save previous day to history before resetting (if any medication was taken)
+        if (medications.earlyMorning.taken || medications.morning.taken || medications.evening.taken) {
           const historyEntry = {
             date: medications.lastReset,
+            earlyMorning: { ...medications.earlyMorning },
             morning: { ...medications.morning },
             evening: { ...medications.evening }
           };
@@ -8604,6 +8610,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         }
         
         // Reset for new day
+        medications.earlyMorning = { taken: false, timestamp: null };
         medications.morning = { taken: false, timestamp: null };
         medications.evening = { taken: false, timestamp: null };
         medications.lastReset = today;
@@ -8959,7 +8966,22 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       dateHeader.textContent = dateLabel;
       
       const dosesContainer = document.createElement('div');
-      dosesContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;';
+      dosesContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;';
+      
+      // Early Morning dose
+      const earlyMorningDiv = document.createElement('div');
+      earlyMorningDiv.style.cssText = 'display: flex; align-items: center; gap: 0.5rem;';
+      const earlyMorningIcon = entry.earlyMorning?.taken ? '✅' : '❌';
+      const earlyMorningTime = entry.earlyMorning?.taken && entry.earlyMorning?.timestamp 
+        ? new Date(entry.earlyMorning.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+        : 'Not taken';
+      earlyMorningDiv.innerHTML = `
+        <span style="font-size: 1.5rem;">🌄</span>
+        <div>
+          <div style="font-weight: 500;">Early Morning ${earlyMorningIcon}</div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary);">${earlyMorningTime}</div>
+        </div>
+      `;
       
       // Morning dose
       const morningDiv = document.createElement('div');
@@ -8991,6 +9013,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         </div>
       `;
       
+      dosesContainer.appendChild(earlyMorningDiv);
       dosesContainer.appendChild(morningDiv);
       dosesContainer.appendChild(eveningDiv);
       
@@ -9009,13 +9032,14 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         };
       }
       
-      // Calculate current streak (consecutive days with both doses taken)
+      // Calculate current streak (consecutive days with all doses taken)
       let currentStreak = 0;
       const sortedHistory = [...medicationsHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
       
       for (let i = 0; i < sortedHistory.length; i++) {
         const entry = sortedHistory[i];
-        if (entry.morning.taken && entry.evening.taken) {
+        const earlyMorningTaken = entry.earlyMorning?.taken ?? false;
+        if (earlyMorningTaken && entry.morning.taken && entry.evening.taken) {
           currentStreak++;
         } else {
           break; // Streak broken
@@ -9023,9 +9047,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
       
       // Calculate compliance rate (percentage of doses taken)
-      const totalDoses = medicationsHistory.length * 2; // 2 doses per day
+      const totalDoses = medicationsHistory.length * 3; // 3 doses per day
       const takenDoses = medicationsHistory.reduce((sum, entry) => {
-        return sum + (entry.morning.taken ? 1 : 0) + (entry.evening.taken ? 1 : 0);
+        const earlyMorningTaken = entry.earlyMorning?.taken ? 1 : 0;
+        return sum + earlyMorningTaken + (entry.morning.taken ? 1 : 0) + (entry.evening.taken ? 1 : 0);
       }, 0);
       const complianceRate = Math.round((takenDoses / totalDoses) * 100);
       
@@ -9044,7 +9069,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const dishwasher = urlParams.get('dishwasher'); // For dishwasher NFC tag support
       
       // Handle medication NFC tags
-      if (med === 'morning' || med === 'evening') {
+      if (med === 'earlyMorning' || med === 'morning' || med === 'evening') {
         console.log(`💊 NFC tag detected: ${med} medication`);
         
         // Auto-check the medication
