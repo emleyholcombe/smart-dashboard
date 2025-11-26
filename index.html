@@ -1807,7 +1807,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v9.95
+        Desktop v9.96
       </div>
     </div>
   </div>
@@ -8476,13 +8476,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Create content area
       const content = document.createElement('div');
       content.className = 'fullscreen-content';
-      // Responsive width: wider on desktop, compact on mobile
-      if (isPWA) {
-        content.style.maxWidth = showingMedicationsHistory ? '800px' : '600px';
-      } else {
-        content.style.maxWidth = showingMedicationsHistory ? '1200px' : '900px';
-      }
-      content.style.margin = '0 auto';
       
       // Check if we need to reset daily
       checkAndResetMedications();
@@ -8727,10 +8720,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Create content area
       const content = document.createElement('div');
       content.className = 'fullscreen-content';
-      // Responsive width: wider on desktop, compact on mobile
-      content.style.maxWidth = isPWA ? '600px' : '900px';
-      content.style.margin = '0 auto';
-      content.style.padding = '2rem';
       
       // Load dishwasher data
       loadDishwasher();
