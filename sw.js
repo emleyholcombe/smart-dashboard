@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1323-cleanup-and-icons';
+const CACHE_NAME = 'bennett-hub-v1324-icon-refresh';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -17,16 +17,15 @@ const urlsToCache = [
   '/smart-dashboard/icon-384.png',
   '/smart-dashboard/icon-512.png',
   '/smart-dashboard/favicon.ico',
-  '/smart-dashboard/google_icon.png',
-  '/smart-dashboard/google_icon_with_white_outline.png',
-  '/smart-dashboard/to_do_list.png',
-  '/smart-dashboard/recipe_book.png',
-  '/smart-dashboard/shopping_cart.png',
-  '/smart-dashboard/to_do_history.png',
-  '/smart-dashboard/dashboard_icon.png',
-  '/smart-dashboard/to_do_calendar.png',
-  '/smart-dashboard/meals_icon.png',
-  '/smart-dashboard/medication.png'
+  '/smart-dashboard/google_icon_with_white_outline.png?v=1126',
+  '/smart-dashboard/to_do_list.png?v=1126',
+  '/smart-dashboard/recipe_book.png?v=1126',
+  '/smart-dashboard/shopping_cart.png?v=1126',
+  '/smart-dashboard/to_do_history.png?v=1126',
+  '/smart-dashboard/dashboard_icon.png?v=1126',
+  '/smart-dashboard/to_do_calendar.png?v=1126',
+  '/smart-dashboard/meals_icon.png?v=1126',
+  '/smart-dashboard/medication.png?v=1126'
 ];
 
 // Handle messages from main thread
