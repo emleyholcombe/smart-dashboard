@@ -1785,6 +1785,11 @@
           <span class="nav-icon">💊</span>
           <span class="nav-label">Medications</span>
         </button>
+        
+        <button class="nav-button" onclick="showFullscreenDishwasher()">
+          <span class="nav-icon">🍽️</span>
+          <span class="nav-label">Dishwasher</span>
+        </button>
       </div>
       
       <!-- Desktop Version Indicator -->
@@ -1802,7 +1807,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v9.90
+        Desktop v9.91
       </div>
     </div>
   </div>
@@ -1931,6 +1936,11 @@
     };
     let medicationsHistory = []; // Array of { date, morning: {taken, timestamp}, evening: {taken, timestamp} }
     let showingMedicationsHistory = false;
+    let dishwasher = {
+      status: 'dirty', // 'clean' or 'dirty'
+      timestamp: new Date().toISOString(),
+      lastUpdated: new Date().toISOString()
+    };
     
     // Data sync status
     let isOnline = navigator.onLine;
@@ -2342,6 +2352,7 @@ Token:`);
         mealHistory,
         medications,
         medicationsHistory,
+        dishwasher,
         lastUpdated: new Date().toISOString()
       };
     }
@@ -2374,6 +2385,9 @@ Token:`);
       if (data.medicationsHistory) {
         medicationsHistory = data.medicationsHistory;
       }
+      if (data.dishwasher) {
+        dishwasher = data.dishwasher;
+      }
     }
     
     // Save to both localStorage and GitHub Gist (master storage)
@@ -2392,6 +2406,7 @@ Token:`);
       localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
       localStorage.setItem('medications', JSON.stringify(medications));
       localStorage.setItem('medicationsHistory', JSON.stringify(medicationsHistory));
+      localStorage.setItem('dishwasher', JSON.stringify(dishwasher));
       
       // Try to sync to GitHub Gist (master storage) if online
       if (isOnline) {
@@ -2659,6 +2674,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const localMealHistory = JSON.parse(localStorage.getItem('mealHistory') || '[]');
       const localMedications = JSON.parse(localStorage.getItem('medications') || 'null');
       const localMedicationsHistory = JSON.parse(localStorage.getItem('medicationsHistory') || '[]');
+      const localDishwasher = JSON.parse(localStorage.getItem('dishwasher') || 'null');
       
       console.log('📱 Local storage data:', {
         todoItems: localTodoItems.length,
@@ -2667,7 +2683,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         mealItems: localMealItems.length,
         mealHistory: localMealHistory.length,
         medications: localMedications ? localMedications.lastReset : 'none',
-        medicationsHistory: localMedicationsHistory.length
+        medicationsHistory: localMedicationsHistory.length,
+        dishwasher: localDishwasher ? localDishwasher.status : 'none'
       });
       
       // If online, try to load from master storage (GitHub Gist)
@@ -2689,6 +2706,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             localStorage.setItem('mealHistory', JSON.stringify(cloudData.mealHistory || []));
             localStorage.setItem('medications', JSON.stringify(cloudData.medications || medications));
             localStorage.setItem('medicationsHistory', JSON.stringify(cloudData.medicationsHistory || []));
+            localStorage.setItem('dishwasher', JSON.stringify(cloudData.dishwasher || dishwasher));
             
             console.log('✅ Successfully loaded data from GitHub master storage:', {
               todoItems: todoItems.length,
@@ -2720,6 +2738,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             localStorage.setItem('mealHistory', JSON.stringify(cloudData.mealHistory || []));
             localStorage.setItem('medications', JSON.stringify(cloudData.medications || medications));
             localStorage.setItem('medicationsHistory', JSON.stringify(cloudData.medicationsHistory || []));
+            localStorage.setItem('dishwasher', JSON.stringify(cloudData.dishwasher || dishwasher));
             
             console.log('✅ Successfully loaded data from JSONBin fallback');
             
@@ -2752,6 +2771,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       if (localMedicationsHistory) {
         medicationsHistory = localMedicationsHistory;
       }
+      if (localDishwasher) {
+        dishwasher = localDishwasher;
+      }
       
       console.log('📱 Using local storage data:', {
         todoItems: todoItems.length,
@@ -2760,7 +2782,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         mealItems: mealItems.length,
         mealHistory: mealHistory.length,
         medications: medications.lastReset,
-        medicationsHistory: medicationsHistory.length
+        medicationsHistory: medicationsHistory.length,
+        dishwasher: dishwasher.status
       });
       
       // If we have local data but no cloud storage, offer to create master storage
@@ -8623,6 +8646,196 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
     }
 
+    // Dishwasher functions
+    function showFullscreenDishwasher() {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      openFullscreenDishwasher();
+      updateURL('dishwasher');
+    }
+
+    function openFullscreenDishwasher() {
+      const main = document.querySelector('main');
+      const header = document.querySelector('header');
+      
+      // Hide main dashboard
+      main.classList.add('hidden');
+      header.classList.add('hidden');
+      
+      // Create full-screen container
+      const fullscreenDiv = document.createElement('div');
+      fullscreenDiv.className = 'fullscreen-mode';
+      fullscreenDiv.id = 'fullscreen-container';
+      
+      // Create header with back button
+      const fullscreenHeader = document.createElement('div');
+      fullscreenHeader.className = 'fullscreen-header';
+      
+      const title = document.createElement('h1');
+      title.className = 'fullscreen-title';
+      title.textContent = 'Dishwasher Status';
+      
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.display = 'flex';
+      buttonContainer.style.gap = '1rem';
+      
+      const homeButton = document.createElement('button');
+      homeButton.className = 'back-button';
+      homeButton.onclick = showLandingPage;
+      homeButton.innerHTML = 'Home';
+      
+      const backButton = document.createElement('button');
+      backButton.className = 'back-button';
+      backButton.onclick = closeFullscreen;
+      backButton.innerHTML = '← Dashboard';
+      
+      fullscreenHeader.appendChild(title);
+      
+      // Check if PWA mode
+      const isPWA = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      
+      if (isPWA) {
+        // PWA: Home button first, then Dashboard button
+        buttonContainer.appendChild(homeButton);
+        buttonContainer.appendChild(backButton);
+      } else {
+        // Desktop: Dashboard button first, then Home button
+        buttonContainer.appendChild(backButton);
+        buttonContainer.appendChild(homeButton);
+      }
+      
+      fullscreenHeader.appendChild(buttonContainer);
+      
+      // Create content area
+      const content = document.createElement('div');
+      content.className = 'fullscreen-content';
+      content.style.maxWidth = '600px';
+      content.style.margin = '0 auto';
+      content.style.padding = '2rem';
+      
+      // Load dishwasher data
+      loadDishwasher();
+      
+      // Create status display
+      const statusCard = document.createElement('div');
+      statusCard.style.cssText = `
+        background: ${dishwasher.status === 'clean' ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'};
+        color: white;
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        margin-bottom: 2rem;
+      `;
+      
+      const statusIcon = document.createElement('div');
+      statusIcon.style.cssText = 'font-size: 5rem; margin-bottom: 1rem;';
+      statusIcon.textContent = dishwasher.status === 'clean' ? '✨' : '🍽️';
+      
+      const statusText = document.createElement('div');
+      statusText.style.cssText = 'font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;';
+      statusText.textContent = dishwasher.status === 'clean' ? 'CLEAN' : 'DIRTY';
+      
+      const timestampText = document.createElement('div');
+      timestampText.style.cssText = 'font-size: 0.95rem; opacity: 0.9;';
+      const time = new Date(dishwasher.timestamp).toLocaleString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      timestampText.textContent = `Last updated: ${time}`;
+      
+      statusCard.appendChild(statusIcon);
+      statusCard.appendChild(statusText);
+      statusCard.appendChild(timestampText);
+      
+      // Create toggle buttons
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;';
+      
+      const cleanButton = document.createElement('button');
+      cleanButton.style.cssText = `
+        padding: 1.5rem;
+        background: ${dishwasher.status === 'clean' ? '#4facfe' : 'white'};
+        color: ${dishwasher.status === 'clean' ? 'white' : '#333'};
+        border: 2px solid #4facfe;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      `;
+      cleanButton.innerHTML = '<div style="font-size: 2rem;">✨</div><div>Mark Clean</div>';
+      cleanButton.onclick = () => setDishwasherStatus('clean');
+      
+      const dirtyButton = document.createElement('button');
+      dirtyButton.style.cssText = `
+        padding: 1.5rem;
+        background: ${dishwasher.status === 'dirty' ? '#f5576c' : 'white'};
+        color: ${dishwasher.status === 'dirty' ? 'white' : '#333'};
+        border: 2px solid #f5576c;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      `;
+      dirtyButton.innerHTML = '<div style="font-size: 2rem;">🍽️</div><div>Mark Dirty</div>';
+      dirtyButton.onclick = () => setDishwasherStatus('dirty');
+      
+      buttonsContainer.appendChild(cleanButton);
+      buttonsContainer.appendChild(dirtyButton);
+      
+      content.appendChild(statusCard);
+      content.appendChild(buttonsContainer);
+      
+      fullscreenDiv.appendChild(fullscreenHeader);
+      fullscreenDiv.appendChild(content);
+      document.body.appendChild(fullscreenDiv);
+      
+      // Start inactivity detection (desktop only)
+      if (!isPWA) {
+        setupInactivityDetection();
+      }
+    }
+
+    function setDishwasherStatus(status) {
+      dishwasher.status = status;
+      dishwasher.timestamp = new Date().toISOString();
+      dishwasher.lastUpdated = new Date().toISOString();
+      saveDishwasher();
+      
+      // Refresh the view
+      const fullscreenContainer = document.getElementById('fullscreen-container');
+      if (fullscreenContainer) {
+        fullscreenContainer.remove();
+      }
+      openFullscreenDishwasher();
+    }
+
+    function saveDishwasher() {
+      localStorage.setItem('dishwasher', JSON.stringify(dishwasher));
+      saveAllData(); // Sync to cloud
+    }
+
+    function loadDishwasher() {
+      const saved = localStorage.getItem('dishwasher');
+      if (saved) {
+        dishwasher = JSON.parse(saved);
+      }
+    }
+
     function toggleMedicationsHistory() {
       showingMedicationsHistory = !showingMedicationsHistory;
       closeFullscreen();
@@ -8814,6 +9027,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const urlParams = new URLSearchParams(window.location.search);
       const view = urlParams.get('view');
       const med = urlParams.get('med'); // For NFC tag support
+      const dishwasher = urlParams.get('dishwasher'); // For dishwasher NFC tag support
       
       // Handle medication NFC tags
       if (med === 'morning' || med === 'evening') {
@@ -8837,6 +9051,22 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             statusDiv.style.animation = 'pulse 0.5s ease-in-out';
           }
         }, 100);
+        
+        return; // Exit early, don't process view parameter
+      }
+      
+      // Handle dishwasher NFC tags
+      if (dishwasher === 'clean' || dishwasher === 'dirty') {
+        console.log(`🍽️ NFC tag detected: dishwasher ${dishwasher}`);
+        
+        // Update dishwasher status
+        loadDishwasher();
+        setDishwasherStatus(dishwasher);
+        
+        // Show dishwasher view
+        document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        openFullscreenDishwasher();
         
         return; // Exit early, don't process view parameter
       }
@@ -8897,6 +9127,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           document.getElementById('landing-page').style.display = 'none';
           document.getElementById('dashboard').style.display = 'block';
           openFullscreenMedications();
+          break;
+        case 'dishwasher':
+          // Show fullscreen dishwasher without updating URL
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          openFullscreenDishwasher();
           break;
         case 'home':
         case null:

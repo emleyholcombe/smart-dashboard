@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1290-desktop-scroll-fix';
+const CACHE_NAME = 'bennett-hub-v1291-dishwasher-tracking';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
