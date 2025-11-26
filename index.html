@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.24
+        Desktop v10.25
       </div>
     </div>
   </div>
@@ -8559,15 +8559,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         align-items: center;
         gap: 1.5rem;
         transition: all 0.3s ease;
+        ${isPWA ? 'cursor: pointer;' : ''}
       `;
+      
+      // Make entire card clickable on PWA
+      if (isPWA) {
+        card.onclick = () => {
+          const checkbox = document.getElementById(`${type}-checkbox`);
+          checkbox.checked = !checkbox.checked;
+          toggleMedication(type);
+        };
+      }
       
       const iconSpan = document.createElement('span');
       const iconSize = isPWA ? '3rem' : '4rem';
-      iconSpan.style.cssText = `font-size: ${iconSize};`;
+      iconSpan.style.cssText = `font-size: ${iconSize}; ${isPWA ? 'pointer-events: none;' : ''}`;
       iconSpan.textContent = icon;
       
       const contentDiv = document.createElement('div');
-      contentDiv.style.cssText = 'flex: 1;';
+      contentDiv.style.cssText = `flex: 1; ${isPWA ? 'pointer-events: none;' : ''}`;
       
       const labelDiv = document.createElement('div');
       const labelSize = isPWA ? '1.25rem' : '1.5rem';
@@ -8592,8 +8602,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         height: ${checkboxSize};
         cursor: pointer;
         accent-color: ${checkboxAccent};
+        ${isPWA ? 'pointer-events: none;' : ''}
       `;
-      checkbox.onchange = () => toggleMedication(type);
+      
+      // Only add onchange for desktop (PWA uses card click)
+      if (!isPWA) {
+        checkbox.onchange = () => toggleMedication(type);
+      }
       
       contentDiv.appendChild(labelDiv);
       contentDiv.appendChild(statusDiv);
