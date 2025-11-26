@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1308-medications-debug';
+const CACHE_NAME = 'bennett-hub-v1309-custom-icons';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -19,7 +19,9 @@ const urlsToCache = [
   '/smart-dashboard/favicon.ico',
   '/smart-dashboard/google_icon.png',
   '/smart-dashboard/google_icon_with_white_outline.png',
-  '/smart-dashboard/corkboard_without_border.jpg'
+  '/smart-dashboard/corkboard_without_border.jpg',
+  '/smart-dashboard/current_to_do_list.png',
+  '/smart-dashboard/recipe_book.png'
 ];
 
 // Handle messages from main thread
