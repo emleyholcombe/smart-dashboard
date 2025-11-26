@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1318-medications-ispwa-fix';
+const CACHE_NAME = 'bennett-hub-v1319-medications-plural-labels';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
