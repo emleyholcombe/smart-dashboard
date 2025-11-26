@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1328-dishwasher-custom-icons';
+const CACHE_NAME = 'bennett-hub-v1329-medication-icons-switched';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
