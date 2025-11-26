@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1311-google-calendar-grocery-cart';
+const CACHE_NAME = 'bennett-hub-v1312-todo-history-icon';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -22,7 +22,8 @@ const urlsToCache = [
   '/smart-dashboard/corkboard_without_border.jpg',
   '/smart-dashboard/current_to_do_list.png',
   '/smart-dashboard/recipe_book.png',
-  '/smart-dashboard/shopping_cart.png'
+  '/smart-dashboard/shopping_cart.png',
+  '/smart-dashboard/to_do_history.png'
 ];
 
 // Handle messages from main thread
