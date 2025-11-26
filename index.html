@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.21
+        Desktop v10.22
       </div>
     </div>
   </div>
@@ -8731,6 +8731,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function openFullscreenDishwasher() {
+      // Check if PWA mode (define early so it can be used throughout)
+      const isPWA = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      
       const main = document.querySelector('main');
       const header = document.querySelector('header');
       
@@ -8772,9 +8775,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       backButton.innerHTML = '<img src="dashboard_icon.png" style="width: 20px; height: 20px; object-fit: cover; border-radius: 0; vertical-align: middle; margin-right: 6px; display: inline-block;">Dashboard';
       
       fullscreenHeader.appendChild(title);
-      
-      // Check if PWA mode
-      const isPWA = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
       
       if (isPWA) {
         // PWA: Home button first, then Dashboard button
