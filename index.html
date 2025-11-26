@@ -1809,7 +1809,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.00
+        Desktop v10.01
       </div>
     </div>
   </div>
@@ -8441,6 +8441,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       title.className = 'fullscreen-title';
       title.textContent = showingMedicationsHistory ? 'Medications History' : 'Medications';
       
+      // Make title clickable on desktop (not PWA)
+      if (!isPWA) {
+        title.onclick = closeFullscreen;
+        title.style.cursor = 'pointer';
+      }
+      
       const buttonContainer = document.createElement('div');
       buttonContainer.style.display = 'flex';
       buttonContainer.style.gap = '1rem';
@@ -8702,6 +8708,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const title = document.createElement('h1');
       title.className = 'fullscreen-title';
       title.textContent = 'Dishwasher Status';
+      
+      // Make title clickable on desktop (not PWA)
+      if (!isPWA) {
+        title.onclick = closeFullscreen;
+        title.style.cursor = 'pointer';
+      }
       
       const buttonContainer = document.createElement('div');
       buttonContainer.style.display = 'flex';

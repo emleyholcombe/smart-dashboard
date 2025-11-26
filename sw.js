@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1300-corkboard-update';
+const CACHE_NAME = 'bennett-hub-v1301-clickable-titles';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
