@@ -1807,7 +1807,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v9.94
+        Desktop v9.95
       </div>
     </div>
   </div>
@@ -8522,6 +8522,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function createMedicationCard(type, icon, label) {
+      // Check if PWA mode
+      const isPWA = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      
       const card = document.createElement('div');
       const cardPadding = isPWA ? '2rem' : '2.5rem';
       card.style.cssText = `
