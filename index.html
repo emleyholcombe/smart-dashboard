@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.20
+        Desktop v10.21
       </div>
     </div>
   </div>
@@ -8501,9 +8501,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       fullscreenHeader.appendChild(title);
       
       if (isPWA) {
-        // PWA: Home button first, then Dashboard button, then History button
+        // PWA: Home button first, then History button (no Dashboard button)
         buttonContainer.appendChild(homeButton);
-        buttonContainer.appendChild(backButton);
         buttonContainer.appendChild(historyButton);
       } else {
         // Desktop: History button first, then Dashboard button, then Home button
@@ -8593,24 +8592,27 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       const labelDiv = document.createElement('div');
       const labelSize = isPWA ? '1.25rem' : '1.5rem';
-      labelDiv.style.cssText = `font-size: ${labelSize}; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;`;
+      const labelColor = isPWA ? '#000000' : 'var(--text-primary)';
+      labelDiv.style.cssText = `font-size: ${labelSize}; font-weight: 600; color: ${labelColor}; margin-bottom: 0.5rem;`;
       labelDiv.textContent = label;
       
       const statusDiv = document.createElement('div');
       statusDiv.id = `${type}-status`;
       const statusSize = isPWA ? '0.9rem' : '1rem';
-      statusDiv.style.cssText = `font-size: ${statusSize}; color: var(--text-secondary);`;
+      const statusColor = isPWA ? '#000000' : 'var(--text-secondary)';
+      statusDiv.style.cssText = `font-size: ${statusSize}; color: ${statusColor};`;
       
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.id = `${type}-checkbox`;
       checkbox.checked = medications[type].taken;
       const checkboxSize = isPWA ? '32px' : '40px';
+      const checkboxAccent = isPWA ? '#000000' : 'var(--primary-color)';
       checkbox.style.cssText = `
         width: ${checkboxSize};
         height: ${checkboxSize};
         cursor: pointer;
-        accent-color: var(--primary-color);
+        accent-color: ${checkboxAccent};
       `;
       checkbox.onchange = () => toggleMedication(type);
       
