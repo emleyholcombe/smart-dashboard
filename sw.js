@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1305-corkboard-sticky-square';
+const CACHE_NAME = 'bennett-hub-v1306-corkboard-no-border';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -19,7 +19,7 @@ const urlsToCache = [
   '/smart-dashboard/favicon.ico',
   '/smart-dashboard/google_icon.png',
   '/smart-dashboard/google_icon_with_white_outline.png',
-  '/smart-dashboard/corkboard_with_sticky_notes.jpg'
+  '/smart-dashboard/corkboard_without_border.jpg'
 ];
 
 // Handle messages from main thread
