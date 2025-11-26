@@ -1744,9 +1744,9 @@
         
         <button class="nav-button" onclick="showFullscreenCalendar()">
           <span class="nav-icon">
-            <img src="google_icon_with_white_outline.png?v=72-force" alt="Calendar" style="width: 2.401rem; height: 2.401rem; margin: 0; transform: translateY(0.1rem); object-fit: contain;">
+            <img src="google_icon_with_white_outline.png?v=72-force" alt="Google Calendar" style="width: 2.401rem; height: 2.401rem; margin: 0; transform: translateY(0.1rem); object-fit: contain;">
           </span>
-          <span class="nav-label">Calendar</span>
+          <span class="nav-label">Google Calendar</span>
         </button>
         
         <button class="nav-button" onclick="showFullscreenTodo()">
@@ -1768,9 +1768,7 @@
         
         <button class="nav-button" onclick="showFullscreenGrocery()">
           <span class="nav-icon">
-            <span class="emoji-basket">🧺</span>
-            <span class="emoji-base">🥖</span>
-            <span class="emoji-overlay">🍎</span>
+            <img src="shopping_cart.png" alt="Grocery" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">
           </span>
           <span class="nav-label">Grocery</span>
         </button>
@@ -1813,7 +1811,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.10
+        Desktop v10.11
       </div>
     </div>
   </div>
@@ -7304,7 +7302,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // Configure based on widget type
       if (widgetType === 'calendar') {
-        title.textContent = 'Calendar';
+        title.textContent = 'Google Calendar';
         // Only make title clickable on desktop (not PWA)
         if (!window.pwaInfo?.isPWA) {
         title.onclick = closeFullscreen;
