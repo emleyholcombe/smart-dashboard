@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.30
+        Desktop v10.31
       </div>
     </div>
   </div>
@@ -9176,6 +9176,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           // Show dashboard without updating URL (already in URL)
           document.getElementById('landing-page').style.display = 'none';
           document.getElementById('dashboard').style.display = 'block';
+          break;
+        case 'dishwasher':
+          // Show dishwasher view without changing status
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'block';
+          openFullscreenDishwasher();
           break;
         case 'calendar':
           // Show fullscreen calendar without updating URL
