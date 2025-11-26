@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.27
+        Desktop v10.28
       </div>
     </div>
   </div>
@@ -8804,8 +8804,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       `;
       
       const statusIcon = document.createElement('div');
-      statusIcon.style.cssText = `font-size: ${iconSize}; margin-bottom: 1rem;`;
-      statusIcon.textContent = dishwasher.status === 'clean' ? '✨' : '🍽️';
+      statusIcon.style.cssText = `margin-bottom: 1rem;`;
+      const iconSrc = dishwasher.status === 'clean' ? 'clean_plate.png' : 'dirty_plate.png';
+      statusIcon.innerHTML = `<img src="${iconSrc}?v=1126" style="width: ${iconSize}; height: ${iconSize}; object-fit: contain;">`;
       
       const statusText = document.createElement('div');
       const textSize = isPWA ? '2rem' : '3rem';
@@ -8851,7 +8852,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         align-items: center;
         gap: 0.5rem;
       `;
-      cleanButton.innerHTML = `<div style="font-size: ${buttonIconSize};">✨</div><div>Mark Clean</div>`;
+      cleanButton.innerHTML = `<div><img src="clean_plate.png?v=1126" style="width: ${buttonIconSize}; height: ${buttonIconSize}; object-fit: contain;"></div><div>Mark Clean</div>`;
       cleanButton.onclick = () => setDishwasherStatus('clean');
       
       const dirtyButton = document.createElement('button');
@@ -8870,7 +8871,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         align-items: center;
         gap: 0.5rem;
       `;
-      dirtyButton.innerHTML = `<div style="font-size: ${buttonIconSize};">🍽️</div><div>Mark Dirty</div>`;
+      dirtyButton.innerHTML = `<div><img src="dirty_plate.png?v=1126" style="width: ${buttonIconSize}; height: ${buttonIconSize}; object-fit: contain;"></div><div>Mark Dirty</div>`;
       dirtyButton.onclick = () => setDishwasherStatus('dirty');
       
       buttonsContainer.appendChild(cleanButton);

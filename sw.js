@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1327-medication-history-text-only';
+const CACHE_NAME = 'bennett-hub-v1328-dishwasher-custom-icons';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -25,7 +25,9 @@ const urlsToCache = [
   '/smart-dashboard/dashboard_icon.png?v=1126',
   '/smart-dashboard/to_do_calendar.png?v=1126',
   '/smart-dashboard/meals_icon.png?v=1126',
-  '/smart-dashboard/medication.png?v=1126'
+  '/smart-dashboard/medication.png?v=1126',
+  '/smart-dashboard/clean_plate.png?v=1126',
+  '/smart-dashboard/dirty_plate.png?v=1126'
 ];
 
 // Handle messages from main thread
