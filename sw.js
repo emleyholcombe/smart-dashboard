@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1297-early-morning-medication';
+const CACHE_NAME = 'bennett-hub-v1298-corkboard-icon';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -18,7 +18,8 @@ const urlsToCache = [
   '/smart-dashboard/icon-512.png',
   '/smart-dashboard/favicon.ico',
   '/smart-dashboard/google_icon.png',
-  '/smart-dashboard/google_icon_with_white_outline.png'
+  '/smart-dashboard/google_icon_with_white_outline.png',
+  '/smart-dashboard/corkboard.jpg'
 ];
 
 // Handle messages from main thread

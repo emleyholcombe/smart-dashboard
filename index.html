@@ -1807,7 +1807,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v9.97
+        Desktop v9.98
       </div>
     </div>
   </div>
@@ -7252,12 +7252,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const homeButton = document.createElement('button');
       homeButton.className = 'back-button';
       homeButton.onclick = showLandingPage;
-      homeButton.innerHTML = 'Home';
+      homeButton.innerHTML = '🏠 Home';
       
       const backButton = document.createElement('button');
       backButton.className = 'back-button';
       backButton.onclick = closeFullscreen;
-      backButton.innerHTML = '← Dashboard';
+      backButton.innerHTML = '<img src="corkboard.jpg" style="width: 20px; height: 20px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 6px;">Dashboard';
       
       // Add auto-return indicator (desktop only)
       const autoReturnIndicator = document.createElement('div');
@@ -8442,12 +8442,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const homeButton = document.createElement('button');
       homeButton.className = 'back-button';
       homeButton.onclick = showLandingPage;
-      homeButton.innerHTML = 'Home';
+      homeButton.innerHTML = '🏠 Home';
       
       const backButton = document.createElement('button');
       backButton.className = 'back-button';
       backButton.onclick = closeFullscreen;
-      backButton.innerHTML = '← Dashboard';
+      backButton.innerHTML = '<img src="corkboard.jpg" style="width: 20px; height: 20px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 6px;">Dashboard';
       
       const historyButton = document.createElement('button');
       historyButton.className = 'back-button';
@@ -8700,12 +8700,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const homeButton = document.createElement('button');
       homeButton.className = 'back-button';
       homeButton.onclick = showLandingPage;
-      homeButton.innerHTML = 'Home';
+      homeButton.innerHTML = '🏠 Home';
       
       const backButton = document.createElement('button');
       backButton.className = 'back-button';
       backButton.onclick = closeFullscreen;
-      backButton.innerHTML = '← Dashboard';
+      backButton.innerHTML = '<img src="corkboard.jpg" style="width: 20px; height: 20px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 6px;">Dashboard';
       
       fullscreenHeader.appendChild(title);
       
