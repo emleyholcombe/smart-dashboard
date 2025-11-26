@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1289-pwa-version-equal-spacing';
+const CACHE_NAME = 'bennett-hub-v1290-desktop-scroll-fix';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
