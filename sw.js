@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1306-corkboard-no-border';
+const CACHE_NAME = 'bennett-hub-v1307-medications-fix-final';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

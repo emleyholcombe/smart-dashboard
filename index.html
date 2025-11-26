@@ -1809,7 +1809,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.06
+        Desktop v10.07
       </div>
     </div>
   </div>
@@ -2680,6 +2680,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const localMealItems = JSON.parse(localStorage.getItem('mealItems') || '[]');
       const localMealHistory = JSON.parse(localStorage.getItem('mealHistory') || '[]');
       const localMedications = JSON.parse(localStorage.getItem('medications') || 'null');
+      // Ensure earlyMorning exists for backward compatibility
+      if (localMedications && !localMedications.earlyMorning) {
+        localMedications.earlyMorning = { taken: false, timestamp: null };
+      }
       const localMedicationsHistory = JSON.parse(localStorage.getItem('medicationsHistory') || '[]');
       const localDishwasher = JSON.parse(localStorage.getItem('dishwasher') || 'null');
       
@@ -8593,6 +8597,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function checkAndResetMedications() {
+      // Ensure earlyMorning exists for backward compatibility
+      if (!medications.earlyMorning) {
+        medications.earlyMorning = { taken: false, timestamp: null };
+      }
+      
       const today = new Date().toDateString();
       if (medications.lastReset !== today) {
         // Save previous day to history before resetting (if any medication was taken)
