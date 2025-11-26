@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1312-todo-history-icon';
+const CACHE_NAME = 'bennett-hub-v1313-dashboard-icon';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -19,11 +19,11 @@ const urlsToCache = [
   '/smart-dashboard/favicon.ico',
   '/smart-dashboard/google_icon.png',
   '/smart-dashboard/google_icon_with_white_outline.png',
-  '/smart-dashboard/corkboard_without_border.jpg',
   '/smart-dashboard/current_to_do_list.png',
   '/smart-dashboard/recipe_book.png',
   '/smart-dashboard/shopping_cart.png',
-  '/smart-dashboard/to_do_history.png'
+  '/smart-dashboard/to_do_history.png',
+  '/smart-dashboard/dashboard_icon.png'
 ];
 
 // Handle messages from main thread
