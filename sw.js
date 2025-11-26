@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1319-medications-plural-labels';
+const CACHE_NAME = 'bennett-hub-v1320-google-calendar-icon-update';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
