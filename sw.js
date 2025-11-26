@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1301-clickable-titles';
+const CACHE_NAME = 'bennett-hub-v1302-corkboard-clipped';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -19,7 +19,7 @@ const urlsToCache = [
   '/smart-dashboard/favicon.ico',
   '/smart-dashboard/google_icon.png',
   '/smart-dashboard/google_icon_with_white_outline.png',
-  '/smart-dashboard/corkboard.jpg'
+  '/smart-dashboard/corkboard_clipped.jpeg'
 ];
 
 // Handle messages from main thread

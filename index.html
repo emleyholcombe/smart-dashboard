@@ -1737,7 +1737,7 @@
       <div class="navigation-grid">
         <button class="nav-button" onclick="showDashboard()">
           <span class="nav-icon">
-            <img src="corkboard.jpg" alt="Dashboard" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 8px;">
+            <img src="corkboard_clipped.jpeg" alt="Dashboard" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">
           </span>
           <span class="nav-label">Dashboard</span>
         </button>
@@ -1809,7 +1809,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.01
+        Desktop v10.02
       </div>
     </div>
   </div>
@@ -7263,7 +7263,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const backButton = document.createElement('button');
       backButton.className = 'back-button';
       backButton.onclick = closeFullscreen;
-      backButton.innerHTML = '<img src="corkboard.jpg" style="width: 20px; height: 20px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 6px;">Dashboard';
+      backButton.innerHTML = '<img src="corkboard_clipped.jpeg" style="width: 20px; height: 20px; object-fit: cover; border-radius: 0; vertical-align: middle; margin-right: 6px; display: inline-block;">Dashboard';
       
       // Add auto-return indicator (desktop only)
       const autoReturnIndicator = document.createElement('div');
@@ -8459,7 +8459,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const backButton = document.createElement('button');
       backButton.className = 'back-button';
       backButton.onclick = closeFullscreen;
-      backButton.innerHTML = '<img src="corkboard.jpg" style="width: 20px; height: 20px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 6px;">Dashboard';
+      backButton.innerHTML = '<img src="corkboard_clipped.jpeg" style="width: 20px; height: 20px; object-fit: cover; border-radius: 0; vertical-align: middle; margin-right: 6px; display: inline-block;">Dashboard';
       
       const historyButton = document.createElement('button');
       historyButton.className = 'back-button';
@@ -8727,7 +8727,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const backButton = document.createElement('button');
       backButton.className = 'back-button';
       backButton.onclick = closeFullscreen;
-      backButton.innerHTML = '<img src="corkboard.jpg" style="width: 20px; height: 20px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 6px;">Dashboard';
+      backButton.innerHTML = '<img src="corkboard_clipped.jpeg" style="width: 20px; height: 20px; object-fit: cover; border-radius: 0; vertical-align: middle; margin-right: 6px; display: inline-block;">Dashboard';
       
       fullscreenHeader.appendChild(title);
       
