@@ -1809,7 +1809,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.07
+        Desktop v10.08
       </div>
     </div>
   </div>
@@ -8418,15 +8418,29 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     // Medications functions
     function showFullscreenMedications() {
-      document.getElementById('landing-page').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      openFullscreenMedications();
-      updateURL('medications');
+      try {
+        console.log('💊 showFullscreenMedications called');
+        console.log('💊 medications object:', medications);
+        document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        openFullscreenMedications();
+        updateURL('medications');
+      } catch (error) {
+        console.error('❌ Error in showFullscreenMedications:', error);
+        alert('Error loading medications: ' + error.message);
+      }
     }
 
     function openFullscreenMedications() {
-      const main = document.querySelector('main');
-      const header = document.querySelector('header');
+      try {
+        console.log('💊 openFullscreenMedications called');
+        console.log('💊 medications:', medications);
+        
+        const main = document.querySelector('main');
+        const header = document.querySelector('header');
+        
+        console.log('💊 main element:', main);
+        console.log('💊 header element:', header);
       
       // Hide main dashboard
       main.classList.add('hidden');
@@ -8529,9 +8543,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       fullscreenDiv.appendChild(content);
       document.body.appendChild(fullscreenDiv);
       
+      console.log('💊 Medications view created successfully');
+      
       // Start inactivity detection (desktop only)
       if (!isPWA) {
         setupInactivityDetection();
+      }
+      } catch (error) {
+        console.error('❌ Error in openFullscreenMedications:', error);
+        console.error('❌ Error stack:', error.stack);
+        alert('Error opening medications view: ' + error.message);
       }
     }
 
