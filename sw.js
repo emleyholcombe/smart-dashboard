@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1314-todo-icons-update';
+const CACHE_NAME = 'bennett-hub-v1315-meals-calendar-icons';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -23,7 +23,9 @@ const urlsToCache = [
   '/smart-dashboard/recipe_book.png',
   '/smart-dashboard/shopping_cart.png',
   '/smart-dashboard/to_do_history.png',
-  '/smart-dashboard/dashboard_icon.png'
+  '/smart-dashboard/dashboard_icon.png',
+  '/smart-dashboard/to_do_calendar.png',
+  '/smart-dashboard/meals_icon.png'
 ];
 
 // Handle messages from main thread
