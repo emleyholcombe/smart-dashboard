@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1326-medication-history-icon';
+const CACHE_NAME = 'bennett-hub-v1327-medication-history-text-only';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

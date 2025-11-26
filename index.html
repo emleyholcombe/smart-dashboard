@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.26
+        Desktop v10.27
       </div>
     </div>
   </div>
@@ -8481,7 +8481,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const historyButton = document.createElement('button');
       historyButton.className = 'back-button';
       historyButton.onclick = toggleMedicationsHistory;
-      historyButton.innerHTML = showingMedicationsHistory ? 'Current' : '<img src="medication.png?v=1126" style="width: 20px; height: 20px; object-fit: cover; border-radius: 0; vertical-align: middle; margin-right: 6px; display: inline-block;">History';
+      historyButton.innerHTML = showingMedicationsHistory ? 'Current' : 'History';
       historyButton.style.background = 'var(--primary-color)';
       
       fullscreenHeader.appendChild(title);
