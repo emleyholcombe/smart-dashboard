@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.31
+        Desktop v10.32
       </div>
     </div>
   </div>
@@ -7580,28 +7580,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         } else {
           // Desktop: History/Current first, then Home
         buttonContainer.insertBefore(historyBtn, homeButton);
-        }
-        
-        // Add search bar for history mode
-        if (showingMealHistory) {
-          const searchContainer = document.createElement('div');
-          searchContainer.className = 'add-item-container';
-          searchContainer.style.marginBottom = '1rem';
-          searchContainer.innerHTML = `
-            <input type="text" id="fullscreen-meals-search" placeholder="Search meals..." maxlength="100">
-            <button onclick="clearMealsSearch()" id="clear-search-btn" title="Clear search">✕</button>
-          `;
-          content.appendChild(searchContainer);
-          
-          // Add search functionality
-          setTimeout(() => {
-            const searchInput = document.getElementById('fullscreen-meals-search');
-            if (searchInput) {
-              searchInput.addEventListener('input', function(e) {
-                filterMealsFullscreen(e.target.value);
-              });
-            }
-          }, 100);
         }
         
         // Add input container
