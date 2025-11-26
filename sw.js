@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1299-medications-backward-compat';
+const CACHE_NAME = 'bennett-hub-v1300-corkboard-update';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
