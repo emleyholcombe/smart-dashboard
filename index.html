@@ -1807,7 +1807,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v9.92
+        Desktop v9.93
       </div>
     </div>
   </div>
@@ -8476,7 +8476,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Create content area
       const content = document.createElement('div');
       content.className = 'fullscreen-content';
-      content.style.maxWidth = showingMedicationsHistory ? '800px' : '600px';
+      // Responsive width: wider on desktop, compact on mobile
+      if (isPWA) {
+        content.style.maxWidth = showingMedicationsHistory ? '800px' : '600px';
+      } else {
+        content.style.maxWidth = showingMedicationsHistory ? '1200px' : '900px';
+      }
       content.style.margin = '0 auto';
       
       // Check if we need to reset daily
@@ -8488,7 +8493,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       } else {
         // Create current medications UI
         const medsContainer = document.createElement('div');
-        medsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 2rem; padding: 2rem;';
+        // Desktop: side-by-side grid, Mobile: stacked
+        if (isPWA) {
+          medsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 2rem; padding: 2rem;';
+        } else {
+          medsContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem;';
+        }
         
         // Morning medication
         const morningCard = createMedicationCard('morning', '🌅', 'Morning Medication');
@@ -8513,10 +8523,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     function createMedicationCard(type, icon, label) {
       const card = document.createElement('div');
+      const cardPadding = isPWA ? '2rem' : '2.5rem';
       card.style.cssText = `
         background: white;
         border-radius: 16px;
-        padding: 2rem;
+        padding: ${cardPadding};
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         display: flex;
         align-items: center;
@@ -8525,27 +8536,31 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       `;
       
       const iconSpan = document.createElement('span');
-      iconSpan.style.cssText = 'font-size: 3rem;';
+      const iconSize = isPWA ? '3rem' : '4rem';
+      iconSpan.style.cssText = `font-size: ${iconSize};`;
       iconSpan.textContent = icon;
       
       const contentDiv = document.createElement('div');
       contentDiv.style.cssText = 'flex: 1;';
       
       const labelDiv = document.createElement('div');
-      labelDiv.style.cssText = 'font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;';
+      const labelSize = isPWA ? '1.25rem' : '1.5rem';
+      labelDiv.style.cssText = `font-size: ${labelSize}; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;`;
       labelDiv.textContent = label;
       
       const statusDiv = document.createElement('div');
       statusDiv.id = `${type}-status`;
-      statusDiv.style.cssText = 'font-size: 0.9rem; color: var(--text-secondary);';
+      const statusSize = isPWA ? '0.9rem' : '1rem';
+      statusDiv.style.cssText = `font-size: ${statusSize}; color: var(--text-secondary);`;
       
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.id = `${type}-checkbox`;
       checkbox.checked = medications[type].taken;
+      const checkboxSize = isPWA ? '32px' : '40px';
       checkbox.style.cssText = `
-        width: 32px;
-        height: 32px;
+        width: ${checkboxSize};
+        height: ${checkboxSize};
         cursor: pointer;
         accent-color: var(--primary-color);
       `;
@@ -8709,7 +8724,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Create content area
       const content = document.createElement('div');
       content.className = 'fullscreen-content';
-      content.style.maxWidth = '600px';
+      // Responsive width: wider on desktop, compact on mobile
+      content.style.maxWidth = isPWA ? '600px' : '900px';
       content.style.margin = '0 auto';
       content.style.padding = '2rem';
       
@@ -8718,22 +8734,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       // Create status display
       const statusCard = document.createElement('div');
+      const iconSize = isPWA ? '5rem' : '8rem';
+      const cardPadding = isPWA ? '3rem 2rem' : '4rem 3rem';
       statusCard.style.cssText = `
         background: ${dishwasher.status === 'clean' ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'};
         color: white;
         border-radius: 20px;
-        padding: 3rem 2rem;
+        padding: ${cardPadding};
         text-align: center;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         margin-bottom: 2rem;
       `;
       
       const statusIcon = document.createElement('div');
-      statusIcon.style.cssText = 'font-size: 5rem; margin-bottom: 1rem;';
+      statusIcon.style.cssText = `font-size: ${iconSize}; margin-bottom: 1rem;`;
       statusIcon.textContent = dishwasher.status === 'clean' ? '✨' : '🍽️';
       
       const statusText = document.createElement('div');
-      statusText.style.cssText = 'font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;';
+      const textSize = isPWA ? '2rem' : '3rem';
+      statusText.style.cssText = `font-size: ${textSize}; font-weight: 700; margin-bottom: 0.5rem;`;
       statusText.textContent = dishwasher.status === 'clean' ? 'CLEAN' : 'DIRTY';
       
       const timestampText = document.createElement('div');
@@ -8757,14 +8776,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       buttonsContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;';
       
       const cleanButton = document.createElement('button');
+      const buttonPadding = isPWA ? '1.5rem' : '2rem';
+      const buttonFontSize = isPWA ? '1.1rem' : '1.3rem';
+      const buttonIconSize = isPWA ? '2rem' : '3rem';
       cleanButton.style.cssText = `
-        padding: 1.5rem;
+        padding: ${buttonPadding};
         background: ${dishwasher.status === 'clean' ? '#4facfe' : 'white'};
         color: ${dishwasher.status === 'clean' ? 'white' : '#333'};
         border: 2px solid #4facfe;
         border-radius: 12px;
         cursor: pointer;
-        font-size: 1.1rem;
+        font-size: ${buttonFontSize};
         font-weight: 600;
         transition: all 0.3s ease;
         display: flex;
@@ -8772,18 +8794,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         align-items: center;
         gap: 0.5rem;
       `;
-      cleanButton.innerHTML = '<div style="font-size: 2rem;">✨</div><div>Mark Clean</div>';
+      cleanButton.innerHTML = `<div style="font-size: ${buttonIconSize};">✨</div><div>Mark Clean</div>`;
       cleanButton.onclick = () => setDishwasherStatus('clean');
       
       const dirtyButton = document.createElement('button');
       dirtyButton.style.cssText = `
-        padding: 1.5rem;
+        padding: ${buttonPadding};
         background: ${dishwasher.status === 'dirty' ? '#f5576c' : 'white'};
         color: ${dishwasher.status === 'dirty' ? 'white' : '#333'};
         border: 2px solid #f5576c;
         border-radius: 12px;
         cursor: pointer;
-        font-size: 1.1rem;
+        font-size: ${buttonFontSize};
         font-weight: 600;
         transition: all 0.3s ease;
         display: flex;
@@ -8791,7 +8813,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         align-items: center;
         gap: 0.5rem;
       `;
-      dirtyButton.innerHTML = '<div style="font-size: 2rem;">🍽️</div><div>Mark Dirty</div>';
+      dirtyButton.innerHTML = `<div style="font-size: ${buttonIconSize};">🍽️</div><div>Mark Dirty</div>`;
       dirtyButton.onclick = () => setDishwasherStatus('dirty');
       
       buttonsContainer.appendChild(cleanButton);

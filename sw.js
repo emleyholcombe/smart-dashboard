@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1292-dishwasher-bubbles-icon';
+const CACHE_NAME = 'bennett-hub-v1293-desktop-optimized-views';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
