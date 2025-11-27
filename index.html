@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.45
+        Desktop v10.46
       </div>
     </div>
   </div>
@@ -2887,29 +2887,40 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           button.style.setProperty('justify-content', 'center', 'important');
         });
         
-        // Make icons much larger and consistent
+        // Make ALL icons exactly the same size - 5rem x 5rem square
         const navIcons = document.querySelectorAll('.nav-icon');
         navIcons.forEach(icon => {
-          icon.style.setProperty('font-size', '5rem', 'important'); // Double from 2.5rem
+          icon.style.setProperty('font-size', '5rem', 'important');
           icon.style.setProperty('width', '5rem', 'important');
           icon.style.setProperty('height', '5rem', 'important');
+          icon.style.setProperty('min-width', '5rem', 'important');
+          icon.style.setProperty('min-height', '5rem', 'important');
+          icon.style.setProperty('max-width', '5rem', 'important');
+          icon.style.setProperty('max-height', '5rem', 'important');
           icon.style.setProperty('display', 'flex', 'important');
           icon.style.setProperty('align-items', 'center', 'important');
           icon.style.setProperty('justify-content', 'center', 'important');
           icon.style.setProperty('transform', 'none', 'important');
           icon.style.setProperty('margin', '0', 'important');
+          icon.style.setProperty('padding', '0', 'important');
           icon.style.setProperty('position', 'relative', 'important');
+          icon.style.setProperty('overflow', 'hidden', 'important');
         });
         
-        // Make icon images much larger
+        // Make icon images exactly 5rem x 5rem
         const navIconImages = document.querySelectorAll('.nav-icon img');
         navIconImages.forEach(img => {
-          img.style.width = '5rem'; // Double from 2.5rem
-          img.style.height = '5rem';
           img.style.setProperty('width', '5rem', 'important');
           img.style.setProperty('height', '5rem', 'important');
+          img.style.setProperty('min-width', '5rem', 'important');
+          img.style.setProperty('min-height', '5rem', 'important');
+          img.style.setProperty('max-width', '5rem', 'important');
+          img.style.setProperty('max-height', '5rem', 'important');
+          img.style.setProperty('object-fit', 'contain', 'important');
           img.style.setProperty('transform', 'none', 'important');
           img.style.setProperty('margin', '0', 'important');
+          img.style.setProperty('padding', '0', 'important');
+          img.style.setProperty('display', 'block', 'important');
         });
         
         // Make labels much larger and consistent
