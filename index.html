@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.48
+        Desktop v10.50
       </div>
     </div>
   </div>
@@ -2865,27 +2865,33 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           landingPage.style.padding = '1rem';
         }
         
-        // Change grid to 2 rows x 5 columns with larger tiles
+        // Change grid to 2 rows x 5 columns - FIXED equal sizes
         const navGrid = document.querySelector('.navigation-grid');
         if (navGrid) {
-          navGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
-          navGrid.style.gridTemplateRows = 'repeat(2, 1fr)';
-          navGrid.style.maxWidth = '100%';
-          navGrid.style.gap = '1.5rem';
-          navGrid.style.margin = '0';
+          navGrid.style.setProperty('grid-template-columns', 'repeat(5, 1fr)', 'important'); // Equal width columns
+          navGrid.style.setProperty('grid-template-rows', 'repeat(2, 250px)', 'important'); // Fixed height rows
+          navGrid.style.setProperty('max-width', '100%', 'important');
+          navGrid.style.setProperty('gap', '1.5rem', 'important');
+          navGrid.style.setProperty('margin', '0', 'important');
+          navGrid.style.setProperty('width', '100%', 'important');
         }
         
-        // Make all tiles much larger (2x size) and exactly the same
+        // Make all tiles EXACTLY the same size - FIXED width and height
         const navButtons = document.querySelectorAll('.nav-button');
         navButtons.forEach(button => {
-          button.style.setProperty('padding', '4rem', 'important');
-          button.style.setProperty('min-height', '200px', 'important');
-          button.style.setProperty('height', 'auto', 'important');
+          button.style.setProperty('width', '100%', 'important'); // Fill grid cell
+          button.style.setProperty('height', '250px', 'important'); // FIXED height
+          button.style.setProperty('min-height', '250px', 'important');
+          button.style.setProperty('max-height', '250px', 'important');
+          button.style.setProperty('min-width', '0', 'important'); // Allow grid to control width
+          button.style.setProperty('padding', '2rem', 'important'); // Reduced padding for text space
           button.style.setProperty('display', 'flex', 'important');
           button.style.setProperty('flex-direction', 'column', 'important');
           button.style.setProperty('align-items', 'center', 'important');
           button.style.setProperty('justify-content', 'center', 'important');
-          button.style.setProperty('gap', '1.5rem', 'important'); // Consistent spacing between icon and label
+          button.style.setProperty('gap', '1rem', 'important'); // Reduced gap
+          button.style.setProperty('box-sizing', 'border-box', 'important');
+          button.style.setProperty('overflow', 'hidden', 'important'); // Hide overflow text
         });
         
         // Make ALL icons exactly the same size - 5rem x 5rem square
