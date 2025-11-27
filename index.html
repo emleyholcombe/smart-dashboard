@@ -1728,8 +1728,8 @@
   <!-- Landing Page -->
   <div id="landing-page" class="landing-page">
     <div class="landing-container">
-      <h1 class="landing-title">Bennett Hub</h1>
-      <p class="landing-subtitle">Your Smart Dashboard</p>
+      <h1 class="landing-title" id="landing-title">Bennett Hub</h1>
+      <p class="landing-subtitle" id="landing-subtitle">Your Smart Dashboard</p>
       
       <!-- PWA Version Indicator Placeholder -->
       <div id="pwa-version-placeholder" style="text-align: center; margin-bottom: 1rem;"></div>
@@ -1799,7 +1799,7 @@
         </button>
         
         <button class="nav-button" onclick="showFullscreenDishwasher()">
-          <span class="nav-icon">🫧</span>
+          <span class="nav-icon" id="dishwasher-icon">🫧</span>
           <span class="nav-label">Dishwasher</span>
         </button>
       </div>
@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.32
+        Desktop v10.33
       </div>
     </div>
   </div>
@@ -1828,7 +1828,7 @@
   <div id="dashboard" class="dashboard" style="display: none;">
   <header>
     <button class="home-button" onclick="showLandingPage()" title="Home">🏠</button>
-    <h1 class="header-title">Bennett Hub</h1>
+    <h1 class="header-title" id="dashboard-title">Bennett Hub</h1>
     <div class="header-info">
       <div class="info-item">
         <span class="info-icon">📅</span>
@@ -1921,6 +1921,10 @@
   </main>
 
   <script>
+    // Device Detection
+    const isFireTV = /Silk/.test(navigator.userAgent) && /TV/.test(navigator.userAgent);
+    console.log('Device detection:', { isFireTV, userAgent: navigator.userAgent });
+    
     // GitHub Sync Configuration
     const GITHUB_USERNAME = 'emleyholcombe'; // Your GitHub username
     let GIST_ID = localStorage.getItem('dashboardGistId') || null;
@@ -2820,6 +2824,40 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     // Initialize lists on page load
     document.addEventListener('DOMContentLoaded', async function() {
       console.log('DOMContentLoaded fired, initializing dashboard...');
+      
+      // Fire TV-specific customizations
+      if (isFireTV) {
+        console.log('📺 Fire TV detected - applying customizations');
+        
+        // Remove subtitle
+        const subtitle = document.getElementById('landing-subtitle');
+        if (subtitle) subtitle.style.display = 'none';
+        
+        // Move title closer to top
+        const title = document.getElementById('landing-title');
+        if (title) {
+          title.style.marginTop = '1rem';
+          title.style.marginBottom = '2rem';
+        }
+        
+        // Change grid to 2 rows x 5 columns
+        const navGrid = document.querySelector('.navigation-grid');
+        if (navGrid) {
+          navGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+          navGrid.style.gridTemplateRows = 'repeat(2, 1fr)';
+          navGrid.style.maxWidth = '100%';
+        }
+        
+        // Hide dashboard title
+        const dashboardTitle = document.getElementById('dashboard-title');
+        if (dashboardTitle) dashboardTitle.style.display = 'none';
+        
+        // Change dishwasher icon to bubbles.png
+        const dishwasherIcon = document.getElementById('dishwasher-icon');
+        if (dishwasherIcon) {
+          dishwasherIcon.innerHTML = '<img src="bubbles.png?v=1126" alt="Dishwasher" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">';
+        }
+      }
       
       // PWA-specific initialization
       if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {

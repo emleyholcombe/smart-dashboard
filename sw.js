@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1332-remove-meals-search';
+const CACHE_NAME = 'bennett-hub-v1333-firetv-customizations';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -27,7 +27,8 @@ const urlsToCache = [
   '/smart-dashboard/meals_icon.png?v=1126',
   '/smart-dashboard/medication.png?v=1126',
   '/smart-dashboard/clean_plate.png?v=1126',
-  '/smart-dashboard/dirty_plate.png?v=1126'
+  '/smart-dashboard/dirty_plate.png?v=1126',
+  '/smart-dashboard/bubbles.png?v=1126'
 ];
 
 // Handle messages from main thread
