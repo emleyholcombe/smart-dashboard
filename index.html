@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.38
+        Desktop v10.39
       </div>
     </div>
   </div>
@@ -2850,13 +2850,41 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           title.style.marginBottom = '2rem';
         }
         
-        // Change grid to 2 rows x 5 columns
+        // Change grid to 2 rows x 5 columns with larger tiles
         const navGrid = document.querySelector('.navigation-grid');
         if (navGrid) {
           navGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
           navGrid.style.gridTemplateRows = 'repeat(2, 1fr)';
           navGrid.style.maxWidth = '100%';
+          navGrid.style.gap = '2rem';
         }
+        
+        // Make all tiles much larger (2x size)
+        const navButtons = document.querySelectorAll('.nav-button');
+        navButtons.forEach(button => {
+          button.style.padding = '4rem'; // Double from 2rem
+          button.style.minHeight = '200px'; // Ensure good height
+        });
+        
+        // Make icons much larger
+        const navIcons = document.querySelectorAll('.nav-icon');
+        navIcons.forEach(icon => {
+          icon.style.fontSize = '5rem'; // Double from 2.5rem
+        });
+        
+        // Make icon images much larger
+        const navIconImages = document.querySelectorAll('.nav-icon img');
+        navIconImages.forEach(img => {
+          img.style.width = '5rem'; // Double from 2.5rem
+          img.style.height = '5rem';
+        });
+        
+        // Make labels much larger
+        const navLabels = document.querySelectorAll('.nav-label');
+        navLabels.forEach(label => {
+          label.style.fontSize = '2rem'; // Double from 1rem
+          label.style.marginTop = '1.5rem';
+        });
         
         // Hide dashboard title
         const dashboardTitle = document.getElementById('dashboard-title');
