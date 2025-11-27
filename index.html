@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.34
+        Desktop v10.35
       </div>
     </div>
   </div>
@@ -2857,6 +2857,32 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         if (dishwasherIcon) {
           dishwasherIcon.innerHTML = '<img src="bubbles.png?v=1126" alt="Dishwasher" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">';
         }
+        
+        // Disable on-screen keyboard for all text inputs (wireless keyboard is connected)
+        const disableOnScreenKeyboard = () => {
+          const allInputs = document.querySelectorAll('input[type="text"], input[type="date"], input[type="search"]');
+          allInputs.forEach(input => {
+            input.setAttribute('inputmode', 'none');
+            input.setAttribute('readonly', 'readonly');
+            // Remove readonly on focus so wireless keyboard works
+            input.addEventListener('focus', function() {
+              this.removeAttribute('readonly');
+            });
+            // Add readonly back on blur to prevent keyboard popup
+            input.addEventListener('blur', function() {
+              this.setAttribute('readonly', 'readonly');
+            });
+          });
+          console.log(`📺 Disabled on-screen keyboard for ${allInputs.length} inputs`);
+        };
+        
+        // Run now and whenever new inputs are added
+        disableOnScreenKeyboard();
+        // Re-run after a delay to catch dynamically created inputs
+        setTimeout(disableOnScreenKeyboard, 1000);
+        // Create observer to handle dynamically added inputs
+        const observer = new MutationObserver(disableOnScreenKeyboard);
+        observer.observe(document.body, { childList: true, subtree: true });
       }
       
       // PWA-specific initialization
