@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.35
+        Desktop v10.36
       </div>
     </div>
   </div>
@@ -1922,7 +1922,7 @@
 
   <script>
     // Device Detection
-    const isFireTV = /Silk/.test(navigator.userAgent) && /TV/.test(navigator.userAgent);
+    const isFireTV = /Silk/.test(navigator.userAgent) || /AFTT/.test(navigator.userAgent);
     console.log('Device detection:', { isFireTV, userAgent: navigator.userAgent });
     
     // GitHub Sync Configuration
@@ -2829,6 +2829,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       if (isFireTV) {
         console.log('📺 Fire TV detected - applying customizations');
         
+        // Add CSS to hide keyboard
+        const style = document.createElement('style');
+        style.textContent = `
+          input, textarea {
+            -webkit-user-select: text !important;
+            user-select: text !important;
+          }
+        `;
+        document.head.appendChild(style);
+        
         // Remove subtitle
         const subtitle = document.getElementById('landing-subtitle');
         if (subtitle) subtitle.style.display = 'none';
@@ -2860,28 +2870,47 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         // Disable on-screen keyboard for all text inputs (wireless keyboard is connected)
         const disableOnScreenKeyboard = () => {
-          const allInputs = document.querySelectorAll('input[type="text"], input[type="date"], input[type="search"]');
+          const allInputs = document.querySelectorAll('input[type="text"], input[type="date"], input[type="search"], textarea');
           allInputs.forEach(input => {
+            // Set inputmode to none
             input.setAttribute('inputmode', 'none');
-            input.setAttribute('readonly', 'readonly');
-            // Remove readonly on focus so wireless keyboard works
-            input.addEventListener('focus', function() {
-              this.removeAttribute('readonly');
-            });
-            // Add readonly back on blur to prevent keyboard popup
-            input.addEventListener('blur', function() {
-              this.setAttribute('readonly', 'readonly');
-            });
+            
+            // Make it readonly by default
+            if (!input.hasAttribute('data-firetv-processed')) {
+              input.setAttribute('readonly', 'true');
+              input.setAttribute('data-firetv-processed', 'true');
+              
+              // On click, remove readonly temporarily so keyboard input works
+              input.addEventListener('click', function(e) {
+                this.removeAttribute('readonly');
+                // Keep it editable for a while
+                setTimeout(() => {
+                  if (document.activeElement !== this) {
+                    this.setAttribute('readonly', 'true');
+                  }
+                }, 100);
+              });
+              
+              // When losing focus, make readonly again
+              input.addEventListener('blur', function() {
+                this.setAttribute('readonly', 'true');
+              });
+            }
           });
-          console.log(`📺 Disabled on-screen keyboard for ${allInputs.length} inputs`);
+          console.log(`📺 Fire TV: Processed ${allInputs.length} inputs for keyboard suppression`);
         };
         
         // Run now and whenever new inputs are added
         disableOnScreenKeyboard();
-        // Re-run after a delay to catch dynamically created inputs
-        setTimeout(disableOnScreenKeyboard, 1000);
+        // Re-run after delays to catch dynamically created inputs
+        setTimeout(disableOnScreenKeyboard, 500);
+        setTimeout(disableOnScreenKeyboard, 1500);
+        setTimeout(disableOnScreenKeyboard, 3000);
+        
         // Create observer to handle dynamically added inputs
-        const observer = new MutationObserver(disableOnScreenKeyboard);
+        const observer = new MutationObserver(() => {
+          setTimeout(disableOnScreenKeyboard, 100);
+        });
         observer.observe(document.body, { childList: true, subtree: true });
       }
       

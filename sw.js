@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1335-firetv-disable-keyboard';
+const CACHE_NAME = 'bennett-hub-v1336-firetv-keyboard-fix';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
