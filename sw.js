@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1347-firetv-centered-icons';
+const CACHE_NAME = 'bennett-hub-v1348-firetv-centered-text';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
