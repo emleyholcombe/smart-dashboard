@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1340-close-button-final-fix';
+const CACHE_NAME = 'bennett-hub-v1343-firetv-uniform-tiles';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
