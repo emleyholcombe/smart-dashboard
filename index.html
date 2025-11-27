@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.44
+        Desktop v10.45
       </div>
     </div>
   </div>
@@ -2930,18 +2930,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         if (dishwasherIcon) {
           dishwasherIcon.innerHTML = '<img src="bubbles.png?v=1126" alt="Dishwasher" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">';
         }
-        
-        // Make all dashboard widgets uniform size
-        const mainDashboard = document.querySelector('main');
-        if (mainDashboard) {
-          mainDashboard.style.setProperty('grid-template-rows', '1fr 1fr', 'important');
-        }
-        
-        const allWidgets = document.querySelectorAll('.widget');
-        allWidgets.forEach(widget => {
-          widget.style.setProperty('min-height', '400px', 'important');
-          widget.style.setProperty('height', 'auto', 'important');
-        });
         
         // Disable on-screen keyboard for all text inputs (wireless keyboard is connected)
         const disableOnScreenKeyboard = () => {
