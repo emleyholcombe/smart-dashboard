@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.51
+        Desktop v10.52
       </div>
     </div>
   </div>
@@ -2846,8 +2846,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Center title with equal spacing above and below
         const title = document.getElementById('landing-title');
         if (title) {
-          title.style.marginTop = '2rem';
-          title.style.marginBottom = '2rem';
+          title.style.marginTop = '3rem'; // Increased for visual centering
+          title.style.marginBottom = '3rem'; // Match top spacing
           title.style.textAlign = 'center';
         }
         
@@ -2856,7 +2856,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         if (landingContainer) {
           landingContainer.style.maxWidth = '100%';
           landingContainer.style.padding = '0 2rem';
-          landingContainer.style.marginTop = '1rem';
+          landingContainer.style.marginTop = '0'; // Remove container top margin
         }
         
         // Adjust landing page padding
