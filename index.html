@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.50
+        Desktop v10.51
       </div>
     </div>
   </div>
@@ -2843,10 +2843,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const subtitle = document.getElementById('landing-subtitle');
         if (subtitle) subtitle.style.display = 'none';
         
-        // Move title closer to top and center it
+        // Center title with equal spacing above and below
         const title = document.getElementById('landing-title');
         if (title) {
-          title.style.marginTop = '1rem';
+          title.style.marginTop = '2rem';
           title.style.marginBottom = '2rem';
           title.style.textAlign = 'center';
         }
@@ -2869,7 +2869,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const navGrid = document.querySelector('.navigation-grid');
         if (navGrid) {
           navGrid.style.setProperty('grid-template-columns', 'repeat(5, 1fr)', 'important'); // Equal width columns
-          navGrid.style.setProperty('grid-template-rows', 'repeat(2, 250px)', 'important'); // Fixed height rows
+          navGrid.style.setProperty('grid-template-rows', 'repeat(2, 300px)', 'important'); // Fixed height rows - 300px
           navGrid.style.setProperty('max-width', '100%', 'important');
           navGrid.style.setProperty('gap', '1.5rem', 'important');
           navGrid.style.setProperty('margin', '0', 'important');
@@ -2880,9 +2880,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const navButtons = document.querySelectorAll('.nav-button');
         navButtons.forEach(button => {
           button.style.setProperty('width', '100%', 'important'); // Fill grid cell
-          button.style.setProperty('height', '250px', 'important'); // FIXED height
-          button.style.setProperty('min-height', '250px', 'important');
-          button.style.setProperty('max-height', '250px', 'important');
+          button.style.setProperty('height', '300px', 'important'); // FIXED height - 300px
+          button.style.setProperty('min-height', '300px', 'important');
+          button.style.setProperty('max-height', '300px', 'important');
           button.style.setProperty('min-width', '0', 'important'); // Allow grid to control width
           button.style.setProperty('padding', '2rem', 'important'); // Reduced padding for text space
           button.style.setProperty('display', 'flex', 'important');

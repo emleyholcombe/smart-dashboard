@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1350-firetv-exact-tile-sizes';
+const CACHE_NAME = 'bennett-hub-v1351-firetv-300px-equal-spacing';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
