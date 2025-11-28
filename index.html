@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.52
+        Desktop v10.53
       </div>
     </div>
   </div>
@@ -4179,7 +4179,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         keywords: ['shampoo', 'conditioner', 'soap', 'body wash', 'lotion', 'moisturizer', 'sunscreen', 'toothpaste', 'toothbrush', 'mouthwash', 'deodorant', 'perfume', 'cologne', 'makeup', 'lipstick', 'mascara', 'foundation', 'vitamins', 'supplements', 'medicine', 'advil', 'tylenol', 'aspirin', 'bandaids', 'first aid', 'contact solution', 'razor', 'shaving cream']
       },
       'Cleaning & Household': {
-        keywords: ['laundry detergent', 'fabric softener', 'bleach', 'dish soap', 'dishwasher detergent', 'all-purpose cleaner', 'glass cleaner', 'bathroom cleaner', 'toilet paper', 'paper towels', 'napkins', 'tissues', 'trash bags', 'garbage bags', 'aluminum foil', 'plastic wrap', 'parchment paper', 'wax paper', 'sponges', 'scrubber', 'cleaning supplies', 'vacuum bags', 'air freshener', 'candles', 'light bulbs', 'batteries']
+        keywords: ['laundry detergent', 'fabric softener', 'bleach', 'dish soap', 'dishwasher detergent', 'all-purpose cleaner', 'glass cleaner', 'bathroom cleaner', 'toilet cleaner', 'toilet bowl cleaner', 'bowl cleaner', 'toilet paper', 'paper towels', 'napkins', 'tissues', 'trash bags', 'garbage bags', 'aluminum foil', 'plastic wrap', 'parchment paper', 'wax paper', 'sponges', 'scrubber', 'cleaning supplies', 'vacuum bags', 'air freshener', 'candles', 'light bulbs', 'batteries', 'disinfectant', 'sanitizer', 'wipes', 'cleaning wipes']
       },
       'Pet Supplies': {
         keywords: ['dog food', 'cat food', 'pet food', 'dog treats', 'cat treats', 'pet treats', 'cat litter', 'dog toys', 'cat toys', 'pet toys', 'leash', 'collar', 'pet supplies', 'bird food', 'fish food', 'hamster food', 'guinea pig food']
@@ -4271,7 +4271,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         return 'Dairy';
       }
       
-      // 9. Baking measurements
+      // 9. Cleaning products (check before baking measurements)
+      const cleaningIndicators = ['cleaner', 'detergent', 'bleach', 'disinfectant', 'sanitizer', 'wipes', 'toilet', 'bathroom', 'kitchen cleaner'];
+      if (cleaningIndicators.some(indicator => text.includes(indicator))) {
+        return 'Cleaning & Household';
+      }
+      
+      // 10. Baking measurements
       const bakingMeasurements = ['cup', 'cups', 'lb', 'pound', 'ounce', 'oz'];
       const bakingIngredients = ['flour', 'sugar', 'brown sugar', 'powdered sugar', 'baking powder', 'baking soda', 'vanilla extract', 'oil'];
       if (bakingMeasurements.some(measurement => text.includes(measurement)) &&
