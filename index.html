@@ -1804,7 +1804,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.65
+        Desktop v10.66
       </div>
     </div>
   </div>
@@ -2961,7 +2961,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Change dishwasher icon to bubbles.png
         const dishwasherIcon = document.getElementById('dishwasher-icon');
         if (dishwasherIcon) {
-          dishwasherIcon.innerHTML = '<img src="bubbles.png?v=' + new Date().getTime() + '" alt="Dishwasher" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">';
+          dishwasherIcon.innerHTML = '<img src="bubbles.png?v=' + new Date().getTime() + '" alt="Dishwasher" style="width: 5rem; height: 5rem; object-fit: contain; border-radius: 0; display: block;">';
         }
         
         
