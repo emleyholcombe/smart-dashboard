@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1362-remove-google-offset';
+const CACHE_NAME = 'bennett-hub-v1363-secondary-labels';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
