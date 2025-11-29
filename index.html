@@ -1804,7 +1804,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.67
+        Desktop v10.68
       </div>
     </div>
   </div>
@@ -2932,26 +2932,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         });
         
         // Style secondary labels (second line of text for multi-line titles)
+        // Use absolute positioning so they don't affect layout
         const navSecondaryLabels = document.querySelectorAll('.nav-label-secondary');
         navSecondaryLabels.forEach(label => {
           label.style.setProperty('font-size', '2rem', 'important');
           label.style.setProperty('margin', '0', 'important');
           label.style.setProperty('padding', '0', 'important');
           label.style.setProperty('line-height', '1.2', 'important');
-          label.style.setProperty('position', 'relative', 'important');
+          label.style.setProperty('position', 'absolute', 'important');
           label.style.setProperty('text-align', 'center', 'important');
           label.style.setProperty('width', '100%', 'important');
-          label.style.setProperty('margin-top', '0.2rem', 'important'); // Small gap between lines
-        });
-        
-        // Adjust buttons with secondary labels to maintain icon/primary label position
-        // Reduce the gap or add negative margin to secondary label to keep content centered
-        navButtons.forEach(button => {
-          const hasSecondaryLabel = button.querySelector('.nav-label-secondary');
-          if (hasSecondaryLabel) {
-            // Reduce bottom padding to account for extra text line
-            button.style.setProperty('padding-bottom', '0.8rem', 'important'); // Reduced from 2rem
-          }
+          label.style.setProperty('left', '0', 'important');
+          label.style.setProperty('bottom', '1.5rem', 'important'); // Position near bottom of tile
         });
         
         // Hide dashboard title
