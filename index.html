@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.58
+        Desktop v10.59
       </div>
     </div>
   </div>
@@ -2934,7 +2934,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         // Make labels much larger and consistent with centered text
         const navLabels = document.querySelectorAll('.nav-label');
-        navLabels.forEach(label => {
+        navLabels.forEach((label, index) => {
           label.style.setProperty('font-size', '2rem', 'important');
           label.style.setProperty('margin', '0', 'important');
           label.style.setProperty('padding', '0', 'important');
@@ -2944,6 +2944,13 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           label.style.setProperty('bottom', '0', 'important');
           label.style.setProperty('text-align', 'center', 'important'); // Center text horizontally
           label.style.setProperty('width', '100%', 'important'); // Full width for centering
+          
+          // Apply transform for multi-line titles immediately in the loop
+          const labelText = label.textContent.trim();
+          if (labelText === 'Google Calendar' || labelText === 'To-Do Calendar') {
+            label.style.setProperty('transform', 'translateY(-1.3rem)', 'important');
+            console.log(`Applied transform to: ${labelText} (index ${index})`);
+          }
         });
         
         // Hide dashboard title
@@ -2956,26 +2963,6 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           dishwasherIcon.innerHTML = '<img src="bubbles.png?v=' + new Date().getTime() + '" alt="Dishwasher" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">';
         }
         
-        // Adjust multi-line titles to align first line with single-line titles
-        // This moves them up so "Google" and "To-Do" are on the same line as "Dashboard", "To-Do List", etc.
-        // IMPORTANT: This runs AFTER general label styling to override the transform
-        const allLabels = document.querySelectorAll('.nav-label');
-        
-        // Find and adjust the multi-line labels (use setTimeout to ensure this runs last)
-        setTimeout(() => {
-          const googleCalendarLabel = allLabels[1]; // Google Calendar (2nd button)
-          const todoCalendarLabel = allLabels[5]; // To-Do Calendar (6th button)
-          
-          if (googleCalendarLabel && googleCalendarLabel.textContent.trim() === 'Google Calendar') {
-            // Move up by approximately one line height to align first line
-            googleCalendarLabel.style.setProperty('transform', 'translateY(-1.3rem)', 'important');
-          }
-          
-          if (todoCalendarLabel && todoCalendarLabel.textContent.trim() === 'To-Do Calendar') {
-            // Move up by approximately one line height to align first line
-            todoCalendarLabel.style.setProperty('transform', 'translateY(-1.3rem)', 'important');
-          }
-        }, 100);
         
         // Disable on-screen keyboard for all text inputs (wireless keyboard is connected)
         const disableOnScreenKeyboard = () => {
