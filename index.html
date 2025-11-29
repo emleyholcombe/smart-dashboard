@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.56
+        Desktop v10.57
       </div>
     </div>
   </div>
@@ -2958,17 +2958,25 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         // Adjust multi-line titles to align first line with single-line titles
         // This moves them up so "Google" and "To-Do" are on the same line as "Dashboard", "To-Do List", etc.
-        const googleCalendarLabel = document.querySelectorAll('.nav-label')[1]; // Google Calendar
-        const todoCalendarLabel = document.querySelectorAll('.nav-label')[5]; // To-Do Calendar
+        const allLabels = document.querySelectorAll('.nav-label');
+        
+        // First, set all labels to have consistent line-height
+        allLabels.forEach(label => {
+          label.style.setProperty('line-height', '1.2', 'important');
+        });
+        
+        // Now find and adjust the multi-line labels
+        const googleCalendarLabel = allLabels[1]; // Google Calendar (2nd button)
+        const todoCalendarLabel = allLabels[5]; // To-Do Calendar (6th button)
         
         if (googleCalendarLabel && googleCalendarLabel.textContent.trim() === 'Google Calendar') {
-          googleCalendarLabel.style.setProperty('line-height', '1.2', 'important');
-          googleCalendarLabel.style.setProperty('margin-top', '-0.6rem', 'important'); // Move up to align first line
+          // Move up by approximately one line height to align first line
+          googleCalendarLabel.style.setProperty('transform', 'translateY(-1.2rem)', 'important');
         }
         
         if (todoCalendarLabel && todoCalendarLabel.textContent.trim() === 'To-Do Calendar') {
-          todoCalendarLabel.style.setProperty('line-height', '1.2', 'important');
-          todoCalendarLabel.style.setProperty('margin-top', '-0.6rem', 'important'); // Move up to align first line
+          // Move up by approximately one line height to align first line
+          todoCalendarLabel.style.setProperty('transform', 'translateY(-1.2rem)', 'important');
         }
         
         // Disable on-screen keyboard for all text inputs (wireless keyboard is connected)
