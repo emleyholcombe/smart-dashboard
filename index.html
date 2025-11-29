@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.54
+        Desktop v10.55
       </div>
     </div>
   </div>
@@ -2951,7 +2951,22 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Change dishwasher icon to bubbles.png
         const dishwasherIcon = document.getElementById('dishwasher-icon');
         if (dishwasherIcon) {
-          dishwasherIcon.innerHTML = '<img src="bubbles.png?v=1126" alt="Dishwasher" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">';
+          dishwasherIcon.innerHTML = '<img src="bubbles.png?v=' + new Date().getTime() + '" alt="Dishwasher" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">';
+        }
+        
+        // Adjust multi-line titles to align first line with single-line titles
+        // This moves them up so "Google" and "To-Do" are on the same line as "Dashboard", "To-Do List", etc.
+        const googleCalendarLabel = document.querySelectorAll('.nav-label')[1]; // Google Calendar
+        const todoCalendarLabel = document.querySelectorAll('.nav-label')[5]; // To-Do Calendar
+        
+        if (googleCalendarLabel && googleCalendarLabel.textContent.trim() === 'Google Calendar') {
+          googleCalendarLabel.style.setProperty('line-height', '1.2', 'important');
+          googleCalendarLabel.style.setProperty('margin-top', '-0.6rem', 'important'); // Move up to align first line
+        }
+        
+        if (todoCalendarLabel && todoCalendarLabel.textContent.trim() === 'To-Do Calendar') {
+          todoCalendarLabel.style.setProperty('line-height', '1.2', 'important');
+          todoCalendarLabel.style.setProperty('margin-top', '-0.6rem', 'important'); // Move up to align first line
         }
         
         // Disable on-screen keyboard for all text inputs (wireless keyboard is connected)
