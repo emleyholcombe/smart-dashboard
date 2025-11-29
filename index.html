@@ -1804,7 +1804,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.64
+        Desktop v10.65
       </div>
     </div>
   </div>
@@ -2942,6 +2942,16 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           label.style.setProperty('text-align', 'center', 'important');
           label.style.setProperty('width', '100%', 'important');
           label.style.setProperty('margin-top', '0.2rem', 'important'); // Small gap between lines
+        });
+        
+        // Adjust buttons with secondary labels to maintain icon/primary label position
+        // Move the entire content down to compensate for the extra line
+        navButtons.forEach(button => {
+          const hasSecondaryLabel = button.querySelector('.nav-label-secondary');
+          if (hasSecondaryLabel) {
+            // Shift content down by approximately half the secondary label height
+            button.style.setProperty('padding-top', 'calc(2rem + 1.2rem)', 'important'); // Original padding + half line height
+          }
         });
         
         // Hide dashboard title
