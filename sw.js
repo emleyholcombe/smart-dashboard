@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1363-secondary-labels';
+const CACHE_NAME = 'bennett-hub-v1364-updated-bubbles';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
