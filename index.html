@@ -1746,7 +1746,7 @@
           <span class="nav-icon">
             <img src="google_icon_with_white_outline.png?v=1126" alt="Google Calendar" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">
           </span>
-          <span class="nav-label">Google Calendar</span>
+          <span class="nav-label">Google<br>Calendar</span>
         </button>
         
         <button class="nav-button" onclick="showFullscreenTodo()">
@@ -1767,7 +1767,7 @@
           <span class="nav-icon">
             <img src="to_do_calendar.png?v=1126" alt="To-Do Calendar" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 0; display: block;">
           </span>
-          <span class="nav-label">To-Do Calendar</span>
+          <span class="nav-label">To-Do<br>Calendar</span>
         </button>
         
         <button class="nav-button" onclick="showFullscreenGrocery()">
@@ -1819,7 +1819,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.59
+        Desktop v10.60
       </div>
     </div>
   </div>
@@ -2945,11 +2945,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           label.style.setProperty('text-align', 'center', 'important'); // Center text horizontally
           label.style.setProperty('width', '100%', 'important'); // Full width for centering
           
-          // Apply transform for multi-line titles immediately in the loop
-          const labelText = label.textContent.trim();
-          if (labelText === 'Google Calendar' || labelText === 'To-Do Calendar') {
-            label.style.setProperty('transform', 'translateY(-1.3rem)', 'important');
-            console.log(`Applied transform to: ${labelText} (index ${index})`);
+          // Apply transform for multi-line titles (those with <br> tags) to align first line
+          const labelHTML = label.innerHTML;
+          if (labelHTML.includes('<br>')) {
+            // Move up by half line height to align first line with single-line titles
+            label.style.setProperty('transform', 'translateY(-0.6rem)', 'important');
+            console.log(`Applied transform to multi-line label: ${label.textContent.trim()} (index ${index})`);
           }
         });
         
