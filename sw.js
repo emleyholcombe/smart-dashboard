@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1368-absolute-secondary-labels';
+const CACHE_NAME = 'bennett-hub-v1369-adjust-secondary-position';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

@@ -1804,7 +1804,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.68
+        Desktop v10.69
       </div>
     </div>
   </div>
@@ -2936,6 +2936,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         const navSecondaryLabels = document.querySelectorAll('.nav-label-secondary');
         navSecondaryLabels.forEach(label => {
           label.style.setProperty('font-size', '2rem', 'important');
+          label.style.setProperty('font-weight', '500', 'important'); // Match primary label weight
           label.style.setProperty('margin', '0', 'important');
           label.style.setProperty('padding', '0', 'important');
           label.style.setProperty('line-height', '1.2', 'important');
@@ -2943,7 +2944,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           label.style.setProperty('text-align', 'center', 'important');
           label.style.setProperty('width', '100%', 'important');
           label.style.setProperty('left', '0', 'important');
-          label.style.setProperty('bottom', '1.5rem', 'important'); // Position near bottom of tile
+          label.style.setProperty('bottom', '3.5rem', 'important'); // Move higher, closer to primary label
         });
         
         // Hide dashboard title
