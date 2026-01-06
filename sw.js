@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1371-custom-calendar-api';
+const CACHE_NAME = 'bennett-hub-v1372-fix-meals-behavior';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

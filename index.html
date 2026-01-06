@@ -2002,7 +2002,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.71
+        Desktop v10.72
       </div>
     </div>
   </div>
@@ -6456,20 +6456,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function toggleMealItem(id) {
-      const item = mealItems.find(item => item.id === id);
-      if (item) {
-        item.completed = !item.completed;
-        if (item.completed) {
-          item.completedAt = new Date().toISOString();
-        } else {
-          delete item.completedAt;
-        }
-        
-        // Sync completion status to history
-        syncMealToHistory(id, { completed: item.completed, completedAt: item.completedAt });
-        
-        saveMealItems();
-        renderMealsList();
+      // When a meal is checked off, remove it from the active meals list
+      // Do NOT sync completion to history - history items stay as normal/uncompleted
+      mealItems = mealItems.filter(item => item.id !== id);
+      saveMealItems();
+      renderMealsList();
+      
+      // Also update fullscreen view if open
+      if (document.getElementById('fullscreen-meals-list')) {
+        renderMealsListFullscreen();
       }
     }
 
@@ -7088,14 +7083,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
         const historyButton = showingMealHistory ? 
           `<button class="add-from-history-btn" onclick="addFromHistory(${item.id})" title="Add to current meals">+</button>` : '';
-          
+        
+        // History items never show as completed - they're just a reference list
+        // Active meals also never show as completed since we remove them on check
         return `
-          <li class="task-item ${item.completed ? 'completed' : ''}">
+          <li class="task-item">
             <span class="drag-handle">☰</span>
             ${showingMealHistory ? '' : `<input type="checkbox" class="task-checkbox" 
-                   ${item.completed ? 'checked' : ''} 
                    onchange="toggleMealItem(${item.id})">`}
-            <span class="task-text ${item.completed ? 'completed' : ''}">${mealText}</span>
+            <span class="task-text">${mealText}</span>
             <div class="task-actions">
               ${historyButton}
               <button class="edit-btn" onclick="editMealRecipe(${item.id}, ${showingMealHistory})" title="Edit recipe">📝</button>
@@ -7384,14 +7380,15 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
         const historyButton = showingMealHistory ? 
           `<button class="add-from-history-btn" onclick="addFromHistory(${item.id}); renderMealsListFullscreen();" title="Add to current meals">+</button>` : '';
-          
+        
+        // History items never show as completed - they're just a reference list
+        // Active meals also never show as completed since we remove them on check
         return `
-          <li class="task-item ${item.completed ? 'completed' : ''}">
+          <li class="task-item">
             <span class="drag-handle">☰</span>
             ${showingMealHistory ? '' : `<input type="checkbox" class="task-checkbox" 
-                   ${item.completed ? 'checked' : ''} 
-                   onchange="toggleMealItem(${item.id}); renderMealsListFullscreen();">`}
-            <span class="task-text ${item.completed ? 'completed' : ''}">${mealText}</span>
+                   onchange="toggleMealItem(${item.id})">`}
+            <span class="task-text">${mealText}</span>
             <div class="task-actions">
               ${historyButton}
               <button class="edit-btn" onclick="editMealRecipe(${item.id}, ${showingMealHistory})" title="Edit recipe">📝</button>
