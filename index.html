@@ -1910,7 +1910,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.73
+        Desktop v10.74
       </div>
     </div>
   </div>
@@ -6377,10 +6377,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
     }
 
     function deleteMealItem(id) {
+      // Delete from both active meals and history
       mealItems = mealItems.filter(item => item.id !== id);
-      // Note: We don't delete from history - history is permanent
+      mealHistory = mealHistory.filter(item => item.id !== id);
+      
       saveMealItems();
+      saveMealHistory();
       renderMealsList();
+      
+      // Also update fullscreen view if open
+      if (document.getElementById('fullscreen-meals-list')) {
+        renderMealsListFullscreen();
+      }
     }
 
 
