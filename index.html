@@ -288,12 +288,15 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.2);
       color: white;
       text-align: center;
-      padding: 1.5rem;
+      padding: 0.5rem 1rem;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       position: relative;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
       gap: 0.5rem;
+      min-height: auto;
     }
 
     header::before {
@@ -308,65 +311,68 @@
     }
 
     .header-title {
-      font-size: 2rem;
+      font-size: 1.2rem;
       font-weight: 600;
       margin: 0;
       z-index: 1;
       position: relative;
+      white-space: nowrap;
     }
 
     .home-button {
-      position: absolute;
-      left: 2rem;
-      top: 50%;
-      transform: translateY(-50%);
+      position: relative;
+      left: auto;
+      top: auto;
+      transform: none;
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: white;
-      border-radius: 12px;
-      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      padding: 0.4rem 0.75rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      font-size: 1.2rem;
+      font-size: 0.9rem;
       z-index: 2;
+      flex-shrink: 0;
     }
 
     .home-button:hover {
       background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-50%) scale(1.05);
+      transform: scale(1.05);
     }
 
     .header-info {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 2rem;
-      font-size: 1rem;
+      gap: 0.75rem;
+      font-size: 0.85rem;
       font-weight: 400;
       opacity: 0.9;
       z-index: 1;
       position: relative;
+      flex-wrap: nowrap;
     }
 
     .info-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.3rem;
       background: rgba(255, 255, 255, 0.1);
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
       backdrop-filter: blur(5px);
       border: 1px solid rgba(255, 255, 255, 0.2);
       transition: all 0.3s ease;
+      font-size: 0.8rem;
     }
 
     .info-item:hover {
       background: rgba(255, 255, 255, 0.15);
-      transform: translateY(-1px);
     }
 
     .info-icon {
-      font-size: 1.1rem;
+      font-size: 0.9rem;
     }
 
     .weather-temp {
@@ -385,13 +391,15 @@
 
     main {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      grid-template-rows: minmax(400px, 1fr) minmax(200px, 1fr);
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
       flex: 1;
-      gap: 1.5rem;
-      padding: 2rem;
+      gap: 0.5rem;
+      padding: 0.5rem;
       box-sizing: border-box;
       animation: fadeIn 0.6s ease-out;
+      height: calc(100vh - 50px); /* Viewport minus compact header */
+      overflow: hidden;
     }
 
     @keyframes fadeIn {
@@ -402,97 +410,70 @@
     .widget {
       background: var(--card-background);
       backdrop-filter: blur(10px);
-      border-radius: 20px;
-      box-shadow: var(--shadow-xl);
-      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow-md);
+      padding: 0.5rem;
       overflow: hidden;
       position: relative;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: none;
       border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
     }
 
     .widget:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      /* Disable hover effects for cleaner look */
     }
 
     .widget::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-      border-radius: 20px 20px 0 0;
+      /* Remove decorative top bar */
+      display: none;
     }
 
     .calendar-widget {
-      grid-column: 1 / 4;
+      grid-column: 1;
       grid-row: 1;
-      /* Force stable dimensions to prevent layout shifts */
-      min-height: 400px;
-      max-height: 600px;
       overflow: hidden;
-      /* Complete isolation from other widgets */
-      contain: layout style size;
-      transform: translateZ(0); /* Force hardware acceleration and isolation */
-      will-change: auto;
     }
     
     .calendar-widget iframe {
-      /* Ensure iframe doesn't cause layout changes */
       width: 100% !important;
       height: 100% !important;
-      min-height: 350px;
-      max-height: 550px;
-      /* Force iframe isolation and stability */
-      contain: strict;
-      transform: translateZ(0);
-      backface-visibility: hidden;
-      pointer-events: auto;
-      position: relative;
-      z-index: 1;
     }
 
-    /* Custom Calendar Styles */
+    /* Custom Calendar Styles - Compact */
     .custom-calendar-container {
-      height: calc(100% - 40px);
+      height: calc(100% - 24px);
       overflow-y: auto;
-      padding-right: 8px;
+      padding-right: 4px;
     }
 
     .custom-calendar-container::-webkit-scrollbar {
-      width: 6px;
+      width: 4px;
     }
 
     .custom-calendar-container::-webkit-scrollbar-track {
       background: rgba(0, 0, 0, 0.05);
-      border-radius: 3px;
     }
 
     .custom-calendar-container::-webkit-scrollbar-thumb {
       background: rgba(102, 126, 234, 0.3);
-      border-radius: 3px;
-    }
-
-    .custom-calendar-container::-webkit-scrollbar-thumb:hover {
-      background: rgba(102, 126, 234, 0.5);
+      border-radius: 2px;
     }
 
     .calendar-date-group {
-      margin-bottom: 1rem;
+      margin-bottom: 0.25rem;
     }
 
     .calendar-date-header {
-      font-size: 0.85rem;
+      font-size: 0.7rem;
       font-weight: 600;
       color: var(--text-secondary);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 0.5rem 0;
+      letter-spacing: 0.3px;
+      padding: 0.15rem 0;
       border-bottom: 1px solid var(--border-color);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.15rem;
       position: sticky;
       top: 0;
       background: var(--card-background);
@@ -507,43 +488,29 @@
     .calendar-event {
       display: flex;
       align-items: flex-start;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-      border-radius: 10px;
-      background: rgba(102, 126, 234, 0.08);
-      border-left: 4px solid var(--primary-color);
-      transition: all 0.2s ease;
-    }
-
-    .calendar-event:hover {
-      background: rgba(102, 126, 234, 0.15);
-      transform: translateX(4px);
+      padding: 0.2rem 0.3rem;
+      margin-bottom: 0.15rem;
+      border-radius: 4px;
+      background: rgba(102, 126, 234, 0.06);
+      border-left: 3px solid var(--primary-color);
     }
 
     .calendar-event.emley-event {
       border-left-color: #d946ef;
-      background: rgba(217, 70, 239, 0.08);
-    }
-
-    .calendar-event.emley-event:hover {
-      background: rgba(217, 70, 239, 0.15);
+      background: rgba(217, 70, 239, 0.06);
     }
 
     .calendar-event.nate-event {
       border-left-color: #60a5fa;
-      background: rgba(96, 165, 250, 0.08);
-    }
-
-    .calendar-event.nate-event:hover {
-      background: rgba(96, 165, 250, 0.15);
+      background: rgba(96, 165, 250, 0.06);
     }
 
     .calendar-event-time {
-      min-width: 70px;
-      font-size: 0.8rem;
+      min-width: 50px;
+      font-size: 0.7rem;
       font-weight: 600;
       color: var(--text-secondary);
-      padding-right: 0.75rem;
+      padding-right: 0.3rem;
     }
 
     .calendar-event-time.all-day {
@@ -553,26 +520,29 @@
 
     .calendar-event-details {
       flex: 1;
+      min-width: 0;
     }
 
     .calendar-event-title {
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       font-weight: 500;
       color: var(--text-primary);
-      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .calendar-event-location {
-      font-size: 0.8rem;
+      font-size: 0.65rem;
       color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .calendar-event-location::before {
       content: '📍';
-      font-size: 0.7rem;
+      font-size: 0.6rem;
     }
 
     .calendar-loading {
@@ -580,18 +550,19 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 200px;
+      height: 100px;
       color: var(--text-secondary);
+      font-size: 0.8rem;
     }
 
     .calendar-loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(102, 126, 234, 0.2);
+      width: 24px;
+      height: 24px;
+      border: 2px solid rgba(102, 126, 234, 0.2);
       border-top-color: var(--primary-color);
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
     }
 
     @keyframes spin {
@@ -600,42 +571,44 @@
 
     .calendar-error {
       text-align: center;
-      padding: 2rem;
+      padding: 1rem;
       color: var(--danger-color);
+      font-size: 0.8rem;
     }
 
     .calendar-error button {
-      margin-top: 1rem;
-      padding: 0.5rem 1rem;
+      margin-top: 0.5rem;
+      padding: 0.25rem 0.5rem;
       background: var(--primary-color);
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 4px;
       cursor: pointer;
+      font-size: 0.75rem;
     }
 
     .calendar-no-events {
       text-align: center;
-      padding: 2rem;
+      padding: 1rem;
       color: var(--text-secondary);
       font-style: italic;
+      font-size: 0.8rem;
     }
 
     .calendar-toggle-container {
       display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
+      gap: 0.25rem;
+      margin-bottom: 0.25rem;
     }
 
     .calendar-toggle {
       flex: 1;
-      padding: 0.4rem 0.75rem;
+      padding: 0.15rem 0.4rem;
       border: none;
-      border-radius: 8px;
-      font-size: 0.8rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
       background: rgba(0, 0, 0, 0.05);
       color: var(--text-secondary);
     }
@@ -654,21 +627,14 @@
     }
 
     .todo-widget {
-      grid-column: 1;
-      grid-row: 2;
-      /* Force stable dimensions to prevent layout shifts */
-      min-height: 400px;
-      max-height: 400px;
+      grid-column: 2;
+      grid-row: 1;
       display: flex;
       flex-direction: column;
-      /* Complete isolation from other widgets */
-      contain: layout style size;
-      transform: translateZ(0);
-      will-change: auto;
+      overflow: hidden;
     }
 
     .todo-widget .task-list {
-      max-height: 250px;
       overflow-y: auto;
       overflow-x: hidden;
       flex: 1;
@@ -676,32 +642,21 @@
     }
 
     .todo-widget #todo-add-container {
-      /* Fixed height for add container to prevent size changes */
-      min-height: 60px;
-      max-height: 80px;
       flex-shrink: 0;
       display: flex;
       flex-direction: row;
-      justify-content: flex-start;
-      align-items: flex-start;
+      gap: 0.25rem;
     }
 
     .grocery-widget {
-      grid-column: 2;
+      grid-column: 1;
       grid-row: 2;
-      /* Force stable dimensions to prevent layout shifts */
-      min-height: 400px;
-      max-height: 400px;
       display: flex;
       flex-direction: column;
-      /* Complete isolation from other widgets */
-      contain: layout style size;
-      transform: translateZ(0);
-      will-change: auto;
+      overflow: hidden;
     }
 
     .grocery-widget .task-list {
-      max-height: 250px;
       overflow-y: auto;
       overflow-x: hidden;
       flex: 1;
@@ -709,23 +664,14 @@
     }
 
     .meals-widget {
-      grid-column: 3;
+      grid-column: 2;
       grid-row: 2;
-      /* Force stable dimensions to prevent layout shifts */
-      min-height: 400px;
-      max-height: 400px;
       display: flex;
       flex-direction: column;
-      /* Complete isolation to prevent affecting other widgets */
-      contain: layout style size;
-      isolation: isolate;
-      transform: translateZ(0);
-      /* Prevent any cascading effects */
-      will-change: auto;
+      overflow: hidden;
     }
 
     .meals-widget .task-list {
-      max-height: 250px;
       overflow-y: auto;
       overflow-x: hidden;
       flex: 1;
@@ -747,39 +693,24 @@
     }
 
     h2 {
-      margin: 0 0 1.5rem 0;
+      margin: 0 0 0.25rem 0;
       text-align: center;
       color: var(--text-primary);
-      font-size: 1.5rem;
+      font-size: 0.9rem;
       font-weight: 600;
       position: relative;
-      padding-bottom: 0.5rem;
       cursor: pointer;
-      transition: all 0.3s ease;
       user-select: none;
       flex-shrink: 0;
     }
 
     h2:hover {
       color: var(--primary-color);
-      transform: translateY(-1px);
     }
 
     h2::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 40px;
-      height: 3px;
-      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-      border-radius: 2px;
-      transition: width 0.3s ease;
-    }
-
-    h2:hover::after {
-      width: 60px;
+      /* Remove decorative underline */
+      display: none;
     }
 
     /* Full-screen mode styles */
@@ -920,26 +851,18 @@
     }
 
     .history-button {
-      background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+      background: var(--secondary-color);
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 12px;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.65rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.3s ease;
       position: absolute;
       right: 0;
       top: 50%;
       transform: translateY(-50%);
-      min-width: 60px;
-      text-align: center;
-    }
-
-    .history-button:hover {
-      transform: translateY(-50%) translateY(-1px);
-      box-shadow: var(--shadow-md);
     }
 
     /* Drag and Drop Styles */
@@ -998,16 +921,14 @@
 
     .drag-handle {
       position: absolute;
-      left: 8px;
+      left: 2px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-secondary);
-      font-size: 16px;
-      opacity: 0.6;
-      transition: all 0.2s ease;
+      font-size: 10px;
+      opacity: 0.4;
       cursor: grab;
-      padding: 4px;
-      border-radius: 4px;
+      padding: 2px;
       user-select: none;
     }
 
@@ -1104,23 +1025,21 @@
 
     .add-item-container {
       display: flex;
-      gap: 12px;
-      margin-bottom: 1.5rem;
+      gap: 4px;
+      margin-bottom: 0.25rem;
       position: relative;
       flex-shrink: 0;
-      min-height: 60px;
-      align-items: flex-start;
+      align-items: center;
     }
 
     .add-item-container input {
       flex: 1;
-      padding: 12px 16px;
-      border: 2px solid var(--border-color);
-      border-radius: 12px;
-      font-size: 14px;
+      padding: 4px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.8rem;
       font-family: inherit;
       background: rgba(255, 255, 255, 0.8);
-      transition: all 0.3s ease;
       color: var(--text-primary);
     }
 
@@ -1137,19 +1056,15 @@
     }
 
     .add-item-container button {
-      padding: 12px 20px;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      padding: 4px 10px;
+      background: var(--primary-color);
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 0.8rem;
       font-weight: 500;
       font-family: inherit;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: var(--shadow-md);
-      position: relative;
-      overflow: hidden;
     }
 
     .add-item-container button:hover {
@@ -1202,19 +1117,18 @@
     .task-item {
       display: flex;
       align-items: center;
-      padding: 16px 0;
-      padding-left: 56px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      gap: 12px;
-      transition: all 0.2s ease;
-      animation: slideIn 0.3s ease-out;
+      padding: 4px 0;
+      padding-left: 28px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+      gap: 6px;
       position: relative;
+      font-size: 0.85rem;
     }
     
     /* Ensure drag handle spacing in all contexts */
     .task-list .task-item,
     .fullscreen-mode .task-item {
-      padding-left: 56px;
+      padding-left: 28px;
     }
     
     /* Fullscreen task list optimization */
@@ -1284,17 +1198,13 @@
     }
 
     .task-checkbox {
-      width: 20px;
-      height: 20px;
+      width: 14px;
+      height: 14px;
       margin-left: 0px;
-      margin-right: 12px;
+      margin-right: 4px;
       accent-color: var(--primary-color);
       cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .task-checkbox:hover {
-      transform: scale(1.1);
+      flex-shrink: 0;
     }
     
     /* PWA: Larger checkboxes for touch with visible border */
@@ -1410,11 +1320,10 @@
 
     .task-text {
       flex: 1;
-      font-size: 15px;
-      line-height: 1.5;
+      font-size: 0.8rem;
+      line-height: 1.3;
       word-wrap: break-word;
       color: var(--text-primary);
-      transition: all 0.3s ease;
     }
 
     .task-text.completed {
@@ -1600,9 +1509,8 @@
 
     .task-actions {
       display: flex;
-      gap: 4px;
-      opacity: 1; /* Always visible for better accessibility */
-      transition: opacity 0.2s ease;
+      gap: 2px;
+      opacity: 0.6;
     }
 
     .task-item:hover .task-actions {
@@ -1613,14 +1521,14 @@
       background: none;
       border: none;
       cursor: pointer;
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: all 0.2s ease;
+      padding: 2px;
+      border-radius: 4px;
+      font-size: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px;
+      width: 20px;
+      height: 20px;
       height: 32px;
     }
 
@@ -2002,7 +1910,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.72
+        Desktop v10.73
       </div>
     </div>
   </div>
