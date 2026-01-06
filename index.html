@@ -1909,7 +1909,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.75
+        Desktop v10.76
       </div>
     </div>
   </div>
@@ -6366,8 +6366,8 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // When a meal is checked off, remove it from the active meals list
       // Do NOT sync completion to history - history items stay as normal/uncompleted
       mealItems = mealItems.filter(item => item.id !== id);
-      saveMealItems();
-      renderMealsList();
+        saveMealItems();
+        renderMealsList();
       
       // Also update fullscreen view if open
       if (document.getElementById('fullscreen-meals-list')) {
@@ -6998,7 +6998,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
         const historyButton = showingMealHistory ? 
           `<button class="add-from-history-btn" onclick="addFromHistory(${item.id})" title="Add to current meals">+</button>` : '';
-        
+          
         // History items never show as completed - they're just a reference list
         // Active meals also never show as completed since we remove them on check
         return `
@@ -7295,7 +7295,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           
         const historyButton = showingMealHistory ? 
           `<button class="add-from-history-btn" onclick="addFromHistory(${item.id}); renderMealsListFullscreen();" title="Add to current meals">+</button>` : '';
-        
+          
         // History items never show as completed - they're just a reference list
         // Active meals also never show as completed since we remove them on check
         return `
@@ -8128,6 +8128,36 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           historyBtn.textContent = showingMealHistory ? 'Current' : 'History';
           // Update URL based on current mode
           updateURL(showingMealHistory ? 'meals-history' : 'meals');
+          
+          // Update the add container to use correct function
+          const addContainer = document.querySelector('.fullscreen-mode .add-item-container');
+          if (addContainer) {
+            if (showingMealHistory) {
+              addContainer.innerHTML = `
+                <input type="text" id="fullscreen-meals-input" placeholder="Add to history only..." maxlength="100">
+                <button onclick="addMealToHistoryOnlyFullscreen()" id="fullscreen-add-meals-btn">Add to History</button>
+              `;
+            } else {
+              addContainer.innerHTML = `
+                <input type="text" id="fullscreen-meals-input" placeholder="Add meal..." maxlength="100">
+                <button onclick="addMealItemFullscreen()" id="fullscreen-add-meals-btn">Add</button>
+              `;
+            }
+            // Re-add Enter key support
+            const input = document.getElementById('fullscreen-meals-input');
+            if (input) {
+              input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                  if (showingMealHistory) {
+                    addMealToHistoryOnlyFullscreen();
+                  } else {
+                    addMealItemFullscreen();
+                  }
+                }
+              });
+            }
+          }
+          
           renderMealsListFullscreen();
         };
         

@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1375-larger-text-for-readability';
+const CACHE_NAME = 'bennett-hub-v1376-fix-history-add-button';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
