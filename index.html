@@ -455,6 +455,204 @@
       z-index: 1;
     }
 
+    /* Custom Calendar Styles */
+    .custom-calendar-container {
+      height: calc(100% - 40px);
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .custom-calendar-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-calendar-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 3px;
+    }
+
+    .custom-calendar-container::-webkit-scrollbar-thumb {
+      background: rgba(102, 126, 234, 0.3);
+      border-radius: 3px;
+    }
+
+    .custom-calendar-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(102, 126, 234, 0.5);
+    }
+
+    .calendar-date-group {
+      margin-bottom: 1rem;
+    }
+
+    .calendar-date-header {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 0.5rem;
+      position: sticky;
+      top: 0;
+      background: var(--card-background);
+      z-index: 1;
+    }
+
+    .calendar-date-header.today {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+
+    .calendar-event {
+      display: flex;
+      align-items: flex-start;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 10px;
+      background: rgba(102, 126, 234, 0.08);
+      border-left: 4px solid var(--primary-color);
+      transition: all 0.2s ease;
+    }
+
+    .calendar-event:hover {
+      background: rgba(102, 126, 234, 0.15);
+      transform: translateX(4px);
+    }
+
+    .calendar-event.emley-event {
+      border-left-color: #d946ef;
+      background: rgba(217, 70, 239, 0.08);
+    }
+
+    .calendar-event.emley-event:hover {
+      background: rgba(217, 70, 239, 0.15);
+    }
+
+    .calendar-event.nate-event {
+      border-left-color: #60a5fa;
+      background: rgba(96, 165, 250, 0.08);
+    }
+
+    .calendar-event.nate-event:hover {
+      background: rgba(96, 165, 250, 0.15);
+    }
+
+    .calendar-event-time {
+      min-width: 70px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding-right: 0.75rem;
+    }
+
+    .calendar-event-time.all-day {
+      font-style: italic;
+      color: var(--primary-color);
+    }
+
+    .calendar-event-details {
+      flex: 1;
+    }
+
+    .calendar-event-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .calendar-event-location {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .calendar-event-location::before {
+      content: '📍';
+      font-size: 0.7rem;
+    }
+
+    .calendar-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--text-secondary);
+    }
+
+    .calendar-loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(102, 126, 234, 0.2);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .calendar-error {
+      text-align: center;
+      padding: 2rem;
+      color: var(--danger-color);
+    }
+
+    .calendar-error button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .calendar-no-events {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .calendar-toggle-container {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .calendar-toggle {
+      flex: 1;
+      padding: 0.4rem 0.75rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-secondary);
+    }
+
+    .calendar-toggle.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .calendar-toggle.emley.active {
+      background: #d946ef;
+    }
+
+    .calendar-toggle.nate.active {
+      background: #60a5fa;
+    }
+
     .todo-widget {
       grid-column: 1;
       grid-row: 2;
@@ -1804,7 +2002,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.70
+        Desktop v10.71
       </div>
     </div>
   </div>
@@ -1848,9 +2046,10 @@
   <main>
     <!-- Google Calendar -->
     <div class="widget calendar-widget" id="calendar-widget">
-      <h2 onclick="openFullscreen('calendar')">Calendar</h2>
-      <iframe src="https://calendar.google.com/calendar/embed?height=800&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%23d946ef&src=2natertots%40gmail.com&color=%2360a5fa&mode=AGENDA&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0&showCalendars=1" style="border: 0" width="100%" height="100%" frameborder="0"></iframe>
-
+      <h2 onclick="openFullscreen('calendar')" style="cursor: pointer;">Calendar</h2>
+      <div id="custom-calendar-content">
+        <!-- Custom calendar will be rendered here -->
+      </div>
     </div>
 
     <!-- To-Do List -->
@@ -1910,6 +2109,252 @@
     const isFireTV = /Silk/.test(navigator.userAgent) || /AFTT/.test(navigator.userAgent);
     console.log('Device detection:', { isFireTV, userAgent: navigator.userAgent });
     
+    // Google Calendar API Configuration
+    const GOOGLE_CALENDAR_API_KEY = 'AIzaSyBxgE3kxzaI_J_f3lnndONO57txK_Idc7Y';
+    const CALENDAR_IDS = {
+      emley: 'holcombe.emley@gmail.com',
+      nate: '2natertots@gmail.com'
+    };
+    const CALENDAR_COLORS = {
+      emley: '#d946ef',
+      nate: '#60a5fa'
+    };
+    let calendarEvents = [];
+    let calendarFilters = { emley: true, nate: true };
+    let calendarLastFetch = null;
+    const CALENDAR_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+    // Fetch events from Google Calendar API
+    async function fetchCalendarEvents(forceRefresh = false) {
+      // Use cache if available and not expired
+      if (!forceRefresh && calendarLastFetch && (Date.now() - calendarLastFetch < CALENDAR_CACHE_DURATION)) {
+        return calendarEvents;
+      }
+
+      const now = new Date();
+      const timeMin = now.toISOString();
+      const timeMax = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ahead
+      
+      const allEvents = [];
+      
+      for (const [owner, calendarId] of Object.entries(CALENDAR_IDS)) {
+        try {
+          const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?` +
+            `key=${GOOGLE_CALENDAR_API_KEY}&` +
+            `timeMin=${encodeURIComponent(timeMin)}&` +
+            `timeMax=${encodeURIComponent(timeMax)}&` +
+            `singleEvents=true&` +
+            `orderBy=startTime&` +
+            `maxResults=100`;
+          
+          const response = await fetch(url);
+          
+          if (!response.ok) {
+            console.error(`Failed to fetch ${owner}'s calendar:`, response.status);
+            continue;
+          }
+          
+          const data = await response.json();
+          
+          if (data.items) {
+            data.items.forEach(event => {
+              allEvents.push({
+                id: event.id,
+                title: event.summary || 'Untitled Event',
+                start: event.start.dateTime || event.start.date,
+                end: event.end.dateTime || event.end.date,
+                isAllDay: !event.start.dateTime,
+                location: event.location || null,
+                description: event.description || null,
+                owner: owner,
+                color: CALENDAR_COLORS[owner]
+              });
+            });
+          }
+        } catch (error) {
+          console.error(`Error fetching ${owner}'s calendar:`, error);
+        }
+      }
+      
+      // Sort all events by start time
+      allEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
+      
+      calendarEvents = allEvents;
+      calendarLastFetch = Date.now();
+      
+      return allEvents;
+    }
+
+    // Format time for display
+    function formatEventTime(dateString, isAllDay) {
+      if (isAllDay) return 'All day';
+      
+      const date = new Date(dateString);
+      return date.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      });
+    }
+
+    // Format date header
+    function formatDateHeader(dateString) {
+      const date = new Date(dateString);
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const isToday = date.toDateString() === today.toDateString();
+      const isTomorrow = date.toDateString() === tomorrow.toDateString();
+      
+      if (isToday) return { text: 'Today', isToday: true };
+      if (isTomorrow) return { text: 'Tomorrow', isToday: false };
+      
+      const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+      const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      return { text: `${dayName}, ${monthDay}`, isToday: false };
+    }
+
+    // Get date key for grouping
+    function getDateKey(dateString) {
+      const date = new Date(dateString);
+      return date.toDateString();
+    }
+
+    // Render custom calendar
+    async function renderCustomCalendar(container, isFullscreen = false) {
+      container.innerHTML = `
+        <div class="calendar-loading">
+          <div class="calendar-loading-spinner"></div>
+          <span>Loading calendar...</span>
+        </div>
+      `;
+      
+      try {
+        const events = await fetchCalendarEvents();
+        
+        // Filter events based on active filters
+        const filteredEvents = events.filter(event => calendarFilters[event.owner]);
+        
+        if (filteredEvents.length === 0) {
+          container.innerHTML = `
+            <div class="calendar-toggle-container">
+              <button class="calendar-toggle emley ${calendarFilters.emley ? 'active' : ''}" onclick="toggleCalendarFilter('emley')">
+                Emley
+              </button>
+              <button class="calendar-toggle nate ${calendarFilters.nate ? 'active' : ''}" onclick="toggleCalendarFilter('nate')">
+                Nate
+              </button>
+            </div>
+            <div class="calendar-no-events">No upcoming events</div>
+          `;
+          return;
+        }
+        
+        // Group events by date
+        const groupedEvents = {};
+        filteredEvents.forEach(event => {
+          const dateKey = getDateKey(event.start);
+          if (!groupedEvents[dateKey]) {
+            groupedEvents[dateKey] = [];
+          }
+          groupedEvents[dateKey].push(event);
+        });
+        
+        // Build HTML
+        let html = `
+          <div class="calendar-toggle-container">
+            <button class="calendar-toggle emley ${calendarFilters.emley ? 'active' : ''}" onclick="toggleCalendarFilter('emley')">
+              Emley
+            </button>
+            <button class="calendar-toggle nate ${calendarFilters.nate ? 'active' : ''}" onclick="toggleCalendarFilter('nate')">
+              Nate
+            </button>
+          </div>
+          <div class="custom-calendar-container">
+        `;
+        
+        for (const [dateKey, dayEvents] of Object.entries(groupedEvents)) {
+          const header = formatDateHeader(dayEvents[0].start);
+          
+          html += `
+            <div class="calendar-date-group">
+              <div class="calendar-date-header ${header.isToday ? 'today' : ''}">${header.text}</div>
+          `;
+          
+          dayEvents.forEach(event => {
+            const timeDisplay = formatEventTime(event.start, event.isAllDay);
+            const locationHtml = event.location ? 
+              `<div class="calendar-event-location">${event.location}</div>` : '';
+            
+            html += `
+              <div class="calendar-event ${event.owner}-event">
+                <div class="calendar-event-time ${event.isAllDay ? 'all-day' : ''}">${timeDisplay}</div>
+                <div class="calendar-event-details">
+                  <div class="calendar-event-title">${event.title}</div>
+                  ${locationHtml}
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+        }
+        
+        html += '</div>';
+        container.innerHTML = html;
+        
+      } catch (error) {
+        console.error('Error rendering calendar:', error);
+        container.innerHTML = `
+          <div class="calendar-error">
+            <p>Failed to load calendar</p>
+            <button onclick="refreshCalendar()">Try Again</button>
+          </div>
+        `;
+      }
+    }
+
+    // Toggle calendar filter
+    function toggleCalendarFilter(owner) {
+      calendarFilters[owner] = !calendarFilters[owner];
+      
+      // Make sure at least one filter is active
+      if (!calendarFilters.emley && !calendarFilters.nate) {
+        calendarFilters[owner] = true;
+      }
+      
+      // Re-render calendar in both widget and fullscreen if open
+      const widgetContainer = document.getElementById('custom-calendar-content');
+      if (widgetContainer) {
+        renderCustomCalendar(widgetContainer, false);
+      }
+      
+      const fullscreenContainer = document.querySelector('.fullscreen-content .custom-calendar-container')?.parentElement;
+      if (fullscreenContainer) {
+        renderCustomCalendar(fullscreenContainer, true);
+      }
+    }
+
+    // Refresh calendar (force fetch)
+    async function refreshCalendar() {
+      calendarLastFetch = null; // Clear cache
+      
+      const widgetContainer = document.getElementById('custom-calendar-content');
+      if (widgetContainer) {
+        await renderCustomCalendar(widgetContainer, false);
+      }
+    }
+
+    // Initialize calendar on page load
+    function initializeCustomCalendar() {
+      const container = document.getElementById('custom-calendar-content');
+      if (container) {
+        renderCustomCalendar(container, false);
+      }
+    }
+
     // GitHub Sync Configuration
     const GITHUB_USERNAME = 'emleyholcombe'; // Your GitHub username
     let GIST_ID = localStorage.getItem('dashboardGistId') || null;
@@ -3087,11 +3532,17 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       updateDateTime();
       updateWeather();
       
+      // Initialize custom calendar
+      initializeCustomCalendar();
+      
       // Update time every second
       setInterval(updateDateTime, 1000);
       
       // Update weather every 10 minutes
       setInterval(updateWeather, 10 * 60 * 1000);
+      
+      // Refresh calendar every 5 minutes
+      setInterval(() => refreshCalendar(), 5 * 60 * 1000);
       
       // DISABLED: Auto-sync for debugging pull-to-refresh
       // Auto-sync: Check for cloud updates every 30 seconds
@@ -7505,13 +7956,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         title.onclick = closeFullscreen;
         title.style.cursor = 'pointer';
         }
-        const iframe = document.createElement('iframe');
-        iframe.src = 'https://calendar.google.com/calendar/embed?height=800&wkst=1&bgcolor=%23ffffff&ctz=America%2FDenver&src=holcombe.emley%40gmail.com&color=%23d946ef&src=2natertots%40gmail.com&color=%2360a5fa&mode=AGENDA&showTabs=1&showPrint=0&showDate=1&showNav=1&showTitle=0&showTz=0&showCalendars=1';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.borderRadius = '10px';
-        content.appendChild(iframe);
+        
+        // Create custom calendar container for fullscreen
+        const calendarContainer = document.createElement('div');
+        calendarContainer.id = 'fullscreen-calendar-content';
+        calendarContainer.style.cssText = `
+          width: 100%;
+          height: 100%;
+          padding: 20px;
+          overflow-y: auto;
+        `;
+        content.appendChild(calendarContainer);
+        
+        // Render custom calendar in fullscreen
+        setTimeout(() => renderCustomCalendar(calendarContainer, true), 100);
         
       } else if (widgetType === 'todo-calendar') {
         title.textContent = 'To-Do Calendar';
