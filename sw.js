@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1379-fix-hover-shift';
+const CACHE_NAME = 'bennett-hub-v1380-google-calendar-title';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
