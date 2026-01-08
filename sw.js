@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1377-consistent-title-spacing';
+const CACHE_NAME = 'bennett-hub-v1378-fix-meals-history-add';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',

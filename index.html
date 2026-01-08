@@ -1909,7 +1909,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.77
+        Desktop v10.78
       </div>
     </div>
   </div>
@@ -7072,38 +7072,36 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         historyButton.textContent = 'Current';
         headerTitle.textContent = 'Meals History';
         
-        // Change input container for history mode
-        const input = document.getElementById('meals-input');
-        const button = document.getElementById('add-meals-btn');
-        if (input && button) {
-          input.placeholder = 'Add to history only...';
-          button.textContent = 'Add to History';
-          button.onclick = addMealToHistoryOnly;
+        // Replace entire add container to ensure clean event handlers
+        if (addContainer) {
+          addContainer.innerHTML = `
+            <input type="text" id="meals-input" placeholder="Add to history only..." maxlength="100">
+            <button onclick="addMealToHistoryOnly()" id="add-meals-btn">Add to History</button>
+          `;
         }
-        
-        // Re-add Enter key support for history input
-        document.getElementById('meals-input').addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
-            addMealToHistoryOnly();
-          }
-        });
       } else {
         historyButton.textContent = 'History';
         headerTitle.textContent = 'Meals';
         
-        // Restore normal input container
-        const input = document.getElementById('meals-input');
-        const button = document.getElementById('add-meals-btn');
-        if (input && button) {
-          input.placeholder = 'Add meal...';
-          button.textContent = 'Add';
-          button.onclick = addMealItem;
+        // Replace entire add container to ensure clean event handlers
+        if (addContainer) {
+          addContainer.innerHTML = `
+            <input type="text" id="meals-input" placeholder="Add meal..." maxlength="100">
+            <button onclick="addMealItem()" id="add-meals-btn">Add</button>
+          `;
         }
-        
-        // Re-add Enter key support for normal input
-        document.getElementById('meals-input').addEventListener('keypress', function(e) {
+      }
+      
+      // Re-add Enter key support with correct function
+      const input = document.getElementById('meals-input');
+      if (input) {
+        input.addEventListener('keypress', function(e) {
           if (e.key === 'Enter') {
-            addMealItem();
+            if (showingMealHistory) {
+              addMealToHistoryOnly();
+            } else {
+              addMealItem();
+            }
           }
         });
       }
