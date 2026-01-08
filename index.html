@@ -1901,7 +1901,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.80
+        Desktop v10.81
       </div>
     </div>
   </div>
@@ -4232,21 +4232,21 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           secondContainer.style.display = 'none';
         }
         addContainer.innerHTML = `
-          <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 2rem;">
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem;">
             <div style="display: flex; gap: 0.5rem; align-items: center;">
               <input type="text" id="todo-search-input" placeholder="Search tasks..." maxlength="100" style="flex: 1;">
               <button onclick="clearTodoSearch()" title="Clear search" style="padding: 0.5rem; font-size: 0.9rem;">✕</button>
             </div>
-            <div style="display: flex; gap: 0.5rem; font-size: 0.9rem;">
-              <label style="font-weight: 500; color: var(--text-secondary); white-space: nowrap;">Date range:</label>
+            <div style="display: flex; gap: 0.5rem; font-size: 0.9rem; align-items: center;">
+              <label style="font-weight: 500; color: var(--text-secondary); white-space: nowrap;">Date:</label>
               <input type="date" id="todo-date-from" style="flex: 1; font-size: 0.85rem;" title="From date">
-              <span style="color: var(--text-secondary); align-self: center;">to</span>
+              <span style="color: var(--text-secondary);">to</span>
               <input type="date" id="todo-date-to" style="flex: 1; font-size: 0.85rem;" title="To date">
-            </div>
-            <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 0.5rem; margin-bottom: 1rem;">
-              <span class="avatar-filter emley" data-avatar="emley" onclick="toggleAvatarFilter('emley')" title="Filter by Emley">E</span>
-              <span class="avatar-filter nate" data-avatar="nate" onclick="toggleAvatarFilter('nate')" title="Filter by Nate">N</span>
-              <span class="avatar-filter family" data-avatar="family" onclick="toggleAvatarFilter('family')" title="Filter by Family">F</span>
+              <div style="display: flex; align-items: center; gap: 6px; margin-left: 0.5rem;">
+                <span class="avatar-filter emley" data-avatar="emley" onclick="toggleAvatarFilter('emley')" title="Filter by Emley">E</span>
+                <span class="avatar-filter nate" data-avatar="nate" onclick="toggleAvatarFilter('nate')" title="Filter by Nate">N</span>
+                <span class="avatar-filter family" data-avatar="family" onclick="toggleAvatarFilter('family')" title="Filter by Family">F</span>
+              </div>
             </div>
           </div>
         `;
