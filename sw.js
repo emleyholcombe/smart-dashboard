@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1378-fix-meals-history-add';
+const CACHE_NAME = 'bennett-hub-v1379-fix-hover-shift';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
