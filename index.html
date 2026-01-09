@@ -7660,12 +7660,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const precipIconElement = document.getElementById('precip-icon');
       const precipDetailsElement = document.getElementById('precip-details');
       
-      // All ZIP codes to check for regional high/low
-      const zipCodes = ['84660', '84663', '84664', '84606', '84605', '84604', '84603', '84602', '84601', '84097', '84062', '84059', '84058', '84057', '84048', '84043', '84003'];
+      // All ZIP codes to check for regional high/low (append ,US to ensure US locations)
+      const zipCodes = ['84660,US', '84663,US', '84664,US', '84606,US', '84605,US', '84604,US', '84603,US', '84602,US', '84601,US', '84097,US', '84062,US', '84059,US', '84058,US', '84057,US', '84048,US', '84043,US', '84003,US'];
       
       try {
         // Primary location for current conditions (use first ZIP)
-        const primaryLocation = '84660';
+        const primaryLocation = '84660,US';
         
         // Fetch weather data for all locations in parallel
         const weatherPromises = zipCodes.map(async (zip) => {
