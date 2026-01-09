@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1381-avatar-filters-same-line';
+const CACHE_NAME = 'bennett-hub-v1382-drag-anywhere-click-to-edit';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
