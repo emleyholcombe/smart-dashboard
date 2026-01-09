@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1383-todo-calendar-icon';
+const CACHE_NAME = 'bennett-hub-v1384-regional-weather-highs-lows';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
