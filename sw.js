@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1382-drag-anywhere-click-to-edit';
+const CACHE_NAME = 'bennett-hub-v1383-todo-calendar-icon';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
