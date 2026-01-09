@@ -7702,10 +7702,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
                   });
                 }
                 
+                // Parse temperatures, ensuring they're valid numbers
+                const minTemp = parseInt(today.mintempF, 10);
+                const maxTemp = parseInt(today.maxtempF, 10);
+                
+                // Skip invalid temperature values
+                if (isNaN(minTemp) || isNaN(maxTemp)) {
+                  console.log(`Invalid temperature data for ${zip}:`, today.mintempF, today.maxtempF);
+                  return null;
+                }
+                
                 return {
                   zip,
-                  minTemp: parseInt(today.mintempF),
-                  maxTemp: parseInt(today.maxtempF),
+                  minTemp,
+                  maxTemp,
                   hasRain,
                   hasSnow,
                   maxRainChance,
@@ -7780,7 +7790,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
           }
           
           // Update temperature display with current temp and regional high/low
-          tempElement.textContent = `${lowestLow}° / ${highestHigh}°`;
+          // Log for debugging
+          console.log(`Weather: Low=${lowestLow}°F, High=${highestHigh}°F from ${validResults.length} locations`);
+          
+          tempElement.textContent = `${lowestLow}°F / ${highestHigh}°F`;
           iconElement.textContent = weatherIcon;
           tempElement.title = `Current: ${currentTempF}°F - ${condition}\nRegional Low: ${lowestLow}°F\nRegional High: ${highestHigh}°F\n(${validResults.length} locations checked)${precipNote}`;
           tempElement.classList.remove('loading');
@@ -7812,7 +7825,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         
         // Fallback: Just show high/low if we have that data
         if (lowestLow !== Infinity && highestHigh !== -Infinity) {
-          tempElement.textContent = `${lowestLow}° / ${highestHigh}°`;
+          tempElement.textContent = `${lowestLow}°F / ${highestHigh}°F`;
           iconElement.textContent = '🌡️';
           tempElement.title = `Regional Low: ${lowestLow}°F\nRegional High: ${highestHigh}°F`;
           tempElement.classList.remove('loading');

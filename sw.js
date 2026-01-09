@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1385-regional-rain-snow-icons';
+const CACHE_NAME = 'bennett-hub-v1386-fix-temp-display';
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
