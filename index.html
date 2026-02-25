@@ -280,6 +280,12 @@
         background: linear-gradient(135deg, #8c5ec4 0%, #764ba2 100%);
         z-index: -1;
       }
+      
+      /* Allow scrolling in fullscreen content for PWA */
+      .fullscreen-content {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+      }
     }
 
     header {
@@ -1895,7 +1901,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.90
+        Desktop v10.91
       </div>
     </div>
   </div>
@@ -9574,9 +9580,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       } else {
         // Create current medications UI
         const medsContainer = document.createElement('div');
-        // Desktop: side-by-side grid (2x2), Mobile: stacked
+        // Desktop: side-by-side grid (2x2), Mobile: stacked and scrollable
         if (isPWA) {
-          medsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 2rem; padding: 2rem;';
+          medsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 2rem; padding: 2rem; padding-bottom: 4rem; overflow-y: auto; flex: 1; min-height: 0;';
+          // Also make the parent content scrollable
+          content.style.overflow = 'auto';
         } else {
           medsContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem; max-width: 900px; margin: 0 auto;';
         }
@@ -12258,7 +12266,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.92 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.93 - Tap to Update';
       versionIndicator.style.cssText = `
         display: inline-block;
         font-size: 11px;
@@ -12305,7 +12313,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.92 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.93 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -13013,7 +13021,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.92';
+      versionIndicator.textContent = 'PWA v12.93';
       versionIndicator.style.cssText = `
         position: fixed !important;
         bottom: 10px !important;
@@ -13072,7 +13080,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.92 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.93 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
