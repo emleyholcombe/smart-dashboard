@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1388-fcm-push-notifications';
+const CACHE_NAME = 'bennett-hub-v1389-fix-triple-notifications';
 
 // Import Firebase messaging for service worker
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
@@ -18,28 +18,32 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // Handle background push messages from FCM
+// Note: When FCM sends a notification payload, it auto-displays the notification.
+// This handler is for data-only messages or customizing the notification.
 messaging.onBackgroundMessage((payload) => {
   console.log('Service Worker: Background message received', payload);
   
-  const notification = payload.notification || {};
+  // If there's already a notification payload, FCM handles display automatically
+  // Only show custom notification for data-only messages
+  if (payload.notification) {
+    console.log('Service Worker: FCM auto-displaying notification, skipping custom display');
+    return;
+  }
+  
   const data = payload.data || {};
   
-  const notificationTitle = notification.title || 'Bennett Hub';
+  const notificationTitle = data.title || 'Bennett Hub';
   const notificationOptions = {
-    body: notification.body || 'You have a new notification',
+    body: data.body || 'You have a new notification',
     icon: '/smart-dashboard/icon-192.png',
     badge: '/smart-dashboard/icon-72.png',
     vibrate: [100, 50, 100],
-    tag: data.tag || 'bennett-hub-notification',
+    tag: 'bennett-hub-notification',
     data: {
       url: data.url || '/smart-dashboard/',
       action: data.action || 'open',
       ...data
-    },
-    actions: [
-      { action: 'open', title: 'Open App' },
-      { action: 'dismiss', title: 'Dismiss' }
-    ]
+    }
   };
   
   return self.registration.showNotification(notificationTitle, notificationOptions);
@@ -188,41 +192,41 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// Push notification handling (fallback for non-FCM push)
+// Push notification handling
+// Note: FCM handles push events internally, so we skip if it's an FCM message
 self.addEventListener('push', (event) => {
   console.log('Service Worker: Push event received');
   
-  let data = {};
-  let title = 'Bennett Hub';
-  let body = 'New notification';
-  
+  // Check if this is an FCM message (FCM handles these automatically)
+  let payload;
   try {
-    if (event.data) {
-      const payload = event.data.json();
-      data = payload.data || payload;
-      title = payload.notification?.title || data.title || 'Bennett Hub';
-      body = payload.notification?.body || data.body || 'New notification';
-    }
+    payload = event.data?.json();
   } catch (e) {
-    body = event.data ? event.data.text() : 'New notification from Bennett Hub';
+    payload = null;
   }
+  
+  // If it has FCM structure with notification, let FCM handle it
+  if (payload?.notification || payload?.fcmMessageId) {
+    console.log('Service Worker: FCM message detected, letting FCM handle display');
+    return;
+  }
+  
+  // Only handle non-FCM push messages
+  const data = payload?.data || payload || {};
+  const title = data.title || 'Bennett Hub';
+  const body = data.body || (event.data ? event.data.text() : 'New notification');
   
   const options = {
     body: body,
     icon: '/smart-dashboard/icon-192.png',
     badge: '/smart-dashboard/icon-72.png',
     vibrate: [100, 50, 100],
-    tag: data.tag || 'bennett-hub-notification',
+    tag: 'bennett-hub-notification',
     data: {
       url: data.url || '/smart-dashboard/',
       action: data.action || 'open',
-      dateOfArrival: Date.now(),
       ...data
-    },
-    actions: [
-      { action: 'open', title: 'Open App' },
-      { action: 'dismiss', title: 'Dismiss' }
-    ]
+    }
   };
 
   event.waitUntil(
