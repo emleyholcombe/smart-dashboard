@@ -1997,10 +1997,243 @@
     </div>
   </main>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+  
   <script>
     // Device Detection
     const isFireTV = /Silk/.test(navigator.userAgent) || /AFTT/.test(navigator.userAgent);
     console.log('Device detection:', { isFireTV, userAgent: navigator.userAgent });
+    
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAnUFxQTbEsfSPopMHIetVO71b2zAipuDo",
+      authDomain: "bennett-hub-smart-dashboard.firebaseapp.com",
+      projectId: "bennett-hub-smart-dashboard",
+      storageBucket: "bennett-hub-smart-dashboard.firebasestorage.app",
+      messagingSenderId: "234568062046",
+      appId: "1:234568062046:web:d519bd469178f6498c50cf"
+    };
+    
+    // VAPID key for web push
+    const VAPID_KEY = 'BHVqSFQ8Nzszoh05BV2L9u9GCxACkocmzbmGoej1aZA4L8awzFragMZ_8h4rVu7qYifYGYVXj_rWq9MqCue9tQc';
+    
+    // Initialize Firebase
+    let firebaseApp = null;
+    let messaging = null;
+    let fcmToken = null;
+    
+    function initializeFirebase() {
+      try {
+        firebaseApp = firebase.initializeApp(firebaseConfig);
+        console.log('🔥 Firebase initialized');
+        
+        // Only initialize messaging if supported
+        if ('Notification' in window && 'serviceWorker' in navigator) {
+          messaging = firebase.messaging();
+          console.log('📬 Firebase Messaging initialized');
+          
+          // Handle foreground messages
+          messaging.onMessage((payload) => {
+            console.log('📩 Foreground message received:', payload);
+            showInAppNotification(payload);
+          });
+        }
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+      }
+    }
+    
+    // Show in-app notification for foreground messages
+    function showInAppNotification(payload) {
+      const notification = payload.notification || {};
+      const title = notification.title || 'Bennett Hub';
+      const body = notification.body || 'New notification';
+      
+      // Create toast notification
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        z-index: 100000;
+        max-width: 350px;
+        animation: slideIn 0.3s ease-out;
+        cursor: pointer;
+      `;
+      toast.innerHTML = `
+        <div style="font-weight: 600; margin-bottom: 4px;">${title}</div>
+        <div style="font-size: 14px; opacity: 0.9;">${body}</div>
+      `;
+      
+      // Add animation style
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      toast.addEventListener('click', () => {
+        toast.remove();
+        // Handle notification click action if needed
+        if (payload.data?.action === 'update') {
+          forceAppUpdate();
+        }
+      });
+      
+      document.body.appendChild(toast);
+      
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    }
+    
+    // Request notification permission and get FCM token
+    async function requestNotificationPermission() {
+      try {
+        console.log('🔔 Requesting notification permission...');
+        
+        // First check if notifications are supported
+        if (!('Notification' in window)) {
+          console.warn('Notifications not supported in this browser');
+          return null;
+        }
+        
+        // Request permission
+        const permission = await Notification.requestPermission();
+        console.log('🔔 Permission result:', permission);
+        
+        if (permission !== 'granted') {
+          console.warn('Notification permission denied');
+          return null;
+        }
+        
+        // Get FCM token
+        if (messaging) {
+          // Wait for service worker to be ready
+          const swRegistration = await navigator.serviceWorker.ready;
+          
+          const token = await messaging.getToken({
+            vapidKey: VAPID_KEY,
+            serviceWorkerRegistration: swRegistration
+          });
+          
+          if (token) {
+            fcmToken = token;
+            console.log('🔑 FCM Token:', token);
+            
+            // Save token to localStorage
+            localStorage.setItem('fcmToken', token);
+            
+            // Save token to Gist for server-side notifications
+            await saveFCMTokenToGist(token);
+            
+            return token;
+          }
+        }
+        
+        return null;
+      } catch (error) {
+        console.error('Error getting notification permission:', error);
+        return null;
+      }
+    }
+    
+    // Save FCM token to Gist for server-side push
+    async function saveFCMTokenToGist(token) {
+      if (!GIST_ID || !GITHUB_TOKEN) {
+        console.log('No Gist configured, storing token locally only');
+        return;
+      }
+      
+      try {
+        // Get device info for identification
+        const deviceInfo = {
+          token: token,
+          device: navigator.userAgent,
+          platform: navigator.platform,
+          timestamp: new Date().toISOString(),
+          isPWA: window.matchMedia('(display-mode: standalone)').matches
+        };
+        
+        // First, fetch current Gist to get existing tokens
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        
+        let existingTokens = [];
+        if (response.ok) {
+          const gistData = await response.json();
+          if (gistData.files['fcm_tokens.json']) {
+            const content = JSON.parse(gistData.files['fcm_tokens.json'].content);
+            existingTokens = content.tokens || [];
+          }
+        }
+        
+        // Check if this token already exists (update timestamp if so)
+        const existingIndex = existingTokens.findIndex(t => t.token === token);
+        if (existingIndex >= 0) {
+          existingTokens[existingIndex] = deviceInfo;
+        } else {
+          existingTokens.push(deviceInfo);
+        }
+        
+        // Save updated tokens
+        await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+          },
+          body: JSON.stringify({
+            files: {
+              'fcm_tokens.json': {
+                content: JSON.stringify({ tokens: existingTokens }, null, 2)
+              }
+            }
+          })
+        });
+        
+        console.log('✅ FCM token saved to Gist');
+      } catch (error) {
+        console.error('Error saving FCM token to Gist:', error);
+      }
+    }
+    
+    // Check notification permission status
+    function getNotificationStatus() {
+      if (!('Notification' in window)) {
+        return 'unsupported';
+      }
+      return Notification.permission; // 'granted', 'denied', or 'default'
+    }
+    
+    // Initialize Firebase on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeFirebase();
+      
+      // Check if we have a stored token and refresh it
+      const storedToken = localStorage.getItem('fcmToken');
+      if (storedToken && Notification.permission === 'granted') {
+        console.log('🔑 Restoring FCM token from storage');
+        fcmToken = storedToken;
+      }
+    });
     
     // Google Calendar API Configuration
     const GOOGLE_CALENDAR_API_KEY = 'AIzaSyBxgE3kxzaI_J_f3lnndONO57txK_Idc7Y';
@@ -11294,6 +11527,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <div style="color: #333; font-size: 14px;">${debugInfo.isOnline ? 'Yes' : 'No'}</div>
             </div>
             
+            <div id="pwa-notification-toggle" style="background: #f5f5f5; padding: 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s ease;" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">PUSH NOTIFICATIONS</div>
+              <div id="pwa-notification-status" style="color: #333; font-size: 14px;">${getNotificationStatus() === 'granted' ? '✅ Enabled' : getNotificationStatus() === 'denied' ? '❌ Blocked' : '🔔 Tap to Enable'}</div>
+            </div>
+            
             <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
               <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">CURRENT DATA</div>
               <div style="color: #333; font-size: 14px;">${totalItems} items total</div>
@@ -11320,6 +11558,33 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       overlay.className = 'pwa-info-overlay';
       overlay.appendChild(popup);
       document.body.appendChild(overlay);
+      
+      // Add notification toggle handler
+      const pwaNotificationToggle = document.getElementById('pwa-notification-toggle');
+      if (pwaNotificationToggle) {
+        pwaNotificationToggle.addEventListener('click', async () => {
+          const status = getNotificationStatus();
+          if (status === 'denied') {
+            alert('Notifications are blocked. Please enable them in your device settings for this app.');
+            return;
+          }
+          if (status === 'granted') {
+            alert('Push notifications are already enabled!');
+            return;
+          }
+          
+          const statusDiv = document.getElementById('pwa-notification-status');
+          if (statusDiv) statusDiv.textContent = '⏳ Requesting...';
+          
+          const token = await requestNotificationPermission();
+          if (token) {
+            if (statusDiv) statusDiv.textContent = '✅ Enabled';
+            alert('Push notifications enabled! You will now receive notifications even when the app is closed.');
+          } else {
+            if (statusDiv) statusDiv.textContent = getNotificationStatus() === 'denied' ? '❌ Blocked' : '🔔 Tap to Enable';
+          }
+        });
+      }
       
       // Close on overlay click (but not popup click)
       overlay.addEventListener('click', (e) => {
@@ -11687,6 +11952,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <span>${navigator.onLine ? '✅ Yes' : '❌ No'}</span>
             </div>
             
+            <div id="notification-toggle-field" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 6px; cursor: pointer; transition: background 0.2s ease;" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
+              <strong>Push Notifications:</strong>
+              <span id="notification-status">${getNotificationStatus() === 'granted' ? '✅ Enabled' : getNotificationStatus() === 'denied' ? '❌ Blocked' : '🔔 Click to Enable'}</span>
+            </div>
+            
             <div style="display: flex; justify-content: space-between; padding: 10px; background: #f5f5f5; border-radius: 6px;">
               <strong>Current Data:</strong>
               <div style="text-align: right;">
@@ -11701,6 +11971,33 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       overlay.appendChild(popup);
       document.body.appendChild(overlay);
+      
+      // Add notification toggle handler
+      const notificationField = document.getElementById('notification-toggle-field');
+      if (notificationField) {
+        notificationField.addEventListener('click', async () => {
+          const status = getNotificationStatus();
+          if (status === 'denied') {
+            alert('Notifications are blocked. Please enable them in your browser settings.');
+            return;
+          }
+          if (status === 'granted') {
+            alert('Push notifications are already enabled!');
+            return;
+          }
+          
+          const statusSpan = document.getElementById('notification-status');
+          if (statusSpan) statusSpan.textContent = '⏳ Requesting...';
+          
+          const token = await requestNotificationPermission();
+          if (token) {
+            if (statusSpan) statusSpan.textContent = '✅ Enabled';
+            alert('Push notifications enabled! You will now receive notifications even when the app is closed.');
+          } else {
+            if (statusSpan) statusSpan.textContent = getNotificationStatus() === 'denied' ? '❌ Blocked' : '🔔 Click to Enable';
+          }
+        });
+      }
       
       // Add close button event listener
       const closeBtn = document.getElementById('desktop-close-btn');

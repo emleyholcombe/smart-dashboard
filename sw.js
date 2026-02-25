@@ -1,5 +1,49 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1387-fix-zip-to-us';
+const CACHE_NAME = 'bennett-hub-v1388-fcm-push-notifications';
+
+// Import Firebase messaging for service worker
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
+
+// Initialize Firebase in service worker
+firebase.initializeApp({
+  apiKey: "AIzaSyAnUFxQTbEsfSPopMHIetVO71b2zAipuDo",
+  authDomain: "bennett-hub-smart-dashboard.firebaseapp.com",
+  projectId: "bennett-hub-smart-dashboard",
+  storageBucket: "bennett-hub-smart-dashboard.firebasestorage.app",
+  messagingSenderId: "234568062046",
+  appId: "1:234568062046:web:d519bd469178f6498c50cf"
+});
+
+const messaging = firebase.messaging();
+
+// Handle background push messages from FCM
+messaging.onBackgroundMessage((payload) => {
+  console.log('Service Worker: Background message received', payload);
+  
+  const notification = payload.notification || {};
+  const data = payload.data || {};
+  
+  const notificationTitle = notification.title || 'Bennett Hub';
+  const notificationOptions = {
+    body: notification.body || 'You have a new notification',
+    icon: '/smart-dashboard/icon-192.png',
+    badge: '/smart-dashboard/icon-72.png',
+    vibrate: [100, 50, 100],
+    tag: data.tag || 'bennett-hub-notification',
+    data: {
+      url: data.url || '/smart-dashboard/',
+      action: data.action || 'open',
+      ...data
+    },
+    actions: [
+      { action: 'open', title: 'Open App' },
+      { action: 'dismiss', title: 'Dismiss' }
+    ]
+  };
+  
+  return self.registration.showNotification(notificationTitle, notificationOptions);
+});
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -144,33 +188,81 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// Push notification handling (for future use)
+// Push notification handling (fallback for non-FCM push)
 self.addEventListener('push', (event) => {
   console.log('Service Worker: Push event received');
   
-  const options = {
-    body: event.data ? event.data.text() : 'New notification from Bennett Hub',
-    icon: '/icon-192.png',
-    badge: '/icon-72.png',
-    vibrate: [100, 50, 100],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
+  let data = {};
+  let title = 'Bennett Hub';
+  let body = 'New notification';
+  
+  try {
+    if (event.data) {
+      const payload = event.data.json();
+      data = payload.data || payload;
+      title = payload.notification?.title || data.title || 'Bennett Hub';
+      body = payload.notification?.body || data.body || 'New notification';
     }
+  } catch (e) {
+    body = event.data ? event.data.text() : 'New notification from Bennett Hub';
+  }
+  
+  const options = {
+    body: body,
+    icon: '/smart-dashboard/icon-192.png',
+    badge: '/smart-dashboard/icon-72.png',
+    vibrate: [100, 50, 100],
+    tag: data.tag || 'bennett-hub-notification',
+    data: {
+      url: data.url || '/smart-dashboard/',
+      action: data.action || 'open',
+      dateOfArrival: Date.now(),
+      ...data
+    },
+    actions: [
+      { action: 'open', title: 'Open App' },
+      { action: 'dismiss', title: 'Dismiss' }
+    ]
   };
 
   event.waitUntil(
-    self.registration.showNotification('Bennett Hub', options)
+    self.registration.showNotification(title, options)
   );
 });
 
 // Notification click handling
 self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification click received');
+  console.log('Service Worker: Notification click received', event.action);
   
   event.notification.close();
   
+  // Handle different actions
+  if (event.action === 'dismiss') {
+    return;
+  }
+  
+  const data = event.notification.data || {};
+  const urlToOpen = data.url || '/smart-dashboard/';
+  
   event.waitUntil(
-    clients.openWindow('/smart-dashboard/')
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Try to focus an existing window
+        for (const client of clientList) {
+          if (client.url.includes('/smart-dashboard/') && 'focus' in client) {
+            // Send message to the client about the notification action
+            client.postMessage({
+              type: 'NOTIFICATION_CLICK',
+              action: data.action,
+              data: data
+            });
+            return client.focus();
+          }
+        }
+        // Open a new window if no existing window found
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
   );
 });
