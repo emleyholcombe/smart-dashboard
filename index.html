@@ -1895,7 +1895,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.87
+        Desktop v10.88
       </div>
     </div>
   </div>
@@ -2509,6 +2509,14 @@
     };
     let medicationsHistory = []; // Array of { date, earlyMorning: {taken, timestamp}, morning: {taken, timestamp}, evening: {taken, timestamp} }
     let showingMedicationsHistory = false;
+    
+    // Pain Management data
+    let painMedications = {
+      nate: [], // Array of { id, medication, color, timestamp, createdAt }
+      emley: []
+    };
+    let currentPainProfile = null; // 'nate' or 'emley'
+    let showingPainManagement = false;
     let dishwasher = {
       status: 'dirty', // 'clean' or 'dirty'
       timestamp: new Date().toISOString(),
@@ -2925,6 +2933,7 @@ Token:`);
         mealHistory,
         medications,
         medicationsHistory,
+        painMedications,
         dishwasher,
         lastUpdated: new Date().toISOString()
       };
@@ -2962,6 +2971,9 @@ Token:`);
       if (data.medicationsHistory) {
         medicationsHistory = data.medicationsHistory;
       }
+      if (data.painMedications) {
+        painMedications = data.painMedications;
+      }
       if (data.dishwasher) {
         dishwasher = data.dishwasher;
       }
@@ -2983,6 +2995,7 @@ Token:`);
       localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
       localStorage.setItem('medications', JSON.stringify(medications));
       localStorage.setItem('medicationsHistory', JSON.stringify(medicationsHistory));
+      localStorage.setItem('painMedications', JSON.stringify(painMedications));
       localStorage.setItem('dishwasher', JSON.stringify(dishwasher));
       
       // Try to sync to GitHub Gist (master storage) if online
@@ -3255,6 +3268,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         localMedications.earlyMorning = { taken: false, timestamp: null };
       }
       const localMedicationsHistory = JSON.parse(localStorage.getItem('medicationsHistory') || '[]');
+      const localPainMedications = JSON.parse(localStorage.getItem('painMedications') || '{"nate":[],"emley":[]}');
       const localDishwasher = JSON.parse(localStorage.getItem('dishwasher') || 'null');
       
       console.log('📱 Local storage data:', {
@@ -3351,6 +3365,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
       if (localMedicationsHistory) {
         medicationsHistory = localMedicationsHistory;
+      }
+      if (localPainMedications) {
+        painMedications = localPainMedications;
       }
       if (localDishwasher) {
         dishwasher = localDishwasher;
@@ -9496,7 +9513,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       const title = document.createElement('h1');
       title.className = 'fullscreen-title';
-      title.textContent = showingMedicationsHistory ? 'Medications History' : 'Medications';
+      title.textContent = showingPainManagement 
+        ? (currentPainProfile ? `Pain Management - ${currentPainProfile === 'nate' ? 'Nate' : 'Emley'}` : 'Pain Management')
+        : (showingMedicationsHistory ? 'Medications History' : 'Medications');
       
       // Make title clickable on desktop (not PWA)
       if (!isPWA) {
@@ -9546,17 +9565,20 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Check if we need to reset daily
       checkAndResetMedications();
       
-      if (showingMedicationsHistory) {
+      if (showingPainManagement) {
+        // Show pain management view
+        renderPainManagement(content);
+      } else if (showingMedicationsHistory) {
         // Show history view
         renderMedicationsHistory(content);
       } else {
         // Create current medications UI
         const medsContainer = document.createElement('div');
-        // Desktop: side-by-side grid (3 columns), Mobile: stacked
+        // Desktop: side-by-side grid (2x2), Mobile: stacked
         if (isPWA) {
           medsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 2rem; padding: 2rem;';
         } else {
-          medsContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; padding: 2rem;';
+          medsContainer.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem; max-width: 900px; margin: 0 auto;';
         }
         
         // Early Morning medication
@@ -9570,6 +9592,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         // Evening medication
         const eveningCard = createMedicationCard('evening', '🌙', 'Evening Medications');
         medsContainer.appendChild(eveningCard);
+        
+        // Pain Management card
+        const painCard = createPainManagementCard();
+        medsContainer.appendChild(painCard);
         
         content.appendChild(medsContainer);
       }
@@ -9753,6 +9779,660 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const savedHistory = localStorage.getItem('medicationsHistory');
       if (savedHistory) {
         medicationsHistory = JSON.parse(savedHistory);
+      }
+      
+      const savedPainMeds = localStorage.getItem('painMedications');
+      if (savedPainMeds) {
+        painMedications = JSON.parse(savedPainMeds);
+      }
+    }
+
+    // Pain Management Functions
+    function createPainManagementCard() {
+      const isPWA = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      
+      const card = document.createElement('div');
+      const cardPadding = isPWA ? '2rem' : '2.5rem';
+      card.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: ${cardPadding};
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      `;
+      
+      card.onclick = () => {
+        showingPainManagement = true;
+        currentPainProfile = null;
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        if (fullscreenContainer) fullscreenContainer.remove();
+        openFullscreenMedications();
+      };
+      
+      card.onmouseover = () => { card.style.transform = 'scale(1.02)'; };
+      card.onmouseout = () => { card.style.transform = 'scale(1)'; };
+      
+      const iconSpan = document.createElement('span');
+      const iconSize = isPWA ? '3rem' : '4rem';
+      iconSpan.style.cssText = `font-size: ${iconSize};`;
+      iconSpan.textContent = '💊';
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.style.cssText = 'flex: 1;';
+      
+      const labelDiv = document.createElement('div');
+      const labelSize = isPWA ? '1.25rem' : '1.5rem';
+      labelDiv.style.cssText = `font-size: ${labelSize}; font-weight: 600; color: white; margin-bottom: 0.5rem;`;
+      labelDiv.textContent = 'Pain Management';
+      
+      const statusDiv = document.createElement('div');
+      const statusSize = isPWA ? '0.9rem' : '1rem';
+      statusDiv.style.cssText = `font-size: ${statusSize}; color: rgba(255,255,255,0.9);`;
+      
+      // Show recent medication info
+      const recentMeds = getRecentPainMedsInfo();
+      statusDiv.textContent = recentMeds || 'Tap to log pain medication';
+      
+      contentDiv.appendChild(labelDiv);
+      contentDiv.appendChild(statusDiv);
+      
+      const arrowSpan = document.createElement('span');
+      arrowSpan.style.cssText = 'font-size: 1.5rem; color: white;';
+      arrowSpan.textContent = '→';
+      
+      card.appendChild(iconSpan);
+      card.appendChild(contentDiv);
+      card.appendChild(arrowSpan);
+      
+      return card;
+    }
+    
+    function getRecentPainMedsInfo() {
+      const now = new Date();
+      const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+      
+      let recentCount = 0;
+      for (const profile of ['nate', 'emley']) {
+        const recent = (painMedications[profile] || []).filter(m => new Date(m.timestamp) > oneDayAgo);
+        recentCount += recent.length;
+      }
+      
+      if (recentCount > 0) {
+        return `${recentCount} dose${recentCount > 1 ? 's' : ''} logged in last 24h`;
+      }
+      return null;
+    }
+    
+    function renderPainManagement(content) {
+      const isPWA = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      
+      if (!currentPainProfile) {
+        // Show profile selection
+        const container = document.createElement('div');
+        container.style.cssText = `
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 2rem;
+          padding: 3rem;
+          min-height: 50vh;
+        `;
+        
+        const title = document.createElement('h2');
+        title.style.cssText = 'color: var(--text-primary); font-size: 1.8rem; margin-bottom: 1rem;';
+        title.textContent = 'Select Profile';
+        container.appendChild(title);
+        
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = 'display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;';
+        
+        // Nate button
+        const nateBtn = createProfileButton('Nate', '#60a5fa', 'nate');
+        buttonContainer.appendChild(nateBtn);
+        
+        // Emley button
+        const emleyBtn = createProfileButton('Emley', '#d946ef', 'emley');
+        buttonContainer.appendChild(emleyBtn);
+        
+        container.appendChild(buttonContainer);
+        
+        // Back button
+        const backBtn = document.createElement('button');
+        backBtn.style.cssText = `
+          margin-top: 2rem;
+          padding: 12px 24px;
+          background: #6b7280;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 1rem;
+        `;
+        backBtn.textContent = '← Back to Medications';
+        backBtn.onclick = () => {
+          showingPainManagement = false;
+          currentPainProfile = null;
+          const fullscreenContainer = document.getElementById('fullscreen-container');
+          if (fullscreenContainer) fullscreenContainer.remove();
+          openFullscreenMedications();
+        };
+        container.appendChild(backBtn);
+        
+        content.appendChild(container);
+      } else {
+        // Show medication log for selected profile
+        renderPainMedicationLog(content);
+      }
+    }
+    
+    function createProfileButton(name, color, profile) {
+      const btn = document.createElement('button');
+      btn.style.cssText = `
+        width: 180px;
+        height: 180px;
+        border-radius: 20px;
+        background: ${color};
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      `;
+      
+      btn.innerHTML = `
+        <span style="font-size: 4rem;">👤</span>
+        <span style="font-size: 1.5rem; font-weight: 600;">${name}</span>
+      `;
+      
+      btn.onmouseover = () => { btn.style.transform = 'scale(1.05)'; };
+      btn.onmouseout = () => { btn.style.transform = 'scale(1)'; };
+      
+      btn.onclick = () => {
+        currentPainProfile = profile;
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        if (fullscreenContainer) fullscreenContainer.remove();
+        openFullscreenMedications();
+      };
+      
+      return btn;
+    }
+    
+    function renderPainMedicationLog(content) {
+      const isPWA = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      const profileName = currentPainProfile === 'nate' ? 'Nate' : 'Emley';
+      const profileColor = currentPainProfile === 'nate' ? '#60a5fa' : '#d946ef';
+      
+      const container = document.createElement('div');
+      container.style.cssText = 'padding: 1.5rem; max-width: 800px; margin: 0 auto;';
+      
+      // Profile header
+      const header = document.createElement('div');
+      header.style.cssText = `
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: ${profileColor};
+        border-radius: 12px;
+        color: white;
+      `;
+      
+      const profileInfo = document.createElement('div');
+      profileInfo.innerHTML = `
+        <span style="font-size: 2rem; margin-right: 1rem;">👤</span>
+        <span style="font-size: 1.5rem; font-weight: 600;">${profileName}'s Pain Medications</span>
+      `;
+      
+      const switchBtn = document.createElement('button');
+      switchBtn.style.cssText = `
+        padding: 8px 16px;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      `;
+      switchBtn.textContent = 'Switch Profile';
+      switchBtn.onclick = () => {
+        currentPainProfile = null;
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        if (fullscreenContainer) fullscreenContainer.remove();
+        openFullscreenMedications();
+      };
+      
+      header.appendChild(profileInfo);
+      header.appendChild(switchBtn);
+      container.appendChild(header);
+      
+      // Add medication buttons
+      const addSection = document.createElement('div');
+      addSection.style.cssText = `
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      `;
+      
+      const meds = [
+        { name: 'Acetaminophen', color: '#f5f5f5', textColor: '#333', borderColor: '#ccc' },
+        { name: 'Ibuprofen', color: '#ef4444', textColor: 'white', borderColor: '#dc2626' },
+        { name: 'Naproxen', color: '#3b82f6', textColor: 'white', borderColor: '#2563eb' }
+      ];
+      
+      meds.forEach(med => {
+        const btn = document.createElement('button');
+        btn.style.cssText = `
+          padding: 16px 24px;
+          background: ${med.color};
+          color: ${med.textColor};
+          border: 2px solid ${med.borderColor};
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 1.1rem;
+          font-weight: 500;
+          transition: all 0.2s ease;
+          min-width: 150px;
+        `;
+        btn.textContent = `+ ${med.name}`;
+        btn.onmouseover = () => { btn.style.transform = 'scale(1.05)'; };
+        btn.onmouseout = () => { btn.style.transform = 'scale(1)'; };
+        btn.onclick = () => addPainMedication(med.name, med.color);
+        addSection.appendChild(btn);
+      });
+      
+      container.appendChild(addSection);
+      
+      // Medication log (last 7 days)
+      const logSection = document.createElement('div');
+      logSection.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+      `;
+      
+      const logHeader = document.createElement('div');
+      logHeader.style.cssText = `
+        padding: 1rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+        font-weight: 600;
+        color: #333;
+      `;
+      logHeader.textContent = 'Medication Log (Last 7 Days)';
+      logSection.appendChild(logHeader);
+      
+      const logContent = document.createElement('div');
+      logContent.style.cssText = 'max-height: 400px; overflow-y: auto;';
+      
+      // Filter to last 7 days
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const profileMeds = (painMedications[currentPainProfile] || [])
+        .filter(m => new Date(m.timestamp) > sevenDaysAgo)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      if (profileMeds.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.cssText = 'padding: 2rem; text-align: center; color: #666;';
+        emptyMsg.textContent = 'No medications logged in the last 7 days';
+        logContent.appendChild(emptyMsg);
+      } else {
+        profileMeds.forEach(med => {
+          const entry = createPainLogEntry(med);
+          logContent.appendChild(entry);
+        });
+      }
+      
+      logSection.appendChild(logContent);
+      container.appendChild(logSection);
+      
+      // Back button
+      const backBtn = document.createElement('button');
+      backBtn.style.cssText = `
+        margin-top: 1.5rem;
+        padding: 12px 24px;
+        background: #6b7280;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      `;
+      backBtn.textContent = '← Back to Medications';
+      backBtn.onclick = () => {
+        showingPainManagement = false;
+        currentPainProfile = null;
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        if (fullscreenContainer) fullscreenContainer.remove();
+        openFullscreenMedications();
+      };
+      container.appendChild(backBtn);
+      
+      content.appendChild(container);
+    }
+    
+    function createPainLogEntry(med) {
+      const entry = document.createElement('div');
+      entry.style.cssText = `
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        gap: 1rem;
+      `;
+      
+      // Medication color indicator
+      const colorDot = document.createElement('div');
+      const medColors = {
+        'Acetaminophen': '#e5e5e5',
+        'Ibuprofen': '#ef4444',
+        'Naproxen': '#3b82f6'
+      };
+      colorDot.style.cssText = `
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: ${medColors[med.medication] || '#ccc'};
+        border: 2px solid ${med.medication === 'Acetaminophen' ? '#999' : 'transparent'};
+        flex-shrink: 0;
+      `;
+      
+      // Medication info
+      const info = document.createElement('div');
+      info.style.cssText = 'flex: 1;';
+      
+      const timestamp = new Date(med.timestamp);
+      const dateStr = timestamp.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const timeStr = timestamp.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      
+      info.innerHTML = `
+        <div style="font-weight: 500; color: #333;">${med.medication}</div>
+        <div style="font-size: 0.85rem; color: #666;">${dateStr} at ${timeStr}</div>
+      `;
+      
+      // Edit button
+      const editBtn = document.createElement('button');
+      editBtn.style.cssText = `
+        padding: 6px 12px;
+        background: #f3f4f6;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: #666;
+      `;
+      editBtn.textContent = '✏️ Edit';
+      editBtn.onclick = () => editPainMedication(med);
+      
+      // Delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.style.cssText = `
+        padding: 6px 12px;
+        background: #fee2e2;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: #dc2626;
+      `;
+      deleteBtn.textContent = '🗑️';
+      deleteBtn.onclick = () => deletePainMedication(med.id);
+      
+      entry.appendChild(colorDot);
+      entry.appendChild(info);
+      entry.appendChild(editBtn);
+      entry.appendChild(deleteBtn);
+      
+      return entry;
+    }
+    
+    async function addPainMedication(medication, color) {
+      // Check for NSAID conflict (Ibuprofen + Naproxen within 8 hours)
+      if (medication === 'Ibuprofen' || medication === 'Naproxen') {
+        const conflictMed = medication === 'Ibuprofen' ? 'Naproxen' : 'Ibuprofen';
+        const eightHoursAgo = new Date(Date.now() - 8 * 60 * 60 * 1000);
+        
+        const recentConflict = (painMedications[currentPainProfile] || []).find(m => 
+          m.medication === conflictMed && new Date(m.timestamp) > eightHoursAgo
+        );
+        
+        if (recentConflict) {
+          const conflictTime = new Date(recentConflict.timestamp).toLocaleTimeString('en-US', { 
+            hour: 'numeric', minute: '2-digit', hour12: true 
+          });
+          const proceed = confirm(
+            `⚠️ NSAID Warning\n\n${conflictMed} was taken at ${conflictTime}.\n\n` +
+            `Taking ${medication} within 8 hours of another NSAID may increase risk of side effects.\n\n` +
+            `Do you want to log this medication anyway?`
+          );
+          if (!proceed) return;
+        }
+      }
+      
+      const now = new Date();
+      const newMed = {
+        id: Date.now(),
+        medication: medication,
+        color: color,
+        timestamp: now.toISOString(),
+        createdAt: now.toISOString()
+      };
+      
+      if (!painMedications[currentPainProfile]) {
+        painMedications[currentPainProfile] = [];
+      }
+      painMedications[currentPainProfile].push(newMed);
+      
+      savePainMedications();
+      
+      // Schedule push notification for 4 hours later
+      await schedulePainMedReminder(currentPainProfile, medication);
+      
+      // Refresh the view
+      const fullscreenContainer = document.getElementById('fullscreen-container');
+      if (fullscreenContainer) fullscreenContainer.remove();
+      openFullscreenMedications();
+    }
+    
+    function editPainMedication(med) {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 10001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      `;
+      
+      const popup = document.createElement('div');
+      popup.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      `;
+      
+      const timestamp = new Date(med.timestamp);
+      const dateValue = timestamp.toISOString().split('T')[0];
+      const timeValue = timestamp.toTimeString().slice(0, 5);
+      
+      popup.innerHTML = `
+        <h3 style="margin: 0 0 20px 0; color: #333;">Edit Medication</h3>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Medication:</label>
+          <select id="edit-pain-med" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+            <option value="Acetaminophen" ${med.medication === 'Acetaminophen' ? 'selected' : ''}>Acetaminophen (white)</option>
+            <option value="Ibuprofen" ${med.medication === 'Ibuprofen' ? 'selected' : ''}>Ibuprofen (red)</option>
+            <option value="Naproxen" ${med.medication === 'Naproxen' ? 'selected' : ''}>Naproxen (blue)</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Date:</label>
+          <input type="date" id="edit-pain-date" value="${dateValue}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+        </div>
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Time:</label>
+          <input type="time" id="edit-pain-time" value="${timeValue}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button id="cancel-edit-pain" style="flex: 1; padding: 12px; background: #e5e7eb; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">Cancel</button>
+          <button id="save-edit-pain" style="flex: 1; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">Save</button>
+        </div>
+      `;
+      
+      overlay.appendChild(popup);
+      document.body.appendChild(overlay);
+      
+      document.getElementById('cancel-edit-pain').onclick = () => overlay.remove();
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      
+      document.getElementById('save-edit-pain').onclick = () => {
+        const newMed = document.getElementById('edit-pain-med').value;
+        const newDate = document.getElementById('edit-pain-date').value;
+        const newTime = document.getElementById('edit-pain-time').value;
+        
+        const newTimestamp = new Date(`${newDate}T${newTime}`);
+        
+        // Find and update the medication
+        const medIndex = painMedications[currentPainProfile].findIndex(m => m.id === med.id);
+        if (medIndex !== -1) {
+          painMedications[currentPainProfile][medIndex].medication = newMed;
+          painMedications[currentPainProfile][medIndex].timestamp = newTimestamp.toISOString();
+          
+          savePainMedications();
+        }
+        
+        overlay.remove();
+        
+        // Refresh the view
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        if (fullscreenContainer) fullscreenContainer.remove();
+        openFullscreenMedications();
+      };
+    }
+    
+    function deletePainMedication(medId) {
+      if (!confirm('Delete this medication entry?')) return;
+      
+      painMedications[currentPainProfile] = painMedications[currentPainProfile].filter(m => m.id !== medId);
+      savePainMedications();
+      
+      // Refresh the view
+      const fullscreenContainer = document.getElementById('fullscreen-container');
+      if (fullscreenContainer) fullscreenContainer.remove();
+      openFullscreenMedications();
+    }
+    
+    function savePainMedications() {
+      localStorage.setItem('painMedications', JSON.stringify(painMedications));
+      saveAllData();
+    }
+    
+    async function schedulePainMedReminder(profile, medication) {
+      const REMINDER_DELAY_MS = 4 * 60 * 60 * 1000; // 4 hours in ms
+      const notifyAt = new Date(Date.now() + REMINDER_DELAY_MS).toISOString();
+      const profileName = profile === 'nate' ? 'Nate' : 'Emley';
+      
+      // Get last two medications for context
+      const profileMeds = (painMedications[profile] || [])
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      let bodyText = `Time for pain medication - ${profileName} last took ${medication}.`;
+      
+      // Check if there's a second recent medication within 24 hours
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const recentMeds = profileMeds.filter(m => new Date(m.timestamp) > oneDayAgo);
+      
+      if (recentMeds.length >= 2) {
+        const secondMed = recentMeds[1].medication;
+        if (secondMed !== medication) {
+          bodyText = `Time for pain medication - ${profileName} last took ${medication}. Before that, ${profileName === 'Nate' ? 'he' : 'she'} took ${secondMed}.`;
+        }
+      }
+      
+      console.log('💊 Scheduling pain med reminder for:', notifyAt);
+      
+      try {
+        if (GIST_ID && GITHUB_TOKEN) {
+          const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+            headers: {
+              'Authorization': `token ${GITHUB_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          });
+          
+          if (response.ok) {
+            const gistData = await response.json();
+            let scheduledNotifications = [];
+            
+            if (gistData.files['scheduled_notifications.json']) {
+              const content = JSON.parse(gistData.files['scheduled_notifications.json'].content);
+              scheduledNotifications = content.notifications || [];
+            }
+            
+            // Remove any existing pain reminders for this profile and add new one
+            scheduledNotifications = scheduledNotifications.filter(n => 
+              !(n.type === 'pain_med_reminder' && n.profile === profile)
+            );
+            
+            scheduledNotifications.push({
+              type: 'pain_med_reminder',
+              profile: profile,
+              notifyAt: notifyAt,
+              title: '💊 Pain Medication Reminder',
+              body: bodyText,
+              data: {
+                action: 'open_pain_management',
+                profile: profile
+              },
+              createdAt: new Date().toISOString()
+            });
+            
+            await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github.v3+json'
+              },
+              body: JSON.stringify({
+                files: {
+                  'scheduled_notifications.json': {
+                    content: JSON.stringify({ notifications: scheduledNotifications }, null, 2)
+                  }
+                }
+              })
+            });
+            
+            console.log('✅ Pain med reminder scheduled');
+          }
+        }
+      } catch (error) {
+        console.error('Error scheduling pain med reminder:', error);
       }
     }
 
@@ -10284,6 +10964,18 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const view = urlParams.get('view');
       const med = urlParams.get('med'); // For NFC tag support
       const dishwasher = urlParams.get('dishwasher'); // For dishwasher NFC tag support
+      const painProfile = urlParams.get('pain'); // For pain management notifications
+      
+      // Handle pain management URL parameter (from push notification)
+      if (painProfile === 'nate' || painProfile === 'emley') {
+        console.log(`💊 Pain management link detected: ${painProfile}`);
+        showingPainManagement = true;
+        currentPainProfile = painProfile;
+        document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        openFullscreenMedications();
+        return;
+      }
       
       // Handle medication NFC tags
       if (med === 'earlyMorning' || med === 'morning' || med === 'evening') {
@@ -11476,7 +12168,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.89 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.90 - Tap to Update';
       versionIndicator.style.cssText = `
         display: inline-block;
         font-size: 11px;
@@ -11523,7 +12215,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.89 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.90 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -12231,7 +12923,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.89';
+      versionIndicator.textContent = 'PWA v12.90';
       versionIndicator.style.cssText = `
         position: fixed !important;
         bottom: 10px !important;
@@ -12290,7 +12982,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.89 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.90 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
