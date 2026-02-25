@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1389-fix-triple-notifications';
+const CACHE_NAME = 'bennett-hub-v1390-dishwasher-reminder';
 
 // Import Firebase messaging for service worker
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
