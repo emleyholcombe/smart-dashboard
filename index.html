@@ -1828,15 +1828,153 @@
     }
 
     /* Dark mode support */
+    /* Dark mode styles - activated by .dark-mode class on body */
+    body.dark-mode {
+      --card-background: rgba(30, 41, 59, 0.95);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border-color: #475569;
+      --bg-primary: #1e293b;
+      --bg-secondary: #334155;
+      --bg-tertiary: #475569;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+    }
+    
+    body.dark-mode .landing-page {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+    
+    body.dark-mode .landing-card {
+      background: rgba(30, 41, 59, 0.95);
+      border-color: var(--border-color);
+    }
+    
+    body.dark-mode .landing-card h1,
+    body.dark-mode .landing-card h2 {
+      color: var(--text-primary);
+    }
+    
+    body.dark-mode .tile {
+      background: linear-gradient(145deg, #334155, #1e293b);
+      border-color: var(--border-color);
+    }
+    
+    body.dark-mode .tile-label {
+      color: var(--text-primary);
+    }
+    
+    body.dark-mode .widget {
+      background: var(--card-background);
+      border-color: var(--border-color);
+    }
+    
+    body.dark-mode .widget h2 {
+      color: var(--text-primary);
+    }
+    
+    body.dark-mode .task-item {
+      background: var(--bg-secondary);
+      border-color: var(--border-color);
+    }
+    
+    body.dark-mode .task-text {
+      color: var(--text-primary);
+    }
+    
+    body.dark-mode .task-text.completed {
+      color: var(--text-secondary);
+    }
+    
+    body.dark-mode .add-item-container input {
+      background: var(--bg-secondary);
+      border-color: var(--border-color);
+      color: var(--text-primary);
+    }
+    
+    body.dark-mode .add-item-container input::placeholder {
+      color: var(--text-secondary);
+    }
+    
+    body.dark-mode .fullscreen-mode {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+    
+    body.dark-mode .fullscreen-content {
+      background: var(--card-background);
+    }
+    
+    body.dark-mode .fullscreen-title {
+      color: var(--text-primary);
+    }
+    
+    body.dark-mode .history-button,
+    body.dark-mode .back-button {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    body.dark-mode .date-header {
+      background: linear-gradient(135deg, #475569, #334155);
+    }
+    
+    body.dark-mode .history-item {
+      background: var(--bg-secondary);
+      border-color: var(--border-color);
+    }
+    
+    body.dark-mode .calendar-event {
+      background: rgba(102, 126, 234, 0.15);
+      border-color: var(--border-color);
+    }
+    
+    body.dark-mode .calendar-event-title {
+      color: var(--text-primary);
+    }
+    
+    body.dark-mode .calendar-toggle {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+    
+    body.dark-mode .category-header {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+    
+    body.dark-mode .empty-message {
+      color: var(--text-secondary);
+    }
+    
+    body.dark-mode .pwa-info-overlay .popup,
+    body.dark-mode .settings-popup {
+      background: var(--bg-primary) !important;
+      color: var(--text-primary);
+    }
+    
+    body.dark-mode .pwa-info-overlay [style*="background: #f5f5f5"],
+    body.dark-mode .pwa-info-overlay [style*="background: #f0f4f8"],
+    body.dark-mode .pwa-info-overlay [style*="background: #e8f4fd"],
+    body.dark-mode .pwa-info-overlay [style*="background: #e8f5e9"],
+    body.dark-mode .pwa-info-overlay [style*="background: #fff3e0"] {
+      background: var(--bg-secondary) !important;
+    }
+    
+    body.dark-mode .pwa-info-overlay [style*="color: #333"],
+    body.dark-mode .pwa-info-overlay [style*="color: #666"] {
+      color: var(--text-secondary) !important;
+    }
+    
+    /* Auto dark mode based on system preference (when not manually set) */
     @media (prefers-color-scheme: dark) {
-      :root {
+      body:not(.light-mode):not(.dark-mode) {
         --card-background: rgba(30, 41, 59, 0.95);
         --text-primary: #f1f5f9;
         --text-secondary: #94a3b8;
         --border-color: #334155;
       }
 
-      .widget {
+      body:not(.light-mode):not(.dark-mode) .widget {
         border: 1px solid rgba(255, 255, 255, 0.1);
       }
 
@@ -1973,7 +2111,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.99
+        Desktop v11.00
       </div>
     </div>
   </div>
@@ -2300,6 +2438,74 @@
       }
       return Notification.permission; // 'granted', 'denied', or 'default'
     }
+    
+    // Dark mode management
+    let darkModePreference = localStorage.getItem('darkMode') || 'auto'; // 'auto', 'dark', 'light'
+    
+    function getDarkModeStatus() {
+      if (darkModePreference === 'auto') {
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return `🔄 Auto (${systemDark ? 'Dark' : 'Light'})`;
+      } else if (darkModePreference === 'dark') {
+        return '🌙 Dark';
+      } else {
+        return '☀️ Light';
+      }
+    }
+    
+    function toggleDarkMode() {
+      // Cycle through: auto -> dark -> light -> auto
+      if (darkModePreference === 'auto') {
+        darkModePreference = 'dark';
+      } else if (darkModePreference === 'dark') {
+        darkModePreference = 'light';
+      } else {
+        darkModePreference = 'auto';
+      }
+      
+      localStorage.setItem('darkMode', darkModePreference);
+      applyDarkMode();
+      
+      // Update the status displays
+      const pwaStatus = document.getElementById('pwa-dark-mode-status');
+      const desktopStatus = document.getElementById('desktop-dark-mode-status');
+      const newStatus = getDarkModeStatus();
+      if (pwaStatus) pwaStatus.textContent = newStatus;
+      if (desktopStatus) desktopStatus.textContent = newStatus;
+      
+      showSchedulingToast(`Theme: ${newStatus}`, 'success');
+    }
+    
+    function applyDarkMode() {
+      const body = document.body;
+      
+      // Remove existing mode classes
+      body.classList.remove('dark-mode', 'light-mode');
+      
+      if (darkModePreference === 'dark') {
+        body.classList.add('dark-mode');
+      } else if (darkModePreference === 'light') {
+        body.classList.add('light-mode');
+      }
+      // 'auto' - no class, let CSS media query handle it
+    }
+    
+    // Apply dark mode on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      applyDarkMode();
+    });
+    
+    // Listen for system preference changes when in auto mode
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (darkModePreference === 'auto') {
+        // Update status displays if settings are open
+        const pwaStatus = document.getElementById('pwa-dark-mode-status');
+        const desktopStatus = document.getElementById('desktop-dark-mode-status');
+        const newStatus = getDarkModeStatus();
+        if (pwaStatus) pwaStatus.textContent = newStatus;
+        if (desktopStatus) desktopStatus.textContent = newStatus;
+      }
+    });
     
     // Fetch and display scheduled notifications from Gist
     async function refreshScheduledNotifications() {
@@ -3200,7 +3406,7 @@ Token:`);
       // Add metadata
       const backup = {
         exportedAt: new Date().toISOString(),
-        version: 'PWA v13.01',
+        version: 'PWA v13.02',
         appName: 'Bennett Hub Smart Dashboard',
         data: data
       };
@@ -12667,7 +12873,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v13.01 - Tap to Update';
+      versionIndicator.textContent = 'PWA v13.02 - Tap to Update';
       versionIndicator.style.cssText = `
         display: inline-block;
         font-size: 11px;
@@ -12714,7 +12920,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v13.01 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v13.02 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -12848,6 +13054,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             <div id="pwa-sync-status" style="background: ${lastSyncSuccess ? '#e8f5e9' : '#fff3e0'}; padding: 12px; border-radius: 8px; cursor: pointer;" onclick="saveAllData(); this.querySelector('div:last-child').textContent='🔄 Syncing...'">
               <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">SYNC STATUS</div>
               <div style="color: #333; font-size: 14px;">${getSyncStatusText()} ${lastSyncSuccess ? '✅' : '⚠️'}</div>
+            </div>
+            
+            <div id="pwa-dark-mode-toggle" style="background: #f5f5f5; padding: 12px; border-radius: 8px; cursor: pointer;" onclick="toggleDarkMode()">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">DARK MODE</div>
+              <div id="pwa-dark-mode-status" style="color: #333; font-size: 14px;">${getDarkModeStatus()}</div>
             </div>
             
             <div id="pwa-notification-toggle" style="background: #f5f5f5; padding: 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s ease;" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
@@ -13298,6 +13509,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <span>${getSyncStatusText()} ${lastSyncSuccess ? '✅' : '⚠️'}</span>
             </div>
             
+            <div id="desktop-dark-mode-toggle" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 6px; cursor: pointer;" onclick="toggleDarkMode()">
+              <strong>Dark Mode:</strong>
+              <span id="desktop-dark-mode-status">${getDarkModeStatus()}</span>
+            </div>
+            
             <div id="notification-toggle-field" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 6px; cursor: pointer; transition: background 0.2s ease;" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
               <strong>Push Notifications:</strong>
               <span id="notification-status">${getNotificationStatus() === 'granted' ? '✅ Enabled' : getNotificationStatus() === 'denied' ? '❌ Blocked' : '🔔 Click to Enable'}</span>
@@ -13459,7 +13675,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v13.01';
+      versionIndicator.textContent = 'PWA v13.02';
       versionIndicator.style.cssText = `
         position: fixed !important;
         bottom: 10px !important;
@@ -13518,7 +13734,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v13.01 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v13.02 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 

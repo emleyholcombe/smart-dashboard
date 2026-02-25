@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1405-export-import';
+const CACHE_NAME = 'bennett-hub-v1406-dark-mode';
 
 // Import Firebase messaging for service worker
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
