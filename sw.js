@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1394-pain-management';
+const CACHE_NAME = 'bennett-hub-v1395-local-notifications';
 
 // Import Firebase messaging for service worker
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
@@ -79,11 +79,55 @@ const urlsToCache = [
   '/smart-dashboard/bubbles.png?v=1126'
 ];
 
+// Store for local notification timers
+const localNotificationTimers = new Map();
+
 // Handle messages from main thread
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     console.log('Service Worker: Received SKIP_WAITING message, activating immediately');
     self.skipWaiting();
+  }
+  
+  // Handle local notification scheduling (offline fallback)
+  if (event.data && event.data.type === 'SCHEDULE_LOCAL_NOTIFICATION') {
+    const { id, title, body, delayMs, url, profile } = event.data;
+    console.log(`Service Worker: Scheduling local notification "${title}" in ${delayMs}ms`);
+    
+    // Clear any existing timer with same ID
+    if (localNotificationTimers.has(id)) {
+      clearTimeout(localNotificationTimers.get(id));
+    }
+    
+    // Schedule the notification
+    const timerId = setTimeout(() => {
+      self.registration.showNotification(title, {
+        body: body,
+        icon: '/smart-dashboard/icon-192.png',
+        badge: '/smart-dashboard/icon-72.png',
+        vibrate: [100, 50, 100],
+        tag: `local-${id}`,
+        data: {
+          url: url || '/smart-dashboard/',
+          profile: profile,
+          isLocal: true
+        }
+      });
+      localNotificationTimers.delete(id);
+      console.log(`Service Worker: Local notification "${title}" shown`);
+    }, delayMs);
+    
+    localNotificationTimers.set(id, timerId);
+  }
+  
+  // Handle canceling local notifications
+  if (event.data && event.data.type === 'CANCEL_LOCAL_NOTIFICATION') {
+    const { id } = event.data;
+    if (localNotificationTimers.has(id)) {
+      clearTimeout(localNotificationTimers.get(id));
+      localNotificationTimers.delete(id);
+      console.log(`Service Worker: Cancelled local notification ${id}`);
+    }
   }
 });
 
