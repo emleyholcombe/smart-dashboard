@@ -1901,7 +1901,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.93
+        Desktop v10.94
       </div>
     </div>
   </div>
@@ -2006,7 +2006,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
-  
+
   <script>
     // Device Detection
     const isFireTV = /Silk/.test(navigator.userAgent) || /AFTT/.test(navigator.userAgent);
@@ -9967,8 +9967,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       `;
       
+      const initial = name.charAt(0).toUpperCase();
       btn.innerHTML = `
-        <span style="font-size: 4rem;">👤</span>
+        <span style="font-size: 4rem; font-weight: 700; line-height: 1;">${initial}</span>
         <span style="font-size: 1.5rem; font-weight: 600;">${name}</span>
       `;
       
@@ -10007,8 +10008,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       `;
       
       const profileInfo = document.createElement('div');
+      profileInfo.style.cssText = 'display: flex; align-items: center;';
+      const initial = profileName.charAt(0).toUpperCase();
       profileInfo.innerHTML = `
-        <span style="font-size: 2rem; margin-right: 1rem;">👤</span>
+        <span style="font-size: 2rem; font-weight: 700; margin-right: 1rem; width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">${initial}</span>
         <span style="font-size: 1.5rem; font-weight: 600;">${profileName}'s Pain Medications</span>
       `;
       
@@ -12276,7 +12279,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.95 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.96 - Tap to Update';
       versionIndicator.style.cssText = `
         display: inline-block;
         font-size: 11px;
@@ -12323,7 +12326,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.95 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.96 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -13031,7 +13034,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.95';
+      versionIndicator.textContent = 'PWA v12.96';
       versionIndicator.style.cssText = `
         position: fixed !important;
         bottom: 10px !important;
@@ -13090,7 +13093,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.95 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.96 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
