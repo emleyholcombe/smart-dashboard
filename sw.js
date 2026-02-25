@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1398-calendar-filter-logic';
+const CACHE_NAME = 'bennett-hub-v1399-reset-medications-state';
 
 // Import Firebase messaging for service worker
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
