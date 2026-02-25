@@ -1,5 +1,5 @@
 // Service Worker for Bennett Hub PWA
-const CACHE_NAME = 'bennett-hub-v1395-local-notifications';
+const CACHE_NAME = 'bennett-hub-v1396-cancel-duplicate-notifications';
 
 // Import Firebase messaging for service worker
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
@@ -22,6 +22,9 @@ const messaging = firebase.messaging();
 // This handler is for data-only messages or customizing the notification.
 messaging.onBackgroundMessage((payload) => {
   console.log('Service Worker: Background message received', payload);
+  
+  // Cancel any matching local notification since we received the cloud version
+  cancelMatchingLocalNotification(payload);
   
   // If there's already a notification payload, FCM handles display automatically
   // Only show custom notification for data-only messages
@@ -48,6 +51,41 @@ messaging.onBackgroundMessage((payload) => {
   
   return self.registration.showNotification(notificationTitle, notificationOptions);
 });
+
+// Cancel local notification when cloud notification is received
+function cancelMatchingLocalNotification(payload) {
+  const data = payload.data || {};
+  const notification = payload.notification || {};
+  
+  // Check if this is a pain medication reminder
+  if (notification.title && notification.title.includes('Pain Medication')) {
+    // Extract profile from the URL in data
+    const url = data.url || data.link || '';
+    const painMatch = url.match(/[?&]pain=(\w+)/);
+    if (painMatch) {
+      const profile = painMatch[1];
+      // Cancel all local pain notifications for this profile
+      for (const [id, timerId] of localNotificationTimers.entries()) {
+        if (id.startsWith(`pain-${profile}-`)) {
+          clearTimeout(timerId);
+          localNotificationTimers.delete(id);
+          console.log(`Service Worker: Cancelled local notification ${id} (cloud version received)`);
+        }
+      }
+    }
+  }
+  
+  // Check if this is a dishwasher reminder
+  if (notification.title && notification.title.includes('Dishwasher')) {
+    for (const [id, timerId] of localNotificationTimers.entries()) {
+      if (id.startsWith('dishwasher-')) {
+        clearTimeout(timerId);
+        localNotificationTimers.delete(id);
+        console.log(`Service Worker: Cancelled local notification ${id} (cloud version received)`);
+      }
+    }
+  }
+}
 const urlsToCache = [
   '/smart-dashboard/',
   '/smart-dashboard/index.html',
@@ -128,6 +166,20 @@ self.addEventListener('message', (event) => {
       localNotificationTimers.delete(id);
       console.log(`Service Worker: Cancelled local notification ${id}`);
     }
+  }
+  
+  // Handle canceling all local notifications with a prefix
+  if (event.data && event.data.type === 'CANCEL_ALL_LOCAL_NOTIFICATIONS') {
+    const { prefix } = event.data;
+    let cancelledCount = 0;
+    for (const [id, timerId] of localNotificationTimers.entries()) {
+      if (id.startsWith(prefix)) {
+        clearTimeout(timerId);
+        localNotificationTimers.delete(id);
+        cancelledCount++;
+      }
+    }
+    console.log(`Service Worker: Cancelled ${cancelledCount} local notifications with prefix "${prefix}"`);
   }
 });
 

@@ -1895,7 +1895,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.89
+        Desktop v10.90
       </div>
     </div>
   </div>
@@ -10742,8 +10742,41 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             console.log('✅ Dishwasher reminder scheduled');
           }
         }
+        
+        // Also schedule local notification as offline fallback
+        scheduleLocalDishwasherReminder();
+        
       } catch (error) {
         console.error('Error scheduling dishwasher reminder:', error);
+      }
+    }
+    
+    // Schedule local dishwasher notification as offline fallback
+    function scheduleLocalDishwasherReminder() {
+      const REMINDER_DELAY_MS = (2 * 60 + 15) * 60 * 1000; // 2 hours 15 minutes
+      
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SCHEDULE_LOCAL_NOTIFICATION',
+          id: `dishwasher-${Date.now()}`,
+          title: '🍽️ Dishwasher Ready',
+          body: 'Time to unload the dishwasher!',
+          delayMs: REMINDER_DELAY_MS,
+          url: '/smart-dashboard/?view=dishwasher'
+        });
+        console.log('📱 Local dishwasher notification scheduled as offline fallback');
+      }
+    }
+    
+    // Cancel local dishwasher notification
+    function cancelLocalDishwasherReminder() {
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        // Cancel all dishwasher local notifications
+        navigator.serviceWorker.controller.postMessage({
+          type: 'CANCEL_ALL_LOCAL_NOTIFICATIONS',
+          prefix: 'dishwasher-'
+        });
+        console.log('📱 Local dishwasher notifications cancelled');
       }
     }
     
@@ -10790,6 +10823,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             }
           }
         }
+        
+        // Also cancel local notification
+        cancelLocalDishwasherReminder();
+        
       } catch (error) {
         console.error('Error cancelling dishwasher reminder:', error);
       }
@@ -12221,7 +12258,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.91 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.92 - Tap to Update';
       versionIndicator.style.cssText = `
         display: inline-block;
         font-size: 11px;
@@ -12268,7 +12305,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.91 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.92 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -12976,7 +13013,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.91';
+      versionIndicator.textContent = 'PWA v12.92';
       versionIndicator.style.cssText = `
         position: fixed !important;
         bottom: 10px !important;
@@ -13035,7 +13072,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.91 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.92 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
