@@ -69,6 +69,68 @@
       100% { transform: rotate(360deg); }
     }
     
+    /* Offline Indicator Banner */
+    .offline-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 100000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .offline-banner.visible {
+      transform: translateY(0);
+    }
+    
+    .offline-banner .offline-icon {
+      font-size: 16px;
+    }
+    
+    .online-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 100000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .online-banner.visible {
+      transform: translateY(0);
+    }
+    
+    /* Adjust for PWA safe area */
+    @media (display-mode: standalone) {
+      .offline-banner, .online-banner {
+        padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+      }
+    }
+    
     /* Landing Page Styles */
     .landing-page {
       min-height: 100vh;
@@ -1800,6 +1862,16 @@
   </style>
 </head>
 <body>
+  <!-- Offline/Online Indicator Banners -->
+  <div id="offline-banner" class="offline-banner">
+    <span class="offline-icon">📡</span>
+    <span>You're offline - changes will sync when reconnected</span>
+  </div>
+  <div id="online-banner" class="online-banner">
+    <span class="offline-icon">✓</span>
+    <span>Back online - syncing data...</span>
+  </div>
+  
   <!-- PWA Loading Screen -->
   <div id="pwa-loading-screen">
     <div class="loading-spinner"></div>
@@ -1901,7 +1973,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.96
+        Desktop v10.97
       </div>
     </div>
   </div>
@@ -2610,6 +2682,62 @@
     // Data sync status
     let isOnline = navigator.onLine;
     let syncInProgress = false;
+    
+    // Offline/Online indicator
+    function showOfflineBanner() {
+      const offlineBanner = document.getElementById('offline-banner');
+      const onlineBanner = document.getElementById('online-banner');
+      if (offlineBanner) {
+        offlineBanner.classList.add('visible');
+      }
+      if (onlineBanner) {
+        onlineBanner.classList.remove('visible');
+      }
+    }
+    
+    function showOnlineBanner() {
+      const offlineBanner = document.getElementById('offline-banner');
+      const onlineBanner = document.getElementById('online-banner');
+      if (offlineBanner) {
+        offlineBanner.classList.remove('visible');
+      }
+      if (onlineBanner) {
+        onlineBanner.classList.add('visible');
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+          onlineBanner.classList.remove('visible');
+        }, 3000);
+      }
+    }
+    
+    function hideOfflineBanner() {
+      const offlineBanner = document.getElementById('offline-banner');
+      if (offlineBanner) {
+        offlineBanner.classList.remove('visible');
+      }
+    }
+    
+    // Set up online/offline event listeners
+    window.addEventListener('online', () => {
+      console.log('📡 Back online!');
+      isOnline = true;
+      showOnlineBanner();
+      // Trigger a data sync when back online
+      saveAllData();
+    });
+    
+    window.addEventListener('offline', () => {
+      console.log('📡 Gone offline');
+      isOnline = false;
+      showOfflineBanner();
+    });
+    
+    // Check initial state on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!navigator.onLine) {
+        showOfflineBanner();
+      }
+    });
     
     // JSONBin.io API functions (free, no auth required)
     async function createJsonBin(data) {
@@ -12406,7 +12534,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.98 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.99 - Tap to Update';
       versionIndicator.style.cssText = `
         display: inline-block;
         font-size: 11px;
@@ -12453,7 +12581,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.98 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.99 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -13169,7 +13297,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.98';
+      versionIndicator.textContent = 'PWA v12.99';
       versionIndicator.style.cssText = `
         position: fixed !important;
         bottom: 10px !important;
@@ -13228,7 +13356,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.98 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.99 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
