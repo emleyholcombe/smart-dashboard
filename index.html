@@ -1973,7 +1973,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.97
+        Desktop v10.98
       </div>
     </div>
   </div>
@@ -2682,6 +2682,8 @@
     // Data sync status
     let isOnline = navigator.onLine;
     let syncInProgress = false;
+    let lastSyncTime = localStorage.getItem('lastSyncTime') ? new Date(localStorage.getItem('lastSyncTime')) : null;
+    let lastSyncSuccess = localStorage.getItem('lastSyncSuccess') === 'true';
     
     // Offline/Online indicator
     function showOfflineBanner() {
@@ -3235,6 +3237,10 @@ Token:`);
         
         if (success) {
           console.log('✅ Data synced to GitHub master storage');
+          lastSyncTime = new Date();
+          lastSyncSuccess = true;
+          localStorage.setItem('lastSyncTime', lastSyncTime.toISOString());
+          localStorage.setItem('lastSyncSuccess', 'true');
         } else {
           console.log('❌ GitHub sync failed, falling back to JSONBin...');
           
@@ -3247,8 +3253,14 @@ Token:`);
           
           if (success) {
             console.log('✅ Data synced to JSONBin fallback');
+            lastSyncTime = new Date();
+            lastSyncSuccess = true;
+            localStorage.setItem('lastSyncTime', lastSyncTime.toISOString());
+            localStorage.setItem('lastSyncSuccess', 'true');
           } else {
             console.log('❌ All cloud sync failed, data saved locally only');
+            lastSyncSuccess = false;
+            localStorage.setItem('lastSyncSuccess', 'false');
           }
         }
       }
@@ -3430,6 +3442,32 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       }
       
       console.log('Debug Info:', data);
+    }
+    
+    // Format time ago for sync status
+    function formatTimeAgo(date) {
+      if (!date) return 'Never';
+      
+      const now = new Date();
+      const diffMs = now - date;
+      const diffSecs = Math.floor(diffMs / 1000);
+      const diffMins = Math.floor(diffSecs / 60);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      
+      if (diffSecs < 10) return 'Just now';
+      if (diffSecs < 60) return `${diffSecs}s ago`;
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return `${diffDays}d ago`;
+    }
+    
+    // Get sync status text for settings
+    function getSyncStatusText() {
+      if (syncInProgress) return 'Syncing...';
+      if (!lastSyncTime) return 'Never synced';
+      const timeAgo = formatTimeAgo(lastSyncTime);
+      return lastSyncSuccess ? `Last synced: ${timeAgo}` : `Sync failed ${timeAgo}`;
     }
     
     // Update sync status indicator
@@ -12534,7 +12572,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.99 - Tap to Update';
+      versionIndicator.textContent = 'PWA v13.00 - Tap to Update';
       versionIndicator.style.cssText = `
         display: inline-block;
         font-size: 11px;
@@ -12581,7 +12619,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.99 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v13.00 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -12709,7 +12747,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
             
             <div style="background: #f5f5f5; padding: 12px; border-radius: 8px;">
               <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">ONLINE</div>
-              <div style="color: #333; font-size: 14px;">${debugInfo.isOnline ? 'Yes' : 'No'}</div>
+              <div style="color: #333; font-size: 14px;">${debugInfo.isOnline ? '✅ Yes' : '❌ No'}</div>
+            </div>
+            
+            <div id="pwa-sync-status" style="background: ${lastSyncSuccess ? '#e8f5e9' : '#fff3e0'}; padding: 12px; border-radius: 8px; cursor: pointer;" onclick="saveAllData(); this.querySelector('div:last-child').textContent='🔄 Syncing...'">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">SYNC STATUS</div>
+              <div style="color: #333; font-size: 14px;">${getSyncStatusText()} ${lastSyncSuccess ? '✅' : '⚠️'}</div>
             </div>
             
             <div id="pwa-notification-toggle" style="background: #f5f5f5; padding: 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s ease;" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
@@ -13145,6 +13188,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <span>${navigator.onLine ? '✅ Yes' : '❌ No'}</span>
             </div>
             
+            <div id="desktop-sync-status" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: ${lastSyncSuccess ? '#e8f5e9' : '#fff3e0'}; border-radius: 6px; cursor: pointer;" onclick="saveAllData(); this.querySelector('span').textContent='🔄 Syncing...'">
+              <strong>Sync Status:</strong>
+              <span>${getSyncStatusText()} ${lastSyncSuccess ? '✅' : '⚠️'}</span>
+            </div>
+            
             <div id="notification-toggle-field" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 6px; cursor: pointer; transition: background 0.2s ease;" onmouseover="this.style.background='#e8e8e8'" onmouseout="this.style.background='#f5f5f5'">
               <strong>Push Notifications:</strong>
               <span id="notification-status">${getNotificationStatus() === 'granted' ? '✅ Enabled' : getNotificationStatus() === 'denied' ? '❌ Blocked' : '🔔 Click to Enable'}</span>
@@ -13297,7 +13345,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.99';
+      versionIndicator.textContent = 'PWA v13.00';
       versionIndicator.style.cssText = `
         position: fixed !important;
         bottom: 10px !important;
@@ -13356,7 +13404,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.99 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v13.00 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
