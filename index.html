@@ -1901,7 +1901,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v10.94
+        Desktop v10.95
       </div>
     </div>
   </div>
@@ -2227,6 +2227,79 @@
         return 'unsupported';
       }
       return Notification.permission; // 'granted', 'denied', or 'default'
+    }
+    
+    // Fetch and display scheduled notifications from Gist
+    async function refreshScheduledNotifications() {
+      const listDiv = document.getElementById('scheduled-notifications-list');
+      if (!listDiv) return;
+      
+      listDiv.textContent = '⏳ Loading...';
+      
+      try {
+        if (!GIST_ID || !GITHUB_TOKEN) {
+          listDiv.innerHTML = '⚠️ Gist not configured';
+          return;
+        }
+        
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        
+        if (!response.ok) {
+          listDiv.innerHTML = `❌ Error: ${response.status}`;
+          return;
+        }
+        
+        const gistData = await response.json();
+        
+        if (!gistData.files['scheduled_notifications.json']) {
+          listDiv.innerHTML = '📭 No notifications scheduled';
+          return;
+        }
+        
+        const content = JSON.parse(gistData.files['scheduled_notifications.json'].content);
+        const notifications = content.notifications || [];
+        
+        if (notifications.length === 0) {
+          listDiv.innerHTML = '📭 No notifications scheduled';
+          return;
+        }
+        
+        // Format and display notifications
+        const notifHtml = notifications.map(n => {
+          const notifyAt = new Date(n.notifyAt);
+          const now = new Date();
+          const diffMs = notifyAt - now;
+          const diffMins = Math.round(diffMs / 60000);
+          
+          let timeStr;
+          if (diffMins < 0) {
+            timeStr = 'Overdue (pending send)';
+          } else if (diffMins < 60) {
+            timeStr = `In ${diffMins} min`;
+          } else {
+            const hours = Math.floor(diffMins / 60);
+            const mins = diffMins % 60;
+            timeStr = `In ${hours}h ${mins}m`;
+          }
+          
+          const icon = n.type === 'dishwasher_reminder' ? '🍽️' : '💊';
+          return `<div style="margin-top: 4px; padding: 6px; background: white; border-radius: 4px;">
+            ${icon} <strong>${n.title}</strong><br>
+            <span style="font-size: 11px; color: #666;">${timeStr}</span>
+          </div>`;
+        }).join('');
+        
+        listDiv.innerHTML = notifHtml;
+        
+      } catch (error) {
+        console.error('Error fetching scheduled notifications:', error);
+        listDiv.innerHTML = `❌ ${error.message}`;
+      }
     }
     
     // Initialize Firebase on page load
@@ -10451,62 +10524,79 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       console.log('💊 Scheduling pain med reminder for:', notifyAt);
       
       try {
-        if (GIST_ID && GITHUB_TOKEN) {
-          const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-            headers: {
-              'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          });
-          
-          if (response.ok) {
-            const gistData = await response.json();
-            let scheduledNotifications = [];
-            
-            if (gistData.files['scheduled_notifications.json']) {
-              const content = JSON.parse(gistData.files['scheduled_notifications.json'].content);
-              scheduledNotifications = content.notifications || [];
-            }
-            
-            // Remove any existing pain reminders for this profile and add new one
-            scheduledNotifications = scheduledNotifications.filter(n => 
-              !(n.type === 'pain_med_reminder' && n.profile === profile)
-            );
-            
-            scheduledNotifications.push({
-              type: 'pain_med_reminder',
-              profile: profile,
-              notifyAt: notifyAt,
-              title: '💊 Pain Medication Reminder',
-              body: bodyText,
-              data: {
-                action: 'open_pain_management',
-                profile: profile
-              },
-              createdAt: new Date().toISOString()
-            });
-            
-            await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-              method: 'PATCH',
-              headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/vnd.github.v3+json'
-              },
-              body: JSON.stringify({
-                files: {
-                  'scheduled_notifications.json': {
-                    content: JSON.stringify({ notifications: scheduledNotifications }, null, 2)
-                  }
-                }
-              })
-            });
-            
-            console.log('✅ Pain med reminder scheduled');
-          }
+        if (!GIST_ID || !GITHUB_TOKEN) {
+          console.error('❌ Cannot schedule: GIST_ID or GITHUB_TOKEN not set');
+          showSchedulingToast('❌ Pain reminder failed: credentials not set', 'error');
+          return;
         }
+        
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        
+        if (!response.ok) {
+          console.error('❌ Failed to fetch Gist:', response.status);
+          showSchedulingToast(`❌ Failed to schedule: ${response.status}`, 'error');
+          return;
+        }
+        
+        const gistData = await response.json();
+        let scheduledNotifications = [];
+        
+        if (gistData.files['scheduled_notifications.json']) {
+          const content = JSON.parse(gistData.files['scheduled_notifications.json'].content);
+          scheduledNotifications = content.notifications || [];
+        }
+        
+        // Remove any existing pain reminders for this profile and add new one
+        scheduledNotifications = scheduledNotifications.filter(n => 
+          !(n.type === 'pain_med_reminder' && n.profile === profile)
+        );
+        
+        scheduledNotifications.push({
+          type: 'pain_med_reminder',
+          profile: profile,
+          notifyAt: notifyAt,
+          title: '💊 Pain Medication Reminder',
+          body: bodyText,
+          data: {
+            action: 'open_pain_management',
+            profile: profile
+          },
+          createdAt: new Date().toISOString()
+        });
+        
+        const patchResponse = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+          },
+          body: JSON.stringify({
+            files: {
+              'scheduled_notifications.json': {
+                content: JSON.stringify({ notifications: scheduledNotifications }, null, 2)
+              }
+            }
+          })
+        });
+        
+        if (!patchResponse.ok) {
+          console.error('❌ Failed to save notification:', patchResponse.status);
+          showSchedulingToast(`❌ Failed to save: ${patchResponse.status}`, 'error');
+          return;
+        }
+        
+        console.log('✅ Pain med reminder scheduled');
+        showSchedulingToast('💊 Reminder set for 4 hours', 'success');
+        
       } catch (error) {
         console.error('Error scheduling pain med reminder:', error);
+        showSchedulingToast(`❌ Error: ${error.message}`, 'error');
       }
     }
 
@@ -10717,59 +10807,104 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       try {
         // Save scheduled notification to Gist
-        if (GIST_ID && GITHUB_TOKEN) {
-          const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-            headers: {
-              'Authorization': `token ${GITHUB_TOKEN}`,
-              'Accept': 'application/vnd.github.v3+json'
-            }
-          });
-          
-          if (response.ok) {
-            const gistData = await response.json();
-            let scheduledNotifications = [];
-            
-            if (gistData.files['scheduled_notifications.json']) {
-              const content = JSON.parse(gistData.files['scheduled_notifications.json'].content);
-              scheduledNotifications = content.notifications || [];
-            }
-            
-            // Remove any existing dishwasher reminders and add new one
-            scheduledNotifications = scheduledNotifications.filter(n => n.type !== 'dishwasher_reminder');
-            scheduledNotifications.push({
-              type: 'dishwasher_reminder',
-              notifyAt: notifyAt,
-              title: 'Dishwasher Ready',
-              body: 'Time to unload the dishwasher! 🍽️',
-              createdAt: new Date().toISOString()
-            });
-            
-            await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-              method: 'PATCH',
-              headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/vnd.github.v3+json'
-              },
-              body: JSON.stringify({
-                files: {
-                  'scheduled_notifications.json': {
-                    content: JSON.stringify({ notifications: scheduledNotifications }, null, 2)
-                  }
-                }
-              })
-            });
-            
-            console.log('✅ Dishwasher reminder scheduled');
-          }
+        if (!GIST_ID || !GITHUB_TOKEN) {
+          console.error('❌ Cannot schedule: GIST_ID or GITHUB_TOKEN not set');
+          console.log('GIST_ID:', GIST_ID ? 'set' : 'NOT SET');
+          console.log('GITHUB_TOKEN:', GITHUB_TOKEN ? 'set' : 'NOT SET');
+          showSchedulingToast('❌ Notification scheduling failed: credentials not set', 'error');
+          return;
         }
+        
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        
+        if (!response.ok) {
+          console.error('❌ Failed to fetch Gist:', response.status, response.statusText);
+          showSchedulingToast(`❌ Failed to schedule: ${response.status}`, 'error');
+          return;
+        }
+        
+        const gistData = await response.json();
+        let scheduledNotifications = [];
+        
+        if (gistData.files['scheduled_notifications.json']) {
+          const content = JSON.parse(gistData.files['scheduled_notifications.json'].content);
+          scheduledNotifications = content.notifications || [];
+        }
+        
+        // Remove any existing dishwasher reminders and add new one
+        scheduledNotifications = scheduledNotifications.filter(n => n.type !== 'dishwasher_reminder');
+        scheduledNotifications.push({
+          type: 'dishwasher_reminder',
+          notifyAt: notifyAt,
+          title: 'Dishwasher Ready',
+          body: 'Time to unload the dishwasher! 🍽️',
+          createdAt: new Date().toISOString()
+        });
+        
+        const patchResponse = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+          },
+          body: JSON.stringify({
+            files: {
+              'scheduled_notifications.json': {
+                content: JSON.stringify({ notifications: scheduledNotifications }, null, 2)
+              }
+            }
+          })
+        });
+        
+        if (!patchResponse.ok) {
+          console.error('❌ Failed to save notification:', patchResponse.status, patchResponse.statusText);
+          showSchedulingToast(`❌ Failed to save: ${patchResponse.status}`, 'error');
+          return;
+        }
+        
+        console.log('✅ Dishwasher reminder scheduled');
+        showSchedulingToast('🍽️ Reminder set for 2h 15m', 'success');
         
         // Also schedule local notification as offline fallback
         scheduleLocalDishwasherReminder();
         
       } catch (error) {
         console.error('Error scheduling dishwasher reminder:', error);
+        showSchedulingToast(`❌ Error: ${error.message}`, 'error');
       }
+    }
+    
+    // Show a toast notification for scheduling status
+    function showSchedulingToast(message, type) {
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        background: ${type === 'success' ? '#10b981' : '#ef4444'};
+        color: white;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 10001;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideUp 0.3s ease;
+      `;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
     }
     
     // Schedule local dishwasher notification as offline fallback
@@ -12279,7 +12414,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.96 - Tap to Update';
+      versionIndicator.textContent = 'PWA v12.97 - Tap to Update';
       versionIndicator.style.cssText = `
         display: inline-block;
         font-size: 11px;
@@ -12326,7 +12461,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.96 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.97 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -12481,6 +12616,11 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
               <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">MEALS</div>
               <div style="color: #333; font-size: 14px;">${debugInfo.currentData.mealItems.length} items</div>
             </div>
+            
+            <div id="scheduled-notifications-section" style="background: #e8f4fd; padding: 12px; border-radius: 8px; cursor: pointer;" onclick="refreshScheduledNotifications()">
+              <div style="font-weight: 600; color: #666; font-size: 12px; margin-bottom: 4px;">SCHEDULED NOTIFICATIONS</div>
+              <div id="scheduled-notifications-list" style="color: #333; font-size: 13px;">Tap to load...</div>
+            </div>
           </div>
         </div>
       `;
@@ -12488,6 +12628,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       overlay.className = 'pwa-info-overlay';
       overlay.appendChild(popup);
       document.body.appendChild(overlay);
+      
+      // Auto-load scheduled notifications
+      refreshScheduledNotifications();
       
       // Add notification toggle handler
       const pwaNotificationToggle = document.getElementById('pwa-notification-toggle');
@@ -13034,7 +13177,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v12.96';
+      versionIndicator.textContent = 'PWA v12.97';
       versionIndicator.style.cssText = `
         position: fixed !important;
         bottom: 10px !important;
@@ -13093,7 +13236,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v12.96 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v12.97 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
