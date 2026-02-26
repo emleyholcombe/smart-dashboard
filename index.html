@@ -2111,7 +2111,7 @@
         cursor: pointer;
         transition: all 0.2s ease;
       " onmouseover="this.style.background='rgba(0, 0, 0, 0.5)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.3)'" onclick="showDesktopInfoPopup()">
-        Desktop v11.00
+        Desktop v11.01
       </div>
     </div>
   </div>
@@ -2884,6 +2884,8 @@
       timestamp: new Date().toISOString(),
       lastUpdated: new Date().toISOString()
     };
+    let dishwasherHistory = []; // Array of { id, status, timestamp }
+    let showingDishwasherHistory = false;
     
     // Data sync status
     let isOnline = navigator.onLine;
@@ -3355,6 +3357,7 @@ Token:`);
         medicationsHistory,
         painMedications,
         dishwasher,
+        dishwasherHistory,
         lastUpdated: new Date().toISOString()
       };
     }
@@ -3397,6 +3400,9 @@ Token:`);
       if (data.dishwasher) {
         dishwasher = data.dishwasher;
       }
+      if (data.dishwasherHistory) {
+        dishwasherHistory = data.dishwasherHistory;
+      }
     }
     
     // Export data backup as JSON file
@@ -3406,7 +3412,7 @@ Token:`);
       // Add metadata
       const backup = {
         exportedAt: new Date().toISOString(),
-        version: 'PWA v13.02',
+        version: 'PWA v13.03',
         appName: 'Bennett Hub Smart Dashboard',
         data: data
       };
@@ -3512,6 +3518,7 @@ Token:`);
       localStorage.setItem('medicationsHistory', JSON.stringify(medicationsHistory));
       localStorage.setItem('painMedications', JSON.stringify(painMedications));
       localStorage.setItem('dishwasher', JSON.stringify(dishwasher));
+      localStorage.setItem('dishwasherHistory', JSON.stringify(dishwasherHistory));
       
       // Try to sync to GitHub Gist (master storage) if online
       if (isOnline) {
@@ -11039,6 +11046,9 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     // Dishwasher functions
     function showFullscreenDishwasher() {
+      // Reset to default view when navigating from home
+      showingDishwasherHistory = false;
+      
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       openFullscreenDishwasher();
@@ -11067,7 +11077,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       const title = document.createElement('h1');
       title.className = 'fullscreen-title';
-      title.textContent = 'Dishwasher Status';
+      title.textContent = showingDishwasherHistory ? 'Dishwasher History' : 'Dishwasher Status';
       
       // Make title clickable on desktop (not PWA)
       if (!isPWA) {
@@ -11084,6 +11094,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       homeButton.onclick = showLandingPage;
       homeButton.innerHTML = '🏠 Home';
       
+      const historyButton = document.createElement('button');
+      historyButton.className = 'back-button';
+      historyButton.onclick = toggleDishwasherHistory;
+      historyButton.innerHTML = showingDishwasherHistory ? '🍽️ Current' : '📜 History';
+      historyButton.style.background = 'var(--primary-color)';
+      
       const backButton = document.createElement('button');
       backButton.className = 'back-button';
       backButton.onclick = closeFullscreen;
@@ -11092,11 +11108,12 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       fullscreenHeader.appendChild(title);
       
       if (isPWA) {
-        // PWA: Home button first, then Dashboard button
+        // PWA: Home button first, then History button
         buttonContainer.appendChild(homeButton);
-        buttonContainer.appendChild(backButton);
+        buttonContainer.appendChild(historyButton);
       } else {
-        // Desktop: Dashboard button first, then Home button
+        // Desktop: History button first, then Dashboard button, then Home button
+        buttonContainer.appendChild(historyButton);
         buttonContainer.appendChild(backButton);
         buttonContainer.appendChild(homeButton);
       }
@@ -11106,10 +11123,32 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Create content area
       const content = document.createElement('div');
       content.className = 'fullscreen-content';
+      if (isPWA) {
+        content.style.overflow = 'auto';
+      }
       
       // Load dishwasher data
       loadDishwasher();
       
+      if (showingDishwasherHistory) {
+        // Render history view
+        renderDishwasherHistory(content);
+      } else {
+        // Render current status view
+        renderDishwasherStatus(content, isPWA);
+      }
+      
+      fullscreenDiv.appendChild(fullscreenHeader);
+      fullscreenDiv.appendChild(content);
+      document.body.appendChild(fullscreenDiv);
+      
+      // Start inactivity detection (desktop only)
+      if (!isPWA) {
+        setupInactivityDetection();
+      }
+    }
+    
+    function renderDishwasherStatus(content, isPWA) {
       // Create status display
       const statusCard = document.createElement('div');
       const iconSize = isPWA ? '5rem' : '8rem';
@@ -11202,21 +11241,150 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       
       content.appendChild(statusCard);
       content.appendChild(buttonsContainer);
+    }
+    
+    function renderDishwasherHistory(content) {
+      const container = document.createElement('div');
+      container.style.cssText = 'padding: 1rem;';
       
-      fullscreenDiv.appendChild(fullscreenHeader);
-      fullscreenDiv.appendChild(content);
-      document.body.appendChild(fullscreenDiv);
-      
-      // Start inactivity detection (desktop only)
-      if (!isPWA) {
-        setupInactivityDetection();
+      if (dishwasherHistory.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.cssText = 'text-align: center; color: var(--text-secondary); padding: 3rem; font-style: italic;';
+        emptyMsg.textContent = 'No history yet. Mark the dishwasher clean or dirty to start tracking.';
+        container.appendChild(emptyMsg);
+      } else {
+        // Group by date
+        const groupedByDate = {};
+        dishwasherHistory.forEach(entry => {
+          const date = new Date(entry.timestamp).toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          });
+          if (!groupedByDate[date]) {
+            groupedByDate[date] = [];
+          }
+          groupedByDate[date].push(entry);
+        });
+        
+        Object.entries(groupedByDate).forEach(([date, entries]) => {
+          const dateHeader = document.createElement('div');
+          dateHeader.className = 'date-header';
+          dateHeader.textContent = date;
+          container.appendChild(dateHeader);
+          
+          entries.forEach(entry => {
+            const item = document.createElement('div');
+            item.style.cssText = `
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 12px 16px;
+              background: white;
+              border-radius: 8px;
+              margin-bottom: 8px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            `;
+            
+            const leftContent = document.createElement('div');
+            leftContent.style.cssText = 'display: flex; align-items: center; gap: 12px;';
+            
+            const icon = document.createElement('span');
+            icon.style.cssText = `
+              width: 36px;
+              height: 36px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: ${entry.status === 'clean' ? '#e0f7fa' : '#fce4ec'};
+            `;
+            icon.innerHTML = `<img src="${entry.status === 'clean' ? 'clean_plate.png' : 'dirty_plate.png'}?v=1126" style="width: 24px; height: 24px; object-fit: contain;">`;
+            
+            const info = document.createElement('div');
+            const time = new Date(entry.timestamp).toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            });
+            info.innerHTML = `
+              <div style="font-weight: 600; color: ${entry.status === 'clean' ? '#0097a7' : '#c2185b'};">
+                Marked ${entry.status.charAt(0).toUpperCase() + entry.status.slice(1)}
+              </div>
+              <div style="font-size: 12px; color: var(--text-secondary);">${time}</div>
+            `;
+            
+            leftContent.appendChild(icon);
+            leftContent.appendChild(info);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.style.cssText = `
+              background: none;
+              border: none;
+              color: #ef4444;
+              cursor: pointer;
+              padding: 8px;
+              font-size: 18px;
+              opacity: 0.6;
+              transition: opacity 0.2s;
+            `;
+            deleteBtn.textContent = '🗑️';
+            deleteBtn.onclick = () => deleteDishwasherHistoryEntry(entry.id);
+            deleteBtn.onmouseover = () => deleteBtn.style.opacity = '1';
+            deleteBtn.onmouseout = () => deleteBtn.style.opacity = '0.6';
+            
+            item.appendChild(leftContent);
+            item.appendChild(deleteBtn);
+            container.appendChild(item);
+          });
+        });
       }
+      
+      content.appendChild(container);
+    }
+    
+    function toggleDishwasherHistory() {
+      showingDishwasherHistory = !showingDishwasherHistory;
+      const fullscreenContainer = document.getElementById('fullscreen-container');
+      if (fullscreenContainer) {
+        fullscreenContainer.remove();
+      }
+      openFullscreenDishwasher();
+    }
+    
+    function deleteDishwasherHistoryEntry(id) {
+      if (!confirm('Delete this history entry?')) return;
+      
+      dishwasherHistory = dishwasherHistory.filter(entry => entry.id !== id);
+      saveDishwasher();
+      
+      // Refresh the view
+      const fullscreenContainer = document.getElementById('fullscreen-container');
+      if (fullscreenContainer) {
+        fullscreenContainer.remove();
+      }
+      openFullscreenDishwasher();
     }
 
     function setDishwasherStatus(status) {
+      const now = new Date().toISOString();
       dishwasher.status = status;
-      dishwasher.timestamp = new Date().toISOString();
-      dishwasher.lastUpdated = new Date().toISOString();
+      dishwasher.timestamp = now;
+      dishwasher.lastUpdated = now;
+      
+      // Add to history
+      dishwasherHistory.unshift({
+        id: Date.now(),
+        status: status,
+        timestamp: now
+      });
+      
+      // Keep only last 100 history entries
+      if (dishwasherHistory.length > 100) {
+        dishwasherHistory = dishwasherHistory.slice(0, 100);
+      }
+      
       saveDishwasher();
       
       // Schedule dishwasher reminder notification when marked clean
@@ -11449,6 +11617,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
 
     function saveDishwasher() {
       localStorage.setItem('dishwasher', JSON.stringify(dishwasher));
+      localStorage.setItem('dishwasherHistory', JSON.stringify(dishwasherHistory));
       saveAllData(); // Sync to cloud
     }
 
@@ -11456,6 +11625,10 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const saved = localStorage.getItem('dishwasher');
       if (saved) {
         dishwasher = JSON.parse(saved);
+      }
+      const savedHistory = localStorage.getItem('dishwasherHistory');
+      if (savedHistory) {
+        dishwasherHistory = JSON.parse(savedHistory);
       }
     }
 
@@ -12873,7 +13046,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v13.02 - Tap to Update';
+      versionIndicator.textContent = 'PWA v13.03 - Tap to Update';
       versionIndicator.style.cssText = `
         display: inline-block;
         font-size: 11px;
@@ -12920,7 +13093,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v13.02 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v13.03 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Tap for debug info and manual update. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
@@ -13675,7 +13848,7 @@ JSONBin ID: ${localStorage.getItem('dashboardJsonBinId') ? 'Saved' : 'Missing'}
       // Add hidden app version indicator (only visible when debugging needed)
       const versionIndicator = document.createElement('div');
       versionIndicator.id = 'pwa-version-indicator';
-      versionIndicator.textContent = 'PWA v13.02';
+      versionIndicator.textContent = 'PWA v13.03';
       versionIndicator.style.cssText = `
         position: fixed !important;
         bottom: 10px !important;
@@ -13734,7 +13907,7 @@ ${totalItems === 0 ? '⚠️ No data loaded! Try refreshing or check sync.' : '�
       const updateVersionIndicator = () => {
         const totalItems = todoItems.length + groceryItems.length + mealItems.length;
         const syncStatus = GIST_ID && GITHUB_TOKEN ? '🔄' : (JSONBIN_ID ? '📡' : '📱');
-        versionIndicator.textContent = `PWA v13.02 ${syncStatus} (${totalItems})`;
+        versionIndicator.textContent = `PWA v13.03 ${syncStatus} (${totalItems})`;
         versionIndicator.title = `Click for debug info. ${totalItems} items loaded. ${
           GIST_ID && GITHUB_TOKEN ? 'GitHub sync active' : 
           JSONBIN_ID ? 'JSONBin sync active' : 
